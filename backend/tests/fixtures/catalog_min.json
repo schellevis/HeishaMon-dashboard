@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "topics": [
+    {"key": "main/Outside_Temp", "id": "TOP14", "kind": "number", "unit": "°C", "decimals": 0,
+     "sentinels": [-128], "category": "temperatures",
+     "label": {"en": "Outside temperature", "nl": "Buitentemperatuur"},
+     "min_firmware": "3.2.3", "feature": null},
+    {"key": "main/Operating_Mode_State", "id": "TOP18", "kind": "enum", "unit": null,
+     "enum": {"0": {"en": "Heat", "nl": "Verwarmen"}, "1": {"en": "Cool", "nl": "Koelen"}},
+     "category": "status", "label": {"en": "Operating mode", "nl": "Bedrijfsmodus"},
+     "min_firmware": "3.2.3", "feature": null}
+  ],
+  "commands": [
+    {"name": "SetDHWTemp", "pcb": false, "class": "setting", "risky": false, "type": "int",
+     "range": {"min": 40, "max": 75, "step": 1}, "allowed": null,
+     "range_source": "panasonic_manual", "readback": ["main/DHW_Target_Temp"], "compare": "equal",
+     "applicability": {"requires": ["profile.dhw_installed"]}, "safe_under_unknown": false,
+     "min_firmware": "3.2.3", "category": "dhw",
+     "label": {"en": "DHW target temperature", "nl": "Doeltemperatuur warm water"}},
+    {"name": "SetHolidayMode", "pcb": false, "class": "setting", "risky": false, "type": "bool",
+     "allowed": [0, 1], "range_source": "encoding_domain", "readback": ["main/Holiday_Mode_State"],
+     "compare": "holiday", "min_firmware": "3.2.3", "category": "operation",
+     "label": {"en": "Holiday mode", "nl": "Vakantiemodus"}}
+  ],
+  "inputs": [],
+  "models": []
+}

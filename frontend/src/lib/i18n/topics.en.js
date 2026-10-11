@@ -1,0 +1,18 @@
+export default {
+  title: 'All topics',
+  suggestions: 'Ignore suggestions',
+  suggestionsEmpty: 'No ignore suggestions.',
+  ignore: 'Ignore',
+  reasonSentinel: 'Stuck on a sentinel value for 24 hours',
+  reasonExtra: 'Replaced by the extra data block',
+  reasonOptional: 'Optional PCB is off in the heat pump settings',
+  raw: 'Raw topic',
+  value: 'Value',
+  rawValue: 'Raw',
+  lastChange: 'Last change',
+  visibility: 'Visibility',
+  visible: 'Visible',
+  hidden: 'Hidden',
+  ignored: 'Ignored',
+  section: '{name}',
+};

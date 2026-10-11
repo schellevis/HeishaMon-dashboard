@@ -1,0 +1,4968 @@
+{
+  "schema": 1,
+  "topics": [
+    {
+      "key": "main/Heatpump_State",
+      "id": "TOP0",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heat pump on/off",
+        "nl": "Warmtepomp aan/uit"
+      }
+    },
+    {
+      "key": "main/Pump_Flow",
+      "id": "TOP1",
+      "kind": "number",
+      "unit": "L/min",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Pump flow",
+        "nl": "Pompdebiet"
+      }
+    },
+    {
+      "key": "main/Force_DHW_State",
+      "id": "TOP2",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": "force",
+      "label": {
+        "en": "Forced DHW",
+        "nl": "Geforceerd warm tapwater"
+      }
+    },
+    {
+      "key": "main/Quiet_Mode_Schedule",
+      "id": "TOP3",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Quiet mode schedule",
+        "nl": "Schema stille modus"
+      }
+    },
+    {
+      "key": "main/Operating_Mode_State",
+      "id": "TOP4",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Operating mode",
+        "nl": "Bedrijfsmodus"
+      },
+      "enum": {
+        "0": {
+          "en": "Heating",
+          "nl": "Verwarmen"
+        },
+        "1": {
+          "en": "Cooling",
+          "nl": "Koelen"
+        },
+        "2": {
+          "en": "Auto (heating)",
+          "nl": "Auto (verwarmen)"
+        },
+        "3": {
+          "en": "DHW only",
+          "nl": "Alleen tapwater"
+        },
+        "4": {
+          "en": "Heating + DHW",
+          "nl": "Verwarmen + tapwater"
+        },
+        "5": {
+          "en": "Cooling + DHW",
+          "nl": "Koelen + tapwater"
+        },
+        "6": {
+          "en": "Auto (heating) + DHW",
+          "nl": "Auto (verwarmen) + tapwater"
+        },
+        "7": {
+          "en": "Auto (cooling)",
+          "nl": "Auto (koelen)"
+        },
+        "8": {
+          "en": "Auto (cooling) + DHW",
+          "nl": "Auto (koelen) + tapwater"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Main_Inlet_Temp",
+      "id": "TOP5",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Water inlet temperature",
+        "nl": "Aanvoertemperatuur"
+      }
+    },
+    {
+      "key": "main/Main_Outlet_Temp",
+      "id": "TOP6",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Water outlet temperature",
+        "nl": "Retourtemperatuur"
+      }
+    },
+    {
+      "key": "main/Main_Target_Temp",
+      "id": "TOP7",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Water target temperature",
+        "nl": "Doeltemperatuur water"
+      }
+    },
+    {
+      "key": "main/Compressor_Freq",
+      "id": "TOP8",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "compressor",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Compressor frequency",
+        "nl": "Compressorfrequentie"
+      }
+    },
+    {
+      "key": "main/DHW_Target_Temp",
+      "id": "TOP9",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW target temperature",
+        "nl": "Doeltemperatuur tapwater"
+      }
+    },
+    {
+      "key": "main/DHW_Temp",
+      "id": "TOP10",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW tank temperature",
+        "nl": "Tapwatertemperatuur"
+      }
+    },
+    {
+      "key": "main/Operations_Hours",
+      "id": "TOP11",
+      "kind": "number",
+      "unit": "h",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "counters",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Compressor running hours",
+        "nl": "Draaiuren compressor"
+      }
+    },
+    {
+      "key": "main/Operations_Counter",
+      "id": "TOP12",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "counters",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Compressor starts",
+        "nl": "Aantal compressorstarts"
+      }
+    },
+    {
+      "key": "main/Main_Schedule_State",
+      "id": "TOP13",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Weekly schedule active",
+        "nl": "Weekschema actief"
+      }
+    },
+    {
+      "key": "main/Outside_Temp",
+      "id": "TOP14",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Outside temperature",
+        "nl": "Buitentemperatuur"
+      }
+    },
+    {
+      "key": "main/Heat_Power_Production",
+      "id": "TOP15",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heating power produced",
+        "nl": "Geleverd verwarmingsvermogen"
+      }
+    },
+    {
+      "key": "main/Heat_Power_Consumption",
+      "id": "TOP16",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heating power consumed",
+        "nl": "Opgenomen verwarmingsvermogen"
+      }
+    },
+    {
+      "key": "main/Powerful_Mode_Time",
+      "id": "TOP17",
+      "kind": "enum",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Powerful mode time",
+        "nl": "Tijd krachtige modus"
+      }
+    },
+    {
+      "key": "main/Quiet_Mode_Level",
+      "id": "TOP18",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Quiet mode level",
+        "nl": "Niveau stille modus"
+      }
+    },
+    {
+      "key": "main/Holiday_Mode_State",
+      "id": "TOP19",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Holiday mode",
+        "nl": "Vakantiemodus"
+      }
+    },
+    {
+      "key": "main/ThreeWay_Valve_State",
+      "id": "TOP20",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "3-way valve position",
+        "nl": "Stand driewegklep"
+      },
+      "enum": {
+        "0": {
+          "en": "Room / heating circuit",
+          "nl": "Ruimte / verwarmingscircuit"
+        },
+        "1": {
+          "en": "DHW",
+          "nl": "Tapwater"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        },
+        "2": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Outside_Pipe_Temp",
+      "id": "TOP21",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Outside pipe temperature",
+        "nl": "Temperatuur buitenleiding"
+      }
+    },
+    {
+      "key": "main/DHW_Heat_Delta",
+      "id": "TOP22",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW heating hysteresis",
+        "nl": "Hysterese tapwaterverwarming"
+      }
+    },
+    {
+      "key": "main/Heat_Delta",
+      "id": "TOP23",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heating hysteresis",
+        "nl": "Hysterese verwarmen"
+      }
+    },
+    {
+      "key": "main/Cool_Delta",
+      "id": "TOP24",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Cooling hysteresis",
+        "nl": "Hysterese koelen"
+      }
+    },
+    {
+      "key": "main/DHW_Holiday_Shift_Temp",
+      "id": "TOP25",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW holiday shift",
+        "nl": "Tapwaterverschuiving vakantie"
+      }
+    },
+    {
+      "key": "main/Defrosting_State",
+      "id": "TOP26",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Defrost active",
+        "nl": "Ontdooien actief"
+      },
+      "enum": {
+        "0": {
+          "en": "Not defrosting",
+          "nl": "Niet aan het ontdooien"
+        },
+        "1": {
+          "en": "Defrosting",
+          "nl": "Ontdooien"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        },
+        "2": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Z1_Heat_Request_Temp",
+      "id": "TOP27",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 heating request",
+        "nl": "Vraag verwarmen zone 1"
+      }
+    },
+    {
+      "key": "main/Z1_Cool_Request_Temp",
+      "id": "TOP28",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 cooling request",
+        "nl": "Vraag koelen zone 1"
+      }
+    },
+    {
+      "key": "main/Z1_Heat_Curve_Target_High_Temp",
+      "id": "TOP29",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 heating curve, water temperature at cold end",
+        "nl": "Stooklijn verwarmen zone 1, watertemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Z1_Heat_Curve_Target_Low_Temp",
+      "id": "TOP30",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 heating curve, water temperature at warm end",
+        "nl": "Stooklijn verwarmen zone 1, watertemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z1_Heat_Curve_Outside_High_Temp",
+      "id": "TOP31",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 heating curve, outdoor temperature at warm end",
+        "nl": "Stooklijn verwarmen zone 1, buitentemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z1_Heat_Curve_Outside_Low_Temp",
+      "id": "TOP32",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 heating curve, outdoor temperature at cold end",
+        "nl": "Stooklijn verwarmen zone 1, buitentemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Room_Thermostat_Temp",
+      "id": "TOP33",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Room thermostat temperature",
+        "nl": "Kamerthermostaattemperatuur"
+      }
+    },
+    {
+      "key": "main/Z2_Heat_Request_Temp",
+      "id": "TOP34",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 heating request",
+        "nl": "Vraag verwarmen zone 2"
+      }
+    },
+    {
+      "key": "main/Z2_Cool_Request_Temp",
+      "id": "TOP35",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 cooling request",
+        "nl": "Vraag koelen zone 2"
+      }
+    },
+    {
+      "key": "main/Z1_Water_Temp",
+      "id": "TOP36",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 water temperature",
+        "nl": "Watertemperatuur zone 1"
+      }
+    },
+    {
+      "key": "main/Z2_Water_Temp",
+      "id": "TOP37",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 water temperature",
+        "nl": "Watertemperatuur zone 2"
+      }
+    },
+    {
+      "key": "main/Cool_Power_Production",
+      "id": "TOP38",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Cooling power produced",
+        "nl": "Geleverd koelvermogen"
+      }
+    },
+    {
+      "key": "main/Cool_Power_Consumption",
+      "id": "TOP39",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Cooling power consumed",
+        "nl": "Opgenomen koelvermogen"
+      }
+    },
+    {
+      "key": "main/DHW_Power_Production",
+      "id": "TOP40",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW power produced",
+        "nl": "Geleverd tapwatervermogen"
+      }
+    },
+    {
+      "key": "main/DHW_Power_Consumption",
+      "id": "TOP41",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW power consumed",
+        "nl": "Opgenomen tapwatervermogen"
+      }
+    },
+    {
+      "key": "main/Z1_Water_Target_Temp",
+      "id": "TOP42",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 target water temperature",
+        "nl": "Doelwatertemperatuur zone 1"
+      }
+    },
+    {
+      "key": "main/Z2_Water_Target_Temp",
+      "id": "TOP43",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 target water temperature",
+        "nl": "Doelwatertemperatuur zone 2"
+      }
+    },
+    {
+      "key": "main/Error",
+      "id": "TOP44",
+      "kind": "text",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Error code",
+        "nl": "Foutcode"
+      }
+    },
+    {
+      "key": "main/Room_Holiday_Shift_Temp",
+      "id": "TOP45",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Room holiday shift",
+        "nl": "Kamerverschuiving vakantie"
+      }
+    },
+    {
+      "key": "main/Buffer_Temp",
+      "id": "TOP46",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "buffer",
+      "label": {
+        "en": "Buffer temperature",
+        "nl": "Buffertemperatuur"
+      }
+    },
+    {
+      "key": "main/Solar_Temp",
+      "id": "TOP47",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "solar",
+      "label": {
+        "en": "Solar collector temperature",
+        "nl": "Temperatuur zonnecollector"
+      }
+    },
+    {
+      "key": "main/Pool_Temp",
+      "id": "TOP48",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "pool",
+      "label": {
+        "en": "Pool temperature",
+        "nl": "Zwembadtemperatuur"
+      }
+    },
+    {
+      "key": "main/Main_Hex_Outlet_Temp",
+      "id": "TOP49",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heat exchanger outlet temperature",
+        "nl": "Uitlaattemperatuur warmtewisselaar"
+      }
+    },
+    {
+      "key": "main/Discharge_Temp",
+      "id": "TOP50",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Compressor discharge temperature",
+        "nl": "Persgastemperatuur"
+      }
+    },
+    {
+      "key": "main/Inside_Pipe_Temp",
+      "id": "TOP51",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Inside pipe temperature",
+        "nl": "Temperatuur binnenleiding"
+      }
+    },
+    {
+      "key": "main/Defrost_Temp",
+      "id": "TOP52",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Defrost temperature",
+        "nl": "Ontdooitemperatuur"
+      }
+    },
+    {
+      "key": "main/Eva_Outlet_Temp",
+      "id": "TOP53",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Evaporator outlet temperature",
+        "nl": "Uitlaattemperatuur verdamper"
+      }
+    },
+    {
+      "key": "main/Bypass_Outlet_Temp",
+      "id": "TOP54",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Bypass outlet temperature",
+        "nl": "Uitlaattemperatuur bypass"
+      }
+    },
+    {
+      "key": "main/Ipm_Temp",
+      "id": "TOP55",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Inverter module temperature",
+        "nl": "Temperatuur omvormermodule"
+      }
+    },
+    {
+      "key": "main/Z1_Temp",
+      "id": "TOP56",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -78,
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 temperature",
+        "nl": "Temperatuur zone 1"
+      }
+    },
+    {
+      "key": "main/Z2_Temp",
+      "id": "TOP57",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -78,
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 temperature",
+        "nl": "Temperatuur zone 2"
+      }
+    },
+    {
+      "key": "main/DHW_Heater_State",
+      "id": "TOP58",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW backup heater",
+        "nl": "Bijverwarming tapwater"
+      }
+    },
+    {
+      "key": "main/Room_Heater_State",
+      "id": "TOP59",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Room backup heater",
+        "nl": "Bijverwarming ruimte"
+      }
+    },
+    {
+      "key": "main/Internal_Heater_State",
+      "id": "TOP60",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Internal heater",
+        "nl": "Interne verwarmer"
+      }
+    },
+    {
+      "key": "main/External_Heater_State",
+      "id": "TOP61",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "External heater",
+        "nl": "Externe verwarmer"
+      }
+    },
+    {
+      "key": "main/Fan1_Motor_Speed",
+      "id": "TOP62",
+      "kind": "number",
+      "unit": "rpm",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Fan 1 speed",
+        "nl": "Toerental ventilator 1"
+      }
+    },
+    {
+      "key": "main/Fan2_Motor_Speed",
+      "id": "TOP63",
+      "kind": "number",
+      "unit": "rpm",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Fan 2 speed",
+        "nl": "Toerental ventilator 2"
+      }
+    },
+    {
+      "key": "main/High_Pressure",
+      "id": "TOP64",
+      "kind": "number",
+      "unit": "bar",
+      "decimals": 1,
+      "sentinels": [
+        -128
+      ],
+      "category": "pressure",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Refrigerant high pressure",
+        "nl": "Hoge koudemiddeldruk"
+      }
+    },
+    {
+      "key": "main/Pump_Speed",
+      "id": "TOP65",
+      "kind": "number",
+      "unit": "rpm",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Pump speed",
+        "nl": "Pomptoerental"
+      }
+    },
+    {
+      "key": "main/Low_Pressure",
+      "id": "TOP66",
+      "kind": "number",
+      "unit": "bar",
+      "decimals": 1,
+      "sentinels": [
+        -128
+      ],
+      "category": "pressure",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Refrigerant low pressure",
+        "nl": "Lage koudemiddeldruk"
+      }
+    },
+    {
+      "key": "main/Compressor_Current",
+      "id": "TOP67",
+      "kind": "number",
+      "unit": "A",
+      "decimals": 1,
+      "sentinels": [
+        -128
+      ],
+      "category": "pressure",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Compressor current",
+        "nl": "Compressorstroom"
+      }
+    },
+    {
+      "key": "main/Force_Heater_State",
+      "id": "TOP68",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Forced heater",
+        "nl": "Geforceerde verwarmer"
+      }
+    },
+    {
+      "key": "main/Sterilization_State",
+      "id": "TOP69",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Sterilization running",
+        "nl": "Sterilisatie actief"
+      }
+    },
+    {
+      "key": "main/Sterilization_Temp",
+      "id": "TOP70",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Sterilization temperature",
+        "nl": "Sterilisatietemperatuur"
+      }
+    },
+    {
+      "key": "main/Sterilization_Max_Time",
+      "id": "TOP71",
+      "kind": "number",
+      "unit": "min",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Sterilization maximum time",
+        "nl": "Maximale sterilisatieduur"
+      }
+    },
+    {
+      "key": "main/Z1_Cool_Curve_Target_High_Temp",
+      "id": "TOP72",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 cooling curve, water temperature at cold end",
+        "nl": "Stooklijn koelen zone 1, watertemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Z1_Cool_Curve_Target_Low_Temp",
+      "id": "TOP73",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 cooling curve, water temperature at warm end",
+        "nl": "Stooklijn koelen zone 1, watertemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z1_Cool_Curve_Outside_High_Temp",
+      "id": "TOP74",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 cooling curve, outdoor temperature at warm end",
+        "nl": "Stooklijn koelen zone 1, buitentemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z1_Cool_Curve_Outside_Low_Temp",
+      "id": "TOP75",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 cooling curve, outdoor temperature at cold end",
+        "nl": "Stooklijn koelen zone 1, buitentemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Heating_Mode",
+      "id": "TOP76",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heating control mode",
+        "nl": "Regelwijze verwarmen"
+      },
+      "enum": {
+        "0": {
+          "en": "Curve",
+          "nl": "Stooklijn"
+        },
+        "1": {
+          "en": "Direct",
+          "nl": "Direct"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        },
+        "2": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Heating_Off_Outdoor_Temp",
+      "id": "TOP77",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heating off above outdoor temperature",
+        "nl": "Verwarmen uit boven buitentemperatuur"
+      }
+    },
+    {
+      "key": "main/Heater_On_Outdoor_Temp",
+      "id": "TOP78",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Backup heater on below outdoor temperature",
+        "nl": "Bijverwarming aan onder buitentemperatuur"
+      }
+    },
+    {
+      "key": "main/Heat_To_Cool_Temp",
+      "id": "TOP79",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Switch heating to cooling at",
+        "nl": "Omschakeling verwarmen naar koelen bij"
+      }
+    },
+    {
+      "key": "main/Cool_To_Heat_Temp",
+      "id": "TOP80",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Switch cooling to heating at",
+        "nl": "Omschakeling koelen naar verwarmen bij"
+      }
+    },
+    {
+      "key": "main/Cooling_Mode",
+      "id": "TOP81",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": "cooling",
+      "label": {
+        "en": "Cooling control mode",
+        "nl": "Regelwijze koelen"
+      },
+      "enum": {
+        "0": {
+          "en": "Curve",
+          "nl": "Stooklijn"
+        },
+        "1": {
+          "en": "Direct",
+          "nl": "Direct"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        },
+        "2": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Z2_Heat_Curve_Target_High_Temp",
+      "id": "TOP82",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 heating curve, water temperature at cold end",
+        "nl": "Stooklijn verwarmen zone 2, watertemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Z2_Heat_Curve_Target_Low_Temp",
+      "id": "TOP83",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 heating curve, water temperature at warm end",
+        "nl": "Stooklijn verwarmen zone 2, watertemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z2_Heat_Curve_Outside_High_Temp",
+      "id": "TOP84",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 heating curve, outdoor temperature at warm end",
+        "nl": "Stooklijn verwarmen zone 2, buitentemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z2_Heat_Curve_Outside_Low_Temp",
+      "id": "TOP85",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 heating curve, outdoor temperature at cold end",
+        "nl": "Stooklijn verwarmen zone 2, buitentemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Z2_Cool_Curve_Target_High_Temp",
+      "id": "TOP86",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 cooling curve, water temperature at cold end",
+        "nl": "Stooklijn koelen zone 2, watertemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Z2_Cool_Curve_Target_Low_Temp",
+      "id": "TOP87",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 cooling curve, water temperature at warm end",
+        "nl": "Stooklijn koelen zone 2, watertemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z2_Cool_Curve_Outside_High_Temp",
+      "id": "TOP88",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 cooling curve, outdoor temperature at warm end",
+        "nl": "Stooklijn koelen zone 2, buitentemperatuur warme kant"
+      }
+    },
+    {
+      "key": "main/Z2_Cool_Curve_Outside_Low_Temp",
+      "id": "TOP89",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 cooling curve, outdoor temperature at cold end",
+        "nl": "Stooklijn koelen zone 2, buitentemperatuur koude kant"
+      }
+    },
+    {
+      "key": "main/Room_Heater_Operations_Hours",
+      "id": "TOP90",
+      "kind": "number",
+      "unit": "h",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Room heater running hours",
+        "nl": "Draaiuren ruimteverwarmer"
+      }
+    },
+    {
+      "key": "main/DHW_Heater_Operations_Hours",
+      "id": "TOP91",
+      "kind": "number",
+      "unit": "h",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW heater running hours",
+        "nl": "Draaiuren tapwaterverwarmer"
+      }
+    },
+    {
+      "key": "main/Heat_Pump_Model",
+      "id": "TOP92",
+      "kind": "text",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [],
+      "category": "temperatures",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heat pump model",
+        "nl": "Warmtepompmodel"
+      }
+    },
+    {
+      "key": "main/Pump_Duty",
+      "id": "TOP93",
+      "kind": "number",
+      "unit": "%",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Pump duty",
+        "nl": "Pompbelasting"
+      }
+    },
+    {
+      "key": "main/Zones_State",
+      "id": "TOP94",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Active zones",
+        "nl": "Actieve zones"
+      },
+      "enum": {
+        "0": {
+          "en": "Zone 1",
+          "nl": "Zone 1"
+        },
+        "1": {
+          "en": "Zone 2",
+          "nl": "Zone 2"
+        },
+        "2": {
+          "en": "Zone 1 and 2",
+          "nl": "Zone 1 en 2"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Max_Pump_Duty",
+      "id": "TOP95",
+      "kind": "number",
+      "unit": "%",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Maximum pump duty",
+        "nl": "Maximale pompbelasting"
+      }
+    },
+    {
+      "key": "main/Heater_Delay_Time",
+      "id": "TOP96",
+      "kind": "number",
+      "unit": "min",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Backup heater delay",
+        "nl": "Vertraging bijverwarming"
+      }
+    },
+    {
+      "key": "main/Heater_Start_Delta",
+      "id": "TOP97",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Backup heater start delta",
+        "nl": "Starttemperatuurverschil bijverwarming"
+      }
+    },
+    {
+      "key": "main/Heater_Stop_Delta",
+      "id": "TOP98",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Backup heater stop delta",
+        "nl": "Stoptemperatuurverschil bijverwarming"
+      }
+    },
+    {
+      "key": "main/Buffer_Installed",
+      "id": "TOP99",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.2.3",
+      "feature": "buffer",
+      "label": {
+        "en": "Buffer tank installed",
+        "nl": "Buffervat aanwezig"
+      },
+      "enum": {
+        "0": {
+          "en": "No",
+          "nl": "Nee"
+        },
+        "1": {
+          "en": "Yes",
+          "nl": "Ja"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/DHW_Installed",
+      "id": "TOP100",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "dhw",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW tank installed",
+        "nl": "Tapwatervat aanwezig"
+      },
+      "enum": {
+        "0": {
+          "en": "No",
+          "nl": "Nee"
+        },
+        "1": {
+          "en": "Yes",
+          "nl": "Ja"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Solar_Mode",
+      "id": "TOP101",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": "solar",
+      "label": {
+        "en": "Solar mode",
+        "nl": "Zonnemodus"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "Buffer",
+          "nl": "Buffer"
+        },
+        "2": {
+          "en": "DHW",
+          "nl": "Tapwater"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Solar_On_Delta",
+      "id": "TOP102",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": "solar",
+      "label": {
+        "en": "Solar switch-on delta",
+        "nl": "Inschakelverschil zon"
+      }
+    },
+    {
+      "key": "main/Solar_Off_Delta",
+      "id": "TOP103",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": "solar",
+      "label": {
+        "en": "Solar switch-off delta",
+        "nl": "Uitschakelverschil zon"
+      }
+    },
+    {
+      "key": "main/Solar_Frost_Protection",
+      "id": "TOP104",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "solar",
+      "min_firmware": "3.2.3",
+      "feature": "solar",
+      "label": {
+        "en": "Solar frost protection",
+        "nl": "Vorstbeveiliging zon"
+      }
+    },
+    {
+      "key": "main/Solar_High_Limit",
+      "id": "TOP105",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "solar",
+      "min_firmware": "3.2.3",
+      "feature": "solar",
+      "label": {
+        "en": "Solar high limit",
+        "nl": "Hoge limiet zon"
+      }
+    },
+    {
+      "key": "main/Pump_Flowrate_Mode",
+      "id": "TOP106",
+      "kind": "enum",
+      "unit": "L/min",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Pump flow-rate mode",
+        "nl": "Pompdebietmodus"
+      }
+    },
+    {
+      "key": "main/Liquid_Type",
+      "id": "TOP107",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Circuit liquid",
+        "nl": "Vloeistof in circuit"
+      },
+      "enum": {
+        "0": {
+          "en": "Water",
+          "nl": "Water"
+        },
+        "1": {
+          "en": "Glycol",
+          "nl": "Glycol"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Alt_External_Sensor",
+      "id": "TOP108",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Alternative outdoor sensor",
+        "nl": "Alternatieve buitensensor"
+      }
+    },
+    {
+      "key": "main/Anti_Freeze_Mode",
+      "id": "TOP109",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Anti-freeze mode",
+        "nl": "Antivriesmodus"
+      }
+    },
+    {
+      "key": "main/Optional_PCB",
+      "id": "TOP110",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Optional PCB enabled",
+        "nl": "Optionele PCB actief"
+      },
+      "enum": {
+        "0": {
+          "en": "No",
+          "nl": "Nee"
+        },
+        "1": {
+          "en": "Yes",
+          "nl": "Ja"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Z1_Sensor_Settings",
+      "id": "TOP111",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 sensor type",
+        "nl": "Sensortype zone 1"
+      },
+      "enum": {
+        "0": {
+          "en": "Water temperature",
+          "nl": "Watertemperatuur"
+        },
+        "1": {
+          "en": "External thermostat",
+          "nl": "Externe thermostaat"
+        },
+        "2": {
+          "en": "Internal thermostat",
+          "nl": "Interne thermostaat"
+        },
+        "3": {
+          "en": "Thermistor",
+          "nl": "Thermistor"
+        }
+      }
+    },
+    {
+      "key": "main/Z2_Sensor_Settings",
+      "id": "TOP112",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 sensor type",
+        "nl": "Sensortype zone 2"
+      },
+      "enum": {
+        "0": {
+          "en": "Water temperature",
+          "nl": "Watertemperatuur"
+        },
+        "1": {
+          "en": "External thermostat",
+          "nl": "Externe thermostaat"
+        },
+        "2": {
+          "en": "Internal thermostat",
+          "nl": "Interne thermostaat"
+        },
+        "3": {
+          "en": "Thermistor",
+          "nl": "Thermistor"
+        }
+      }
+    },
+    {
+      "key": "main/Buffer_Tank_Delta",
+      "id": "TOP113",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "curve",
+      "min_firmware": "3.2.3",
+      "feature": "buffer",
+      "label": {
+        "en": "Buffer tank delta",
+        "nl": "Temperatuurverschil buffervat"
+      }
+    },
+    {
+      "key": "main/External_Pad_Heater",
+      "id": "TOP114",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "External pad heater",
+        "nl": "Externe verwarmingsmat"
+      }
+    },
+    {
+      "key": "main/Water_Pressure",
+      "id": "TOP115",
+      "kind": "number",
+      "unit": "bar",
+      "decimals": 1,
+      "sentinels": [
+        -128
+      ],
+      "category": "pressure",
+      "min_firmware": "3.5",
+      "feature": null,
+      "label": {
+        "en": "Water pressure",
+        "nl": "Waterdruk"
+      }
+    },
+    {
+      "key": "main/Second_Inlet_Temp",
+      "id": "TOP116",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.5",
+      "feature": null,
+      "label": {
+        "en": "Second inlet temperature",
+        "nl": "Tweede aanvoertemperatuur"
+      }
+    },
+    {
+      "key": "main/Economizer_Outlet_Temp",
+      "id": "TOP117",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.5",
+      "feature": null,
+      "label": {
+        "en": "Economizer outlet temperature",
+        "nl": "Uitlaattemperatuur economizer"
+      }
+    },
+    {
+      "key": "main/Second_Room_Thermostat_Temp",
+      "id": "TOP118",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.5",
+      "feature": null,
+      "label": {
+        "en": "Second room thermostat temperature",
+        "nl": "Tweede kamerthermostaattemperatuur"
+      }
+    },
+    {
+      "key": "main/External_Control",
+      "id": "TOP119",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.9",
+      "feature": null,
+      "label": {
+        "en": "External control",
+        "nl": "Externe sturing"
+      }
+    },
+    {
+      "key": "main/External_Heat_Cool_Control",
+      "id": "TOP120",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.9",
+      "feature": null,
+      "label": {
+        "en": "External heat/cool switch",
+        "nl": "Externe schakeling verwarmen/koelen"
+      }
+    },
+    {
+      "key": "main/External_Error_Signal",
+      "id": "TOP121",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": null,
+      "label": {
+        "en": "External error signal",
+        "nl": "Extern foutsignaal"
+      }
+    },
+    {
+      "key": "main/External_Compressor_Control",
+      "id": "TOP122",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.9",
+      "feature": null,
+      "label": {
+        "en": "External compressor control",
+        "nl": "Externe compressorsturing"
+      }
+    },
+    {
+      "key": "main/Z2_Pump_State",
+      "id": "TOP123",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 pump",
+        "nl": "Pomp zone 2"
+      }
+    },
+    {
+      "key": "main/Z1_Pump_State",
+      "id": "TOP124",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 pump",
+        "nl": "Pomp zone 1"
+      }
+    },
+    {
+      "key": "main/TwoWay_Valve_State",
+      "id": "TOP125",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": null,
+      "label": {
+        "en": "2-way valve position",
+        "nl": "Stand tweewegklep"
+      }
+    },
+    {
+      "key": "main/ThreeWay_Valve_State2",
+      "id": "TOP126",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": null,
+      "label": {
+        "en": "Second 3-way valve position",
+        "nl": "Stand tweede driewegklep"
+      }
+    },
+    {
+      "key": "main/Z1_Valve_PID",
+      "id": "TOP127",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 valve PID",
+        "nl": "PID-klep zone 1"
+      }
+    },
+    {
+      "key": "main/Z2_Valve_PID",
+      "id": "TOP128",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 valve PID",
+        "nl": "PID-klep zone 2"
+      }
+    },
+    {
+      "key": "main/Bivalent_Control",
+      "id": "TOP129",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent control",
+        "nl": "Bivalente regeling"
+      },
+      "enum": {
+        "0": {
+          "en": "No",
+          "nl": "Nee"
+        },
+        "1": {
+          "en": "Yes",
+          "nl": "Ja"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
+      }
+    },
+    {
+      "key": "main/Bivalent_Mode",
+      "id": "TOP130",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent mode",
+        "nl": "Bivalente modus"
+      }
+    },
+    {
+      "key": "main/Bivalent_Start_Temp",
+      "id": "TOP131",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent start temperature",
+        "nl": "Bivalente starttemperatuur"
+      }
+    },
+    {
+      "key": "main/Bivalent_Advanced_Heat",
+      "id": "TOP132",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent advanced heating",
+        "nl": "Bivalent uitgebreid verwarmen"
+      }
+    },
+    {
+      "key": "main/Bivalent_Advanced_DHW",
+      "id": "TOP133",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "dhw",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent advanced DHW",
+        "nl": "Bivalent uitgebreid tapwater"
+      }
+    },
+    {
+      "key": "main/Bivalent_Advanced_Start_Temp",
+      "id": "TOP134",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent advanced start temperature",
+        "nl": "Bivalent uitgebreid: starttemperatuur"
+      }
+    },
+    {
+      "key": "main/Bivalent_Advanced_Stop_Temp",
+      "id": "TOP135",
+      "kind": "number",
+      "unit": "°C",
+      "decimals": 0,
+      "sentinels": [
+        -128
+      ],
+      "category": "temperatures",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent advanced stop temperature",
+        "nl": "Bivalent uitgebreid: stoptemperatuur"
+      }
+    },
+    {
+      "key": "main/Bivalent_Advanced_Start_Delay",
+      "id": "TOP136",
+      "kind": "number",
+      "unit": "min",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent advanced start delay",
+        "nl": "Bivalent uitgebreid: startvertraging"
+      }
+    },
+    {
+      "key": "main/Bivalent_Advanced_Stop_Delay",
+      "id": "TOP137",
+      "kind": "number",
+      "unit": "min",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent advanced stop delay",
+        "nl": "Bivalent uitgebreid: stopvertraging"
+      }
+    },
+    {
+      "key": "main/Bivalent_Advanced_DHW_Delay",
+      "id": "TOP138",
+      "kind": "number",
+      "unit": "min",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "dhw",
+      "min_firmware": "3.9",
+      "feature": "bivalent",
+      "label": {
+        "en": "Bivalent advanced DHW delay",
+        "nl": "Bivalent uitgebreid: vertraging tapwater"
+      }
+    },
+    {
+      "key": "main/Heating_Control",
+      "id": "TOP139",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "4.0",
+      "feature": null,
+      "label": {
+        "en": "Heating control",
+        "nl": "Verwarmingsregeling"
+      }
+    },
+    {
+      "key": "main/Smart_DHW",
+      "id": "TOP140",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "dhw",
+      "min_firmware": "4.0",
+      "feature": "smart",
+      "label": {
+        "en": "Smart DHW",
+        "nl": "Slim tapwater"
+      }
+    },
+    {
+      "key": "main/Quiet_Mode_Priority",
+      "id": "TOP141",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "4.0",
+      "feature": null,
+      "label": {
+        "en": "Quiet mode priority",
+        "nl": "Prioriteit stille modus"
+      }
+    },
+    {
+      "key": "main/Expansion_Valve",
+      "id": "TOP142",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "4.0",
+      "feature": null,
+      "label": {
+        "en": "Expansion valve",
+        "nl": "Expansieklep"
+      }
+    },
+    {
+      "key": "main/DHW_Sensor_Selection",
+      "id": "TOP143",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "settings",
+      "min_firmware": "4.1.2",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW sensor selection",
+        "nl": "Keuze tapwatersensor"
+      }
+    },
+    {
+      "key": "extra/Heat_Power_Consumption_Extra",
+      "id": "XTOP0",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heating power consumed (extra)",
+        "nl": "Opgenomen verwarmingsvermogen (extra)"
+      }
+    },
+    {
+      "key": "extra/Cool_Power_Consumption_Extra",
+      "id": "XTOP1",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Cooling power consumed (extra)",
+        "nl": "Opgenomen koelvermogen (extra)"
+      }
+    },
+    {
+      "key": "extra/DHW_Power_Consumption_Extra",
+      "id": "XTOP2",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW power consumed (extra)",
+        "nl": "Opgenomen tapwatervermogen (extra)"
+      }
+    },
+    {
+      "key": "extra/Heat_Power_Production_Extra",
+      "id": "XTOP3",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Heating power produced (extra)",
+        "nl": "Geleverd verwarmingsvermogen (extra)"
+      }
+    },
+    {
+      "key": "extra/Cool_Power_Production_Extra",
+      "id": "XTOP4",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Cooling power produced (extra)",
+        "nl": "Geleverd koelvermogen (extra)"
+      }
+    },
+    {
+      "key": "extra/DHW_Power_Production_Extra",
+      "id": "XTOP5",
+      "kind": "number",
+      "unit": "W",
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "power",
+      "min_firmware": "3.2.3",
+      "feature": "dhw",
+      "label": {
+        "en": "DHW power produced (extra)",
+        "nl": "Geleverd tapwatervermogen (extra)"
+      }
+    },
+    {
+      "key": "optional/Z1_Water_Pump",
+      "id": "OPT0",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 water pump",
+        "nl": "Waterpomp zone 1"
+      }
+    },
+    {
+      "key": "optional/Z1_Mixing_Valve",
+      "id": "OPT1",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": "zone1",
+      "label": {
+        "en": "Zone 1 mixing valve",
+        "nl": "Mengklep zone 1"
+      }
+    },
+    {
+      "key": "optional/Z2_Water_Pump",
+      "id": "OPT2",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 water pump",
+        "nl": "Waterpomp zone 2"
+      }
+    },
+    {
+      "key": "optional/Z2_Mixing_Valve",
+      "id": "OPT3",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": "zone2",
+      "label": {
+        "en": "Zone 2 mixing valve",
+        "nl": "Mengklep zone 2"
+      }
+    },
+    {
+      "key": "optional/Pool_Water_Pump",
+      "id": "OPT4",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": "pool",
+      "label": {
+        "en": "Pool water pump",
+        "nl": "Zwembadpomp"
+      }
+    },
+    {
+      "key": "optional/Solar_Water_Pump",
+      "id": "OPT5",
+      "kind": "number",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "flow",
+      "min_firmware": "3.2.3",
+      "feature": "solar",
+      "label": {
+        "en": "Solar water pump",
+        "nl": "Zonnepomp"
+      }
+    },
+    {
+      "key": "optional/Alarm_State",
+      "id": "OPT6",
+      "kind": "enum",
+      "unit": null,
+      "decimals": 0,
+      "sentinels": [
+        -1
+      ],
+      "category": "status",
+      "min_firmware": "3.2.3",
+      "feature": null,
+      "label": {
+        "en": "Alarm",
+        "nl": "Alarm"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "SetHeatpump",
+      "pcb": false,
+      "class": "setting",
+      "risky": true,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heatpump_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Heat pump on/off",
+        "nl": "Warmtepomp aan/uit"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetPump",
+      "pcb": false,
+      "class": "unverifiable",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Circulation pump",
+        "nl": "Circulatiepomp"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetMaxPumpDuty",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Max_Pump_Duty"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Maximum pump duty",
+        "nl": "Maximale pompbelasting"
+      },
+      "range": {
+        "min": 0,
+        "max": 100,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetQuietMode",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Quiet_Mode_Level"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Quiet mode",
+        "nl": "Stille modus"
+      },
+      "range": {
+        "min": 0,
+        "max": 3,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetZ1HeatRequestTemperature",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Z1_Heat_Request_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 1 heating request",
+        "nl": "Vraag verwarmen zone 1"
+      },
+      "range": {
+        "min": -5,
+        "max": 5,
+        "step": 1
+      },
+      "conditional_ranges": [
+        {
+          "when": {
+            "profile.heating_control": "curve"
+          },
+          "min": -5,
+          "max": 5,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z1.sensor": "water"
+          },
+          "min": 20,
+          "max": 65,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z1.sensor": "ext_thermostat"
+          },
+          "min": 10,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z1.sensor": "int_thermostat"
+          },
+          "min": 10,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z1.sensor": "thermistor"
+          },
+          "min": 10,
+          "max": 30,
+          "step": 1
+        }
+      ]
+    },
+    {
+      "name": "SetZ1CoolRequestTemperature",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Z1_Cool_Request_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 1 cooling request",
+        "nl": "Vraag koelen zone 1"
+      },
+      "range": {
+        "min": -5,
+        "max": 5,
+        "step": 1
+      },
+      "conditional_ranges": [
+        {
+          "when": {
+            "profile.cooling_control": "curve"
+          },
+          "min": -5,
+          "max": 5,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z1.sensor": "water"
+          },
+          "min": 5,
+          "max": 20,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z1.sensor": "ext_thermostat"
+          },
+          "min": 18,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z1.sensor": "int_thermostat"
+          },
+          "min": 18,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z1.sensor": "thermistor"
+          },
+          "min": 18,
+          "max": 30,
+          "step": 1
+        }
+      ]
+    },
+    {
+      "name": "SetZ2HeatRequestTemperature",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Z2_Heat_Request_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 2 heating request",
+        "nl": "Vraag verwarmen zone 2"
+      },
+      "range": {
+        "min": -5,
+        "max": 5,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.zone.z2.active"
+        ]
+      },
+      "safe_under_unknown": false,
+      "conditional_ranges": [
+        {
+          "when": {
+            "profile.heating_control": "curve"
+          },
+          "min": -5,
+          "max": 5,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z2.sensor": "water"
+          },
+          "min": 20,
+          "max": 65,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z2.sensor": "ext_thermostat"
+          },
+          "min": 10,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z2.sensor": "int_thermostat"
+          },
+          "min": 10,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.heating_control": "direct",
+            "profile.zone.z2.sensor": "thermistor"
+          },
+          "min": 10,
+          "max": 30,
+          "step": 1
+        }
+      ]
+    },
+    {
+      "name": "SetZ2CoolRequestTemperature",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Z2_Cool_Request_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 2 cooling request",
+        "nl": "Vraag koelen zone 2"
+      },
+      "range": {
+        "min": -5,
+        "max": 5,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.zone.z2.active"
+        ]
+      },
+      "safe_under_unknown": false,
+      "conditional_ranges": [
+        {
+          "when": {
+            "profile.cooling_control": "curve"
+          },
+          "min": -5,
+          "max": 5,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z2.sensor": "water"
+          },
+          "min": 5,
+          "max": 20,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z2.sensor": "ext_thermostat"
+          },
+          "min": 18,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z2.sensor": "int_thermostat"
+          },
+          "min": 18,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "when": {
+            "profile.cooling_control": "direct",
+            "profile.zone.z2.sensor": "thermistor"
+          },
+          "min": 18,
+          "max": 30,
+          "step": 1
+        }
+      ]
+    },
+    {
+      "name": "SetForceDHW",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Force_DHW_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "dhw",
+      "label": {
+        "en": "Force DHW run",
+        "nl": "Tapwaterrun forceren"
+      },
+      "allowed": [
+        0,
+        1
+      ],
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetForceDefrost",
+      "pcb": false,
+      "class": "trigger",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Force defrost",
+        "nl": "Ontdooien forceren"
+      },
+      "allowed": [
+        1
+      ]
+    },
+    {
+      "name": "SetForceSterilization",
+      "pcb": false,
+      "class": "trigger",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Force sterilization",
+        "nl": "Sterilisatie forceren"
+      },
+      "allowed": [
+        1
+      ],
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetSterilizationTemp",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int2",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Sterilization_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Sterilization temperature",
+        "nl": "Sterilisatietemperatuur"
+      },
+      "range": {
+        "min": 55,
+        "max": 75,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetSterilizationMaxTime",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int12",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Sterilization_Max_Time"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Sterilization maximum time",
+        "nl": "Maximale sterilisatieduur"
+      },
+      "range": {
+        "min": 5,
+        "max": 60,
+        "step": 5
+      },
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetForceHeater",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Force_Heater_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.2.0",
+      "category": "settings",
+      "label": {
+        "en": "Force backup heater",
+        "nl": "Bijverwarming forceren"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetHolidayMode",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Holiday_Mode_State"
+      ],
+      "compare": "holiday",
+      "min_firmware": "3.2.3",
+      "category": "operation",
+      "label": {
+        "en": "Holiday mode",
+        "nl": "Vakantiemodus"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetPowerfulMode",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Powerful_Mode_Time"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Powerful mode",
+        "nl": "Krachtige modus"
+      },
+      "range": {
+        "min": 0,
+        "max": 3,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetOperationMode",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Operating_Mode_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "operation",
+      "label": {
+        "en": "Operating mode",
+        "nl": "Bedrijfsmodus"
+      },
+      "range": {
+        "min": 0,
+        "max": 6,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetDHWTemp",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/DHW_Target_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "dhw",
+      "label": {
+        "en": "DHW target temperature",
+        "nl": "Doeltemperatuur tapwater"
+      },
+      "range": {
+        "min": 40,
+        "max": 75,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetCurves",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "json",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Z1_Heat_Curve_Target_High_Temp",
+        "main/Z1_Heat_Curve_Target_Low_Temp",
+        "main/Z1_Heat_Curve_Outside_High_Temp",
+        "main/Z1_Heat_Curve_Outside_Low_Temp",
+        "main/Z1_Cool_Curve_Target_High_Temp",
+        "main/Z1_Cool_Curve_Target_Low_Temp",
+        "main/Z1_Cool_Curve_Outside_High_Temp",
+        "main/Z1_Cool_Curve_Outside_Low_Temp",
+        "main/Z2_Heat_Curve_Target_High_Temp",
+        "main/Z2_Heat_Curve_Target_Low_Temp",
+        "main/Z2_Heat_Curve_Outside_High_Temp",
+        "main/Z2_Heat_Curve_Outside_Low_Temp",
+        "main/Z2_Cool_Curve_Target_High_Temp",
+        "main/Z2_Cool_Curve_Target_Low_Temp",
+        "main/Z2_Cool_Curve_Outside_High_Temp",
+        "main/Z2_Cool_Curve_Outside_Low_Temp"
+      ],
+      "compare": "curve_leaf",
+      "min_firmware": "3.2.3",
+      "category": "curve",
+      "label": {
+        "en": "Heating/cooling curves",
+        "nl": "Stooklijnen verwarmen/koelen"
+      }
+    },
+    {
+      "name": "SetZones",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Zones_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Active zones",
+        "nl": "Actieve zones"
+      },
+      "range": {
+        "min": 0,
+        "max": 2,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetFloorHeatDelta",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heat_Delta"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Heating hysteresis",
+        "nl": "Hysterese verwarmen"
+      },
+      "range": {
+        "min": -10,
+        "max": 10,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetFloorCoolDelta",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Cool_Delta"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Cooling hysteresis",
+        "nl": "Hysterese koelen"
+      },
+      "range": {
+        "min": -10,
+        "max": 10,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetDHWHeatDelta",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/DHW_Heat_Delta"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "dhw",
+      "label": {
+        "en": "DHW heating hysteresis",
+        "nl": "Hysterese tapwaterverwarming"
+      },
+      "range": {
+        "min": -10,
+        "max": 10,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetReset",
+      "pcb": false,
+      "class": "trigger",
+      "risky": true,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Reset error",
+        "nl": "Fout resetten"
+      },
+      "allowed": [
+        1
+      ]
+    },
+    {
+      "name": "SetHeaterDelayTime",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heater_Delay_Time"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Backup heater delay",
+        "nl": "Vertraging bijverwarming"
+      },
+      "range": {
+        "min": 0,
+        "max": 30,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetHeaterStartDelta",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heater_Start_Delta"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Backup heater start delta",
+        "nl": "Starttemperatuurverschil bijverwarming"
+      },
+      "range": {
+        "min": -15,
+        "max": 15,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetHeaterStopDelta",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heater_Stop_Delta"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Backup heater stop delta",
+        "nl": "Stoptemperatuurverschil bijverwarming"
+      },
+      "range": {
+        "min": -15,
+        "max": 15,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetMainSchedule",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Main_Schedule_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Weekly schedule",
+        "nl": "Weekschema"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetAltExternalSensor",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Alt_External_Sensor"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Alternative outdoor sensor",
+        "nl": "Alternatieve buitensensor"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetExternalPadHeater",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/External_Pad_Heater"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "External pad heater",
+        "nl": "Externe verwarmingsmat"
+      },
+      "range": {
+        "min": 0,
+        "max": 2,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetBufferDelta",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Buffer_Tank_Delta"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Buffer tank delta",
+        "nl": "Temperatuurverschil buffervat"
+      },
+      "range": {
+        "min": -10,
+        "max": 10,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.buffer_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetBuffer",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Buffer_Installed"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Buffer tank",
+        "nl": "Buffervat"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetHeatingOffOutdoorTemp",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heating_Off_Outdoor_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Heating off above outdoor temperature",
+        "nl": "Verwarmen uit boven buitentemperatuur"
+      },
+      "range": {
+        "min": 5,
+        "max": 35,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetExternalControl",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/External_Control"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "External control",
+        "nl": "Externe sturing"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetExternalError",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/External_Error_Signal"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "External error signal",
+        "nl": "Extern foutsignaal"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetExternalCompressorControl",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/External_Compressor_Control"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "External compressor control",
+        "nl": "Externe compressorsturing"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetExternalHeatCoolControl",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/External_Heat_Cool_Control"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "External heat/cool switch",
+        "nl": "Externe schakeling verwarmen/koelen"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetBivalentControl",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Bivalent_Control"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "Bivalent control",
+        "nl": "Bivalente regeling"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetBivalentMode",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Bivalent_Mode"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "Bivalent mode",
+        "nl": "Bivalente modus"
+      },
+      "range": {
+        "min": 0,
+        "max": 2,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.bivalent"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetBivalentStartTemp",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Bivalent_Start_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "Bivalent start temperature",
+        "nl": "Bivalente starttemperatuur"
+      },
+      "range": {
+        "min": -20,
+        "max": 30,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.bivalent"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetBivalentAPStartTemp",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Bivalent_Advanced_Start_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "Bivalent advanced start temperature",
+        "nl": "Bivalent uitgebreid: starttemperatuur"
+      },
+      "range": {
+        "min": -20,
+        "max": 30,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.bivalent"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetBivalentAPStopTemp",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Bivalent_Advanced_Stop_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "3.9",
+      "category": "settings",
+      "label": {
+        "en": "Bivalent advanced stop temperature",
+        "nl": "Bivalent uitgebreid: stoptemperatuur"
+      },
+      "range": {
+        "min": -20,
+        "max": 30,
+        "step": 1
+      },
+      "applicability": {
+        "requires": [
+          "profile.bivalent"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetHeatingControl",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heating_Control"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.0",
+      "category": "settings",
+      "label": {
+        "en": "Heating control",
+        "nl": "Verwarmingsregeling"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetSmartDHW",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Smart_DHW"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.0",
+      "category": "dhw",
+      "label": {
+        "en": "Smart DHW",
+        "nl": "Slim tapwater"
+      },
+      "allowed": [
+        0,
+        1
+      ],
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetQuietModePriority",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Quiet_Mode_Priority"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.0",
+      "category": "settings",
+      "label": {
+        "en": "Quiet mode priority",
+        "nl": "Prioriteit stille modus"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetPumpFlowrateMode",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Pump_Flowrate_Mode"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.0",
+      "category": "settings",
+      "label": {
+        "en": "Pump flow-rate mode",
+        "nl": "Pompdebietmodus"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetDHWSensorSelection",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/DHW_Sensor_Selection"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.1.2",
+      "category": "dhw",
+      "label": {
+        "en": "DHW sensor selection",
+        "nl": "Keuze tapwatersensor"
+      },
+      "allowed": [
+        0,
+        1
+      ],
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetDHWHeaterState",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/DHW_Heater_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.1.2",
+      "category": "dhw",
+      "label": {
+        "en": "DHW backup heater",
+        "nl": "Bijverwarming tapwater"
+      },
+      "allowed": [
+        0,
+        1
+      ],
+      "applicability": {
+        "requires": [
+          "profile.dhw_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetRoomHeaterState",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Room_Heater_State"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.1.2",
+      "category": "settings",
+      "label": {
+        "en": "Room backup heater",
+        "nl": "Bijverwarming ruimte"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetHeaterOnOutdoorTemp",
+      "pcb": false,
+      "class": "setting",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [
+        "main/Heater_On_Outdoor_Temp"
+      ],
+      "compare": "equal",
+      "min_firmware": "4.1.2",
+      "category": "settings",
+      "label": {
+        "en": "Backup heater on below outdoor temperature",
+        "nl": "Bijverwarming aan onder buitentemperatuur"
+      },
+      "range": {
+        "min": -15,
+        "max": 20,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetHeatCoolMode",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Heat/cool mode (optional PCB)",
+        "nl": "Verwarmen/koelen-modus (optionele PCB)"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetCompressorState",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": false,
+      "type": "bool",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Compressor (optional PCB)",
+        "nl": "Compressor (optionele PCB)"
+      },
+      "allowed": [
+        0,
+        1
+      ]
+    },
+    {
+      "name": "SetSmartGridMode",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Smart grid mode (optional PCB)",
+        "nl": "Smart-gridmodus (optionele PCB)"
+      },
+      "range": {
+        "min": 0,
+        "max": 3,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetExternalThermostat1State",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "External thermostat 1 (optional PCB)",
+        "nl": "Externe thermostaat 1 (optionele PCB)"
+      },
+      "range": {
+        "min": 0,
+        "max": 3,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetExternalThermostat2State",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "External thermostat 2 (optional PCB)",
+        "nl": "Externe thermostaat 2 (optionele PCB)"
+      },
+      "range": {
+        "min": 0,
+        "max": 3,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetDemandControl",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": false,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Demand control (optional PCB)",
+        "nl": "Vraagsturing (optionele PCB)"
+      },
+      "range": {
+        "min": 0,
+        "max": 255,
+        "step": 1
+      }
+    },
+    {
+      "name": "SetPoolTemp",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "dec1",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Pool temperature (optional PCB)",
+        "nl": "Zwembadtemperatuur (optionele PCB)"
+      },
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      }
+    },
+    {
+      "name": "SetBufferTemp",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "dec1",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Buffer temperature (optional PCB)",
+        "nl": "Buffertemperatuur (optionele PCB)"
+      },
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "applicability": {
+        "requires": [
+          "profile.buffer_installed"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetZ1RoomTemp",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "dec1",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 1 room temperature (optional PCB)",
+        "nl": "Kamertemperatuur zone 1 (optionele PCB)"
+      },
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      }
+    },
+    {
+      "name": "SetZ1WaterTemp",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "dec1",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 1 water temperature (optional PCB)",
+        "nl": "Watertemperatuur zone 1 (optionele PCB)"
+      },
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      }
+    },
+    {
+      "name": "SetZ2RoomTemp",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "dec1",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 2 room temperature (optional PCB)",
+        "nl": "Kamertemperatuur zone 2 (optionele PCB)"
+      },
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "applicability": {
+        "requires": [
+          "profile.zone.z2.active"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetZ2WaterTemp",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "dec1",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "zones",
+      "label": {
+        "en": "Zone 2 water temperature (optional PCB)",
+        "nl": "Watertemperatuur zone 2 (optionele PCB)"
+      },
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "applicability": {
+        "requires": [
+          "profile.zone.z2.active"
+        ]
+      },
+      "safe_under_unknown": false
+    },
+    {
+      "name": "SetSolarTemp",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "dec1",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "settings",
+      "label": {
+        "en": "Solar temperature (optional PCB)",
+        "nl": "Zonnetemperatuur (optionele PCB)"
+      },
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      }
+    },
+    {
+      "name": "SetOptPCBByte9",
+      "pcb": true,
+      "class": "unverifiable",
+      "risky": true,
+      "type": "int",
+      "range_source": "panasonic_manual",
+      "readback": [],
+      "compare": "equal",
+      "min_firmware": "3.2.3",
+      "category": "pcb",
+      "label": {
+        "en": "Optional PCB raw byte 9",
+        "nl": "Optionele PCB ruwe byte 9"
+      },
+      "range": {
+        "min": 0,
+        "max": 255,
+        "step": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "path": "opentherm/read/chPressure",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": 0,
+        "max": 10,
+        "step": 0.1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm water pressure",
+        "nl": "OpenTherm waterdruk"
+      }
+    },
+    {
+      "path": "opentherm/read/chSetLowBound",
+      "class": "retained_exception",
+      "retain": true,
+      "type": "int",
+      "range": {
+        "min": 0,
+        "max": 255,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm heating setpoint lower bound",
+        "nl": "OpenTherm ondergrens instelwaarde verwarming"
+      }
+    },
+    {
+      "path": "opentherm/read/chSetUppBound",
+      "class": "retained_exception",
+      "retain": true,
+      "type": "int",
+      "range": {
+        "min": 0,
+        "max": 255,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm heating setpoint upper bound",
+        "nl": "OpenTherm bovengrens instelwaarde verwarming"
+      }
+    },
+    {
+      "path": "opentherm/read/chState",
+      "class": "input",
+      "retain": false,
+      "type": "bool",
+      "range": {
+        "min": 0,
+        "max": 1,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm heating active",
+        "nl": "OpenTherm verwarming actief"
+      }
+    },
+    {
+      "path": "opentherm/read/coolingState",
+      "class": "input",
+      "retain": false,
+      "type": "bool",
+      "range": {
+        "min": 0,
+        "max": 1,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm cooling active",
+        "nl": "OpenTherm koelen actief"
+      }
+    },
+    {
+      "path": "opentherm/read/dhwSetLowBound",
+      "class": "retained_exception",
+      "retain": true,
+      "type": "int",
+      "range": {
+        "min": 0,
+        "max": 255,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm dHW setpoint lower bound",
+        "nl": "OpenTherm ondergrens instelwaarde tapwater"
+      }
+    },
+    {
+      "path": "opentherm/read/dhwSetUppBound",
+      "class": "retained_exception",
+      "retain": true,
+      "type": "int",
+      "range": {
+        "min": 0,
+        "max": 255,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm dHW setpoint upper bound",
+        "nl": "OpenTherm bovengrens instelwaarde tapwater"
+      }
+    },
+    {
+      "path": "opentherm/read/dhwSetpoint",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm dHW setpoint",
+        "nl": "OpenTherm instelwaarde tapwater"
+      }
+    },
+    {
+      "path": "opentherm/read/dhwState",
+      "class": "input",
+      "retain": false,
+      "type": "bool",
+      "range": {
+        "min": 0,
+        "max": 1,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm dHW active",
+        "nl": "OpenTherm tapwater actief"
+      }
+    },
+    {
+      "path": "opentherm/read/dhwTemp",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm dHW temperature",
+        "nl": "OpenTherm tapwatertemperatuur"
+      }
+    },
+    {
+      "path": "opentherm/read/flameState",
+      "class": "input",
+      "retain": false,
+      "type": "bool",
+      "range": {
+        "min": 0,
+        "max": 1,
+        "step": 1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm burner flame",
+        "nl": "OpenTherm brandervlam"
+      }
+    },
+    {
+      "path": "opentherm/read/inletTemp",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm inlet temperature",
+        "nl": "OpenTherm aanvoertemperatuur"
+      }
+    },
+    {
+      "path": "opentherm/read/maxTSet",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm maximum flow setpoint",
+        "nl": "OpenTherm maximale aanvoerinstelling"
+      }
+    },
+    {
+      "path": "opentherm/read/outletTemp",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm outlet temperature",
+        "nl": "OpenTherm retourtemperatuur"
+      }
+    },
+    {
+      "path": "opentherm/read/outsideTemp",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm outside temperature",
+        "nl": "OpenTherm buitentemperatuur"
+      }
+    },
+    {
+      "path": "opentherm/read/relativeModulation",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": 0,
+        "max": 100,
+        "step": 0.1
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm relative modulation",
+        "nl": "OpenTherm relatieve modulatie"
+      }
+    },
+    {
+      "path": "opentherm/read/roomSetOverride",
+      "class": "input",
+      "retain": false,
+      "type": "dec1",
+      "range": {
+        "min": -30.0,
+        "max": 90.0,
+        "step": 0.5
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.5",
+      "label": {
+        "en": "OpenTherm room setpoint override",
+        "nl": "OpenTherm overschrijving kamerinstelling"
+      }
+    },
+    {
+      "path": "s0/WatthourTotal/1",
+      "class": "retained_exception",
+      "retain": true,
+      "type": "dec3",
+      "range": {
+        "min": 0
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.2.3",
+      "label": {
+        "en": "S0 meter 1 total energy",
+        "nl": "S0-meter 1 totale energie"
+      }
+    },
+    {
+      "path": "s0/WatthourTotal/2",
+      "class": "retained_exception",
+      "retain": true,
+      "type": "dec3",
+      "range": {
+        "min": 0
+      },
+      "range_source": "heishamon_fact",
+      "min_firmware": "3.2.3",
+      "label": {
+        "en": "S0 meter 2 total energy",
+        "nl": "S0-meter 2 totale energie"
+      }
+    }
+  ],
+  "models": []
+}
