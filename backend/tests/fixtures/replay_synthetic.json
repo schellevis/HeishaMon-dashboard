@@ -1,0 +1,2481 @@
+{
+ "format": "heishamon-replay/1",
+ "synthetic": true,
+ "duration_s": 330,
+ "note": "synthetic: generated from tools/simulator.py (heat_dhw preset); not a real capture",
+ "dropped": {},
+ "messages": [
+  {
+   "t": 0,
+   "topic": "main/Alt_External_Sensor",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Anti_Freeze_Mode",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Advanced_DHW",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Advanced_DHW_Delay",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Advanced_Heat",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Advanced_Start_Delay",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Advanced_Start_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Advanced_Stop_Delay",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Advanced_Stop_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Mode",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bivalent_Start_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Buffer_Tank_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Buffer_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Bypass_Outlet_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Compressor_Current",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Compressor_Freq",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Cool_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Cool_Power_Consumption",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Cool_Power_Production",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Cool_To_Heat_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Cooling_Mode",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Heat_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Heater_Operations_Hours",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Heater_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Holiday_Shift_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Power_Consumption",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Power_Production",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Sensor_Selection",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Target_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/DHW_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Defrost_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Defrosting_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Discharge_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Economizer_Outlet_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Error",
+   "payload": "ok",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Eva_Outlet_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Expansion_Valve",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/External_Compressor_Control",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/External_Control",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/External_Error_Signal",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/External_Heat_Cool_Control",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/External_Heater_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/External_Pad_Heater",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Fan1_Motor_Speed",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Fan2_Motor_Speed",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Force_DHW_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Force_Heater_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heat_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heat_Power_Consumption",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heat_Power_Production",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heat_To_Cool_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heater_Delay_Time",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heater_On_Outdoor_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heater_Start_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heater_Stop_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heating_Control",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heating_Mode",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heating_Off_Outdoor_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Heatpump_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/High_Pressure",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Holiday_Mode_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Inside_Pipe_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Internal_Heater_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Ipm_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Low_Pressure",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Main_Hex_Outlet_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Main_Inlet_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Main_Outlet_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Main_Schedule_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Main_Target_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Max_Pump_Duty",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Operating_Mode_State",
+   "payload": "4",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Operations_Counter",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Operations_Hours",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Outside_Pipe_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Outside_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Pool_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Powerful_Mode_Time",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Pump_Duty",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Pump_Flow",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Pump_Flowrate_Mode",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Pump_Speed",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Quiet_Mode_Level",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Quiet_Mode_Priority",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Quiet_Mode_Schedule",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Room_Heater_Operations_Hours",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Room_Heater_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Room_Holiday_Shift_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Room_Thermostat_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Second_Inlet_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Second_Room_Thermostat_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Smart_DHW",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Solar_Frost_Protection",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Solar_High_Limit",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Solar_Off_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Solar_On_Delta",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Solar_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Sterilization_Max_Time",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Sterilization_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Sterilization_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/ThreeWay_Valve_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/ThreeWay_Valve_State2",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/TwoWay_Valve_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Water_Pressure",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Cool_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Cool_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Cool_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Cool_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Cool_Request_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Heat_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Heat_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Heat_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Heat_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Heat_Request_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Pump_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Sensor_Settings",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Valve_PID",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Water_Target_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z1_Water_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Cool_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Cool_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Cool_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Cool_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Cool_Request_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Heat_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Heat_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Heat_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Heat_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Heat_Request_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Pump_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Sensor_Settings",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Valve_PID",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Water_Target_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Z2_Water_Temp",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "main/Zones_State",
+   "payload": "0",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "stats",
+   "payload": "{}",
+   "retained": true
+  },
+  {
+   "t": 0,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 5000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 5000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 10000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 10000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 15000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 15000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 20000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 20000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 25000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 25000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 30000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 30000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 35000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 35000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 40000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 40000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 45000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 45000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 50000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 50000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 55000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 55000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 60000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 60000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 60000,
+   "topic": "main/DHW_Target_Temp",
+   "payload": "50",
+   "retained": false
+  },
+  {
+   "t": 65000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 65000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 70000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 70000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 75000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 75000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 80000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 80000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 85000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 85000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 90000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 90000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 95000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 95000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 100000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 100000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 105000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 105000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 110000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 110000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 115000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 115000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 120000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 120000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 120000,
+   "topic": "main/DHW_Target_Temp",
+   "payload": "52",
+   "retained": false
+  },
+  {
+   "t": 125000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 125000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 130000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 130000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 135000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 135000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 140000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 140000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 145000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 145000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 150000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 150000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 155000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 155000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 160000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 160000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 165000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 165000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 170000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 170000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 175000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 175000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 180000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 180000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 180000,
+   "topic": "main/DHW_Target_Temp",
+   "payload": "50",
+   "retained": false
+  },
+  {
+   "t": 185000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 185000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 190000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 190000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 195000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 195000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 200000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 200000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 205000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 205000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 210000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 210000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 215000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 215000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 220000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 220000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 225000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 225000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 230000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 230000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 235000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 235000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 240000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 240000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 245000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 245000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 250000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 250000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 255000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 255000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 260000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 260000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 265000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 265000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 270000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 270000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 275000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 275000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 280000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 280000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 285000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 285000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 290000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 290000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 295000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 295000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Alt_External_Sensor",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Anti_Freeze_Mode",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Advanced_DHW",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Advanced_DHW_Delay",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Advanced_Heat",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Advanced_Start_Delay",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Advanced_Start_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Advanced_Stop_Delay",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Advanced_Stop_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Mode",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bivalent_Start_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Buffer_Tank_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Buffer_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Bypass_Outlet_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Compressor_Current",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Compressor_Freq",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Cool_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Cool_Power_Consumption",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Cool_Power_Production",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Cool_To_Heat_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Cooling_Mode",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Heat_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Heater_Operations_Hours",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Heater_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Holiday_Shift_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Power_Consumption",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Power_Production",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Sensor_Selection",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Target_Temp",
+   "payload": "50",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/DHW_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Defrost_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Defrosting_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Discharge_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Economizer_Outlet_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Error",
+   "payload": "ok",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Eva_Outlet_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Expansion_Valve",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/External_Compressor_Control",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/External_Control",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/External_Error_Signal",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/External_Heat_Cool_Control",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/External_Heater_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/External_Pad_Heater",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Fan1_Motor_Speed",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Fan2_Motor_Speed",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Force_DHW_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Force_Heater_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heat_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heat_Power_Consumption",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heat_Power_Production",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heat_To_Cool_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heater_Delay_Time",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heater_On_Outdoor_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heater_Start_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heater_Stop_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heating_Control",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heating_Mode",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heating_Off_Outdoor_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Heatpump_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/High_Pressure",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Holiday_Mode_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Inside_Pipe_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Internal_Heater_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Ipm_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Low_Pressure",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Main_Hex_Outlet_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Main_Inlet_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Main_Outlet_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Main_Schedule_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Main_Target_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Max_Pump_Duty",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Operating_Mode_State",
+   "payload": "4",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Operations_Counter",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Operations_Hours",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Outside_Pipe_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Outside_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Pool_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Powerful_Mode_Time",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Pump_Duty",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Pump_Flow",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Pump_Flowrate_Mode",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Pump_Speed",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Quiet_Mode_Level",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Quiet_Mode_Priority",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Quiet_Mode_Schedule",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Room_Heater_Operations_Hours",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Room_Heater_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Room_Holiday_Shift_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Room_Thermostat_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Second_Inlet_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Second_Room_Thermostat_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Smart_DHW",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Solar_Frost_Protection",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Solar_High_Limit",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Solar_Off_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Solar_On_Delta",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Solar_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Sterilization_Max_Time",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Sterilization_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Sterilization_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/ThreeWay_Valve_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/ThreeWay_Valve_State2",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/TwoWay_Valve_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Water_Pressure",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Cool_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Cool_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Cool_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Cool_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Cool_Request_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Heat_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Heat_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Heat_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Heat_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Heat_Request_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Pump_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Sensor_Settings",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Valve_PID",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Water_Target_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z1_Water_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Cool_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Cool_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Cool_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Cool_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Cool_Request_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Heat_Curve_Outside_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Heat_Curve_Outside_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Heat_Curve_Target_High_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Heat_Curve_Target_Low_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Heat_Request_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Pump_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Sensor_Settings",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Valve_PID",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Water_Target_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Z2_Water_Temp",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "main/Zones_State",
+   "payload": "0",
+   "retained": false
+  },
+  {
+   "t": 300000,
+   "topic": "stats",
+   "payload": "{}",
+   "retained": false
+  },
+  {
+   "t": 305000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 305000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 310000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 310000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 315000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 315000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 320000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 320000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 325000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 325000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  },
+  {
+   "t": 330000,
+   "topic": "stats",
+   "payload": "{\"version\":\"v4.2.3\"}",
+   "retained": false
+  },
+  {
+   "t": 330000,
+   "topic": "LWT",
+   "payload": "Online",
+   "retained": false
+  }
+ ]
+}

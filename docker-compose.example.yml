@@ -1,0 +1,43 @@
+# Example only. The dashboard has no authentication — publish it only through
+# an authenticating reverse proxy (see README). Replace every placeholder.
+# Do not commit real hostnames, addresses, usernames or passwords.
+#
+# The process does not read a .env file. Values below are injected into the
+# environment. You can remove `environment` and use `env_file: .env` instead
+# (copy .env.example). Keep STATIC_DIR=/app/static for this image.
+
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: heishamon-dashboard:local
+    restart: unless-stopped
+    # SIGTERM flush must finish before the container is killed (spec §5.1, A11).
+    stop_grace_period: 60s
+    ports:
+      # Loopback only. The reverse proxy on this host connects here.
+      - "127.0.0.1:8000:8000"
+    environment:
+      MQTT_HOST: mqtt.example.invalid
+      MQTT_PORT: "1883"
+      MQTT_USER: ""
+      MQTT_PASSWORD: ""
+      MQTT_TLS: "0"
+      MQTT_BASE_TOPIC: panasonic_heat_pump
+      DATA_DIR: /data
+      FLUSH_INTERVAL_SECONDS: "900"
+      BUFFER_MAX_ENTRIES: "200000"
+      BUFFER_MAX_BYTES: "268435456"
+      AUDIT_BUFFER_MAX: "10000"
+      RAW_RETENTION_DAYS: ""
+      HTTP_PORT: "8000"
+      TZ: UTC
+      PUBLIC_ORIGINS: https://heatpump.example.invalid
+      ALLOWED_ORIGINS: ""
+      STATIC_DIR: /app/static
+    volumes:
+      - dashboard-data:/data
+
+volumes:
+  dashboard-data:

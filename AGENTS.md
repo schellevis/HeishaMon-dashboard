@@ -13,8 +13,11 @@ heating-curve ("stooklijn") module.
 **The design spec is the source of truth:**
 `docs/superpowers/specs/2026-10-11-heishamon-dashboard-design.md`.
 
-Status (2026-10-11): spec written. The implementation plan is next; no application code exists yet,
-and `main.py` is the `uv init` placeholder.
+Status (2026-10-11): spec (revision 4.2) written, plan executed, build complete and independently
+verified (backend, frontend, simulator and capture tool; everything still uncommitted). Open item:
+the real-capture replay fixture, which the owner records with `tools/capture.py` (decision-006); that
+test stays skipped until `backend/tests/fixtures/replay_real.json` exists. The Docker image was never
+built in development; the release check is in the README.
 
 **Workflow:** brainstorm → spec → implementation plan → build. Do not start building without an
 approved plan.
@@ -107,7 +110,7 @@ Note: `heishamon/HeishaMon` and `Egyras/HeishaMon` are the same repository.
 
 - **Format:** publish the plain-text value to `<base>/commands/<Name>`.
   - The same is possible over HTTP: `GET /command?SetX=v`.
-  - There are 50 standard commands plus 14 optional-PCB commands. PCB commands only work with emulation on.
+  - There are 64 commands: 50 standard (including `SetCurves`) plus 14 optional-PCB. PCB commands only work with emulation on.
 - **Always publish commands NON-retained.**
   - HeishaMon subscribes to `commands/#`, so a retained command is re-executed on every reconnect.
   - That overrides later changes and wears the heat pump's EEPROM.
@@ -115,7 +118,8 @@ Note: `heishamon/HeishaMon` and `Egyras/HeishaMon` are the same repository.
   - `s0/WatthourTotal/{1,2}` — sync the S0 counter; read back at boot.
   - `opentherm/read/{dhw,ch}Set{Upp,Low}Bound`.
 - **Parsing and validation:**
-  - Payloads are parsed as **integers** (`toInt()`), and booleans treat exactly `1` as on.
+  - Most payloads are parsed as **integers** (`toInt()`), and booleans treat exactly `1` as on. The
+    seven optional-PCB temperature commands parse decimals (spike-001, spec §3 / Appendix A.2).
   - The firmware does almost **no range validation**; only `SetSterilizationTemp` and `SetSterilizationMaxTime` are checked. The dashboard must validate.
 - **Reliability and wear:**
   - The heat pump sometimes drops commands. Verify via the read-back topic and retry once after ~10 s.
@@ -178,8 +182,11 @@ Note: `heishamon/HeishaMon` and `Egyras/HeishaMon` are the same repository.
 ## Development notes
 
 - Use `uv`. When running Python against downloaded or untrusted files, use `python -I`.
+- Run the app from a checkout with `.venv/bin/python -m heishamon_dashboard` (config from environment
+  variables only; `STATIC_DIR` optionally points at the built SPA, default `frontend/dist`).
 - **Testing:**
-  - pytest for the backend and Vitest plus Playwright for the frontend.
+  - pytest for the backend (`backend/tests`) and Vitest plus Playwright for the frontend
+    (`npm --prefix frontend run test`; Playwright in `frontend/e2e`, run from `frontend/`).
   - A **simulator** with profile presets (heat-only, Heat+DHW, Cool+DHW, auto, two zones with mixed modes, thermostat sensor, no DHW tank, with/without `extra/`, PCB on) lets every UI variant be tested without a heat pump.
   - Replay fixtures must have the `ip` topic and any identifying data stripped.
 - Commit only when asked. The default branch is `main`.

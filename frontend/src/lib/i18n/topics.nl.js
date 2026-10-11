@@ -1,0 +1,18 @@
+export default {
+  title: 'Alle topics',
+  suggestions: 'Negeervoorstellen',
+  suggestionsEmpty: 'Geen negeervoorstellen.',
+  ignore: 'Negeren',
+  reasonSentinel: 'Al 24 uur vast op een sentinelwaarde',
+  reasonExtra: 'Vervangen door het extra gegevensblok',
+  reasonOptional: 'Optionele PCB staat uit in de warmtepompinstellingen',
+  raw: 'Ruwe topic',
+  value: 'Waarde',
+  rawValue: 'Ruw',
+  lastChange: 'Laatste wijziging',
+  visibility: 'Zichtbaarheid',
+  visible: 'Zichtbaar',
+  hidden: 'Verborgen',
+  ignored: 'Genegeerd',
+  section: '{name}',
+};
