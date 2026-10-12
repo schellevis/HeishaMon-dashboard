@@ -1,5 +1,6 @@
 """catalog.json loader and validator (spec Appendix A.3)."""
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -19,6 +20,8 @@ _CMD_OPT = {"range", "allowed", "conditional_ranges", "readback", "compare", "ap
 _INPUT_REQ = {"path", "class", "retain", "type", "range", "range_source", "min_firmware", "label"}
 _MODEL_REQ = {"hex", "name", "series"}
 _RANGE_KEYS = {"min", "max", "step"}
+# TOP92 as HeishaMon publishes it: ten bytes as upper-case hex pairs separated by single spaces.
+_MODEL_HEX = re.compile(r"[0-9A-F]{2}( [0-9A-F]{2}){9}")
 
 
 class CatalogError(ValueError):
@@ -43,6 +46,13 @@ class Catalog:
 
     def input(self, path: str) -> dict | None:
         return self._inputs_by_path.get(path)
+
+    def model(self, payload: str | None) -> dict | None:
+        """The models entry for a Heat_Pump_Model payload (whitespace and case normalised), else None."""
+        if not isinstance(payload, str):
+            return None
+        key = " ".join(payload.split()).upper()
+        return next((m for m in self.models if m["hex"] == key), None)
 
 
 def _keys(obj, where, req, opt=()):
@@ -165,6 +175,8 @@ def _validate_model(m, i):
     w = f"models[{i}]"
     _keys(m, w, _MODEL_REQ)
     _str(m["hex"], f"{w}.hex")
+    if not _MODEL_HEX.fullmatch(m["hex"]):
+        raise CatalogError(f"{w}.hex: must be ten upper-case hex bytes separated by single spaces")
     _str(m["name"], f"{w}.name")
     _choice(m["series"], {"J", "K", "L", "other"}, f"{w}.series")
 
@@ -195,6 +207,7 @@ def parse(data) -> Catalog:
         _validate_input(x, i)
     for i, m in enumerate(models):
         _validate_model(m, i)
+    _index(models, "hex", "model hex")
     return Catalog(
         topics=tuple(topics), commands=tuple(commands), inputs=tuple(inputs), models=tuple(models),
         _topics_by_key=_index(topics, "key", "topic key"),

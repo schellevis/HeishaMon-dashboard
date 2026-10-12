@@ -47,6 +47,7 @@ export default {
   plus: '+1',
   stepRefused: 'Deze stap zou een grens of de ordeningsregel overschrijden en is daarom niet beschikbaar.',
   invariantHint: 'De koude kant moet minstens 1 °C links van de warme kant liggen, en het doel van de koude kant mag niet lager zijn dan dat van de warme kant.',
+  invariantHintCoupled: 'De koude kant moet minstens 1 °C links van de warme kant liggen. In deze modus is het doel van de koude kant de instelwaarde en wordt het doel van de warme kant niet gebruikt, dus de twee doelen mogen in elke volgorde staan.',
   limitsHeat: 'Grenzen: buiten −20..30 °C, doel 15..75 °C.',
   limitsCool: 'Grenzen: buiten 15..30 °C, doel 5..20 °C.',
   draftTitle: 'Openstaande wijzigingen',

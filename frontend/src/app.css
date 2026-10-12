@@ -1,0 +1,64 @@
+/* Shared design tokens and base control styling. */
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-hover: #e4e4e7;
+  --border: #d4d4d8;
+  --text: #18181b;
+  --text-secondary: #52525b;
+  --primary: #1d4ed8;
+  --primary-dark: #1e40af;
+  --danger: #b91c1c;
+  --warn-bg: #fef3c7;
+  --warn-border: #f59e0b;
+  --card-radius: 8px;
+  color: var(--text);
+  background: var(--bg);
+}
+
+button,
+select,
+input,
+textarea {
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--text);
+}
+
+button {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+select,
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+textarea {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}

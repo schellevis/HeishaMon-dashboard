@@ -2,7 +2,8 @@
   import { onMount, onDestroy, untrack } from 'svelte';
   import { createChart, historyToUplot, insertBreaks } from '../../lib/uplot.js';
   import { api } from '../../lib/api.js';
-  import { state as stateStore, profile, prefs, language } from '../../lib/stores.js';
+  import { language, system } from '../../lib/stores.js';
+  import { catalog } from '../../lib/catalog.js';
   import { translate } from '../../lib/i18n/index.js';
   
   /**
@@ -114,13 +115,13 @@
   }
 
   // Create the chart once per data load (called from a single effect, never reads chartInstance reactively)
-  async function buildChart(data, el, legend) {
+  async function buildChart(data, el, legend, lang, timeZone) {
     const token = ++renderToken;
     destroyChart();
     if (!el || !data) return;
     const w = el.clientWidth || 800;
-    const h = el.clientHeight || height || 300;
-    const opts = historyToUplot(data);
+    const h = height || 300;
+    const opts = historyToUplot(data, catalog, { lang, timeZone });
     opts.width = w;
     opts.height = h;
     opts.legend.show = legend;
@@ -135,7 +136,7 @@
   // Resizes adjust the existing chart in place
   function handleResize() {
     if (!chartInstance || !chartContainer) return;
-    chartInstance.setSize(chartContainer.clientWidth || 800, chartContainer.clientHeight || height || 300);
+    chartInstance.setSize(chartContainer.clientWidth || 800, height || 300);
   }
 
   onMount(() => {
@@ -166,7 +167,9 @@
     const data = historyData;
     const el = chartContainer;
     const legend = showLegend;
-    untrack(() => buildChart(data, el, legend));
+    const lang = $language;
+    const timeZone = $system?.tz || undefined;
+    untrack(() => buildChart(data, el, legend, lang, timeZone));
   });
 
   // Render status message
@@ -189,7 +192,7 @@
 
 <div class="chart-container-wrapper" bind:this={containerElement}>
   {#if topics.length > 0}
-    <div class="chart-container" bind:this={chartContainer} style={`height: ${height}px`} data-testid="chart-container"></div>
+    <div class="chart-container" bind:this={chartContainer} data-testid="chart-container"></div>
   {:else}
     <div class="chart-placeholder">
       {translate($language, 'charts.no_topics_selected')}
@@ -208,7 +211,6 @@
   
   .chart-container {
     width: 100%;
-    height: 100%;
   }
   
   .chart-placeholder {

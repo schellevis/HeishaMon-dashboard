@@ -24,7 +24,7 @@
   }
 </script>
 
-<div class="tile" data-testid="tile-{key}" data-pinned={isPinned}>
+<div class="tile" data-testid="tile-{key}" data-pinned={isPinned} lang={lang}>
   <header>
     <span class="label">{label}</span>
     <button type="button" class="pin" aria-label={isPinned ? translate(lang, 'overview.unpinTile') : translate(lang, 'overview.pinTile')} onclick={togglePin}>
@@ -35,7 +35,7 @@
       {/if}
     </button>
   </header>
-  <div class="value" class:value-stale={presented.className}>
+  <div class="value" class:text={topic?.kind !== 'number'} class:value-stale={presented.className}>
     {presented.text}
   </div>
   {#if sparkline}
@@ -45,45 +45,76 @@
 
 <style>
   .tile {
-    background: #1a1a1a;
-    border-radius: 8px;
-    padding: 0.75rem;
-    color: #e5e5e5;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 0.625rem 0.75rem;
     font-size: 0.875rem;
     position: relative;
-    min-width: 140px;
-    flex: 0 0 140px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
   }
   header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    color: #888;
-    font-size: 0.75rem;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
   }
   .label {
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    min-width: 0;
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   .pin {
     background: none;
     border: none;
-    color: #888;
+    color: var(--text-secondary);
     cursor: pointer;
     font-size: 0.875rem;
-    padding: 0.125rem;
+    padding: 0 0.125rem;
     line-height: 1;
+    flex: none;
   }
   .pin:hover {
-    color: #ffd700;
+    color: #b45309;
   }
   .value {
     font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    min-width: 0;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    font-variant-numeric: tabular-nums;
+  }
+  .value.text {
+    font-size: 0.9375rem;
   }
   .value-stale {
     color: #6b7280;
+  }
+  @media (max-width: 480px) {
+    .tile {
+      padding: 0.5rem 0.625rem;
+    }
+    header {
+      font-size: 0.75rem;
+    }
+    .value {
+      font-size: 1.25rem;
+    }
+    .value.text {
+      font-size: 0.875rem;
+    }
+  }
+  .tile :global(svg) {
+    margin-top: auto;
+    color: var(--primary);
   }
 </style>

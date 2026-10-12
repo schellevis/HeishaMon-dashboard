@@ -150,7 +150,7 @@ A2_TABLE = {
         "readback": ["main/Max_Pump_Duty"],
         "compare": "equal",
         "min_firmware": "3.2.3",
-        "range": {"min": 0, "max": 100, "step": 1},
+        "range": {"min": 64, "max": 254, "step": 1},
         "risky": False,
     },
     "SetQuietMode": {
@@ -320,7 +320,7 @@ A2_TABLE = {
         "readback": ["main/Heat_Delta"],
         "compare": "equal",
         "min_firmware": "3.2.3",
-        "range": {"min": -10, "max": 10, "step": 1},
+        "range": {"min": 1, "max": 15, "step": 1},
         "risky": False,
     },
     "SetFloorCoolDelta": {
@@ -329,7 +329,7 @@ A2_TABLE = {
         "readback": ["main/Cool_Delta"],
         "compare": "equal",
         "min_firmware": "3.2.3",
-        "range": {"min": -10, "max": 10, "step": 1},
+        "range": {"min": 1, "max": 15, "step": 1},
         "risky": False,
     },
     "SetDHWHeatDelta": {
@@ -338,7 +338,7 @@ A2_TABLE = {
         "readback": ["main/DHW_Heat_Delta"],
         "compare": "equal",
         "min_firmware": "3.2.3",
-        "range": {"min": -10, "max": 10, "step": 1},
+        "range": {"min": -12, "max": -2, "step": 1},
         "risky": False,
     },
     "SetReset": {
@@ -410,7 +410,7 @@ A2_TABLE = {
         "readback": ["main/Buffer_Tank_Delta"],
         "compare": "equal",
         "min_firmware": "3.2.3",
-        "range": {"min": -10, "max": 10, "step": 1},
+        "range": {"min": 0, "max": 10, "step": 1},
         "risky": False,
     },
     "SetBuffer": {
@@ -491,7 +491,7 @@ A2_TABLE = {
         "readback": ["main/Bivalent_Start_Temp"],
         "compare": "equal",
         "min_firmware": "3.9",
-        "range": {"min": -20, "max": 30, "step": 1},
+        "range": {"min": -15, "max": 35, "step": 1},
         "risky": False,
     },
     "SetBivalentAPStartTemp": {
@@ -500,7 +500,7 @@ A2_TABLE = {
         "readback": ["main/Bivalent_Advanced_Start_Temp"],
         "compare": "equal",
         "min_firmware": "3.9",
-        "range": {"min": -20, "max": 30, "step": 1},
+        "range": {"min": -15, "max": 35, "step": 1},
         "risky": False,
     },
     "SetBivalentAPStopTemp": {
@@ -509,7 +509,7 @@ A2_TABLE = {
         "readback": ["main/Bivalent_Advanced_Stop_Temp"],
         "compare": "equal",
         "min_firmware": "3.9",
-        "range": {"min": -20, "max": 30, "step": 1},
+        "range": {"min": -15, "max": 35, "step": 1},
         "risky": False,
     },
     "SetHeatingControl": {
@@ -959,9 +959,37 @@ def test_topic_count(cat):
 # ---------------------------------------------------------------------------
 
 
-def test_models_empty(cat):
-    """models: [] (empty is valid per A.3)."""
-    assert len(cat.models) == 0
+def _real_capture():
+    path = HERE / "fixtures" / "replay_real.json"
+    if not path.exists():
+        pytest.skip("real capture fixture not present")
+    return json.loads(path.read_text())
+
+
+def test_models_table_populated(cat):
+    """models: byte signatures from the firmware's model list (79 known), series J/K/L/other."""
+    assert len(cat.models) == 79
+    assert {m["series"] for m in cat.models} == {"J", "K", "L", "other"}
+    assert all(m["name"].startswith(("WH-", "KIT-")) for m in cat.models)
+
+
+@pytest.mark.parametrize("payload,series", [
+    ("E2 CF 0B 13 33 32 D1 0C 16 33", "other"),  # H generation monoblock
+    ("C2 D3 0B 33 65 B2 D3 0B 94 65", "J"),
+    ("E2 D5 0B 08 95 02 D6 0E 66 95", "K"),
+    ("E2 D5 0C 29 99 83 92 0C 28 98", "L"),
+    ("12 D7 0D 98 11 33 94 0C 83 10", "other"),  # M generation
+])
+def test_model_lookup_series(payload, series, cat):
+    assert cat.model(payload)["series"] == series
+
+
+def test_model_from_real_capture(cat):
+    """The sanitized real capture's TOP92 payload resolves to a model."""
+    data = _real_capture()
+    payload = next(m["payload"] for m in data["messages"] if m["topic"] == "main/Heat_Pump_Model")
+    hit = cat.model(payload)
+    assert hit is not None and hit["series"] == "J"
 
 
 # ---------------------------------------------------------------------------
@@ -1072,3 +1100,109 @@ def test_applicability_requirements(name, path):
 
 def test_catalog_still_loads_with_new_fields(cat):
     assert len(cat.commands) == 64
+
+
+# ---------------------------------------------------------------------------
+# Topic audit against the firmware decoder (commit 6c35bd9)
+# ---------------------------------------------------------------------------
+
+
+def test_every_enum_topic_has_labels(cat):
+    for t in cat.topics:
+        if t["kind"] == "enum":
+            assert t.get("enum"), f"{t['key']} is enum without value labels"
+            assert t.get("unit") is None, f"{t['key']} is enum but has unit {t['unit']}"
+            for v, lab in t["enum"].items():
+                int(v)
+                assert lab["en"] and lab["nl"]
+
+
+ENUM_VALUES = {
+    "main/Heatpump_State": {0, 1}, "main/Force_DHW_State": {0, 1}, "main/Quiet_Mode_Schedule": {0, 1},
+    "main/Main_Schedule_State": {0, 1}, "main/Powerful_Mode_Time": {0, 1, 2, 3},
+    "main/Quiet_Mode_Level": {0, 1, 2, 3}, "main/Holiday_Mode_State": {0, 1, 2},
+    "main/DHW_Heater_State": {0, 1}, "main/Room_Heater_State": {0, 1}, "main/Internal_Heater_State": {0, 1},
+    "main/External_Heater_State": {0, 1}, "main/Force_Heater_State": {0, 1}, "main/Sterilization_State": {0, 1},
+    "main/Pump_Flowrate_Mode": {0, 1}, "main/Alt_External_Sensor": {0, 1}, "main/Anti_Freeze_Mode": {0, 1},
+    "main/External_Pad_Heater": {0, 1, 2}, "main/External_Control": {0, 1},
+    "main/External_Heat_Cool_Control": {0, 1}, "main/External_Error_Signal": {0, 1},
+    "main/External_Compressor_Control": {0, 1}, "main/Z1_Pump_State": {0, 1}, "main/Z2_Pump_State": {0, 1},
+    "main/TwoWay_Valve_State": {0, 1}, "main/ThreeWay_Valve_State2": {0, 1}, "main/Bivalent_Mode": {0, 1, 2},
+    "main/Bivalent_Advanced_Heat": {0, 1}, "main/Bivalent_Advanced_DHW": {0, 1},
+    "main/Heating_Control": {0, 1}, "main/Smart_DHW": {0, 1}, "main/Quiet_Mode_Priority": {0, 1},
+    "main/DHW_Sensor_Selection": {0, 1},
+    "optional/Z1_Water_Pump": {0, 1}, "optional/Z1_Mixing_Valve": {0, 1, 2, 3},
+    "optional/Z2_Water_Pump": {0, 1}, "optional/Z2_Mixing_Valve": {0, 1, 2, 3},
+    "optional/Pool_Water_Pump": {0, 1}, "optional/Solar_Water_Pump": {0, 1}, "optional/Alarm_State": {0, 1},
+}
+
+
+@pytest.mark.parametrize("key", ENUM_VALUES)
+def test_enum_value_domain(key, cat):
+    t = cat.topic(key)
+    assert t["kind"] == "enum"
+    real = {int(v) for v, lab in t["enum"].items() if lab["en"] != "Unknown"}
+    assert real == ENUM_VALUES[key]
+
+
+@pytest.mark.parametrize("key", [
+    "main/Expansion_Valve", "main/Z1_Valve_PID", "main/Z2_Valve_PID", "main/Compressor_Freq",
+    "main/Heat_Delta", "main/Pump_Duty", "main/Max_Pump_Duty"])
+def test_numeric_topics_are_numbers(key, cat):
+    t = cat.topic(key)
+    assert t["kind"] == "number" and "enum" not in t
+
+
+UNITS = {
+    "main/Compressor_Freq": "Hz", "main/Expansion_Valve": "steps", "main/Z1_Valve_PID": "%",
+    "main/Z2_Valve_PID": "%", "main/Pump_Flowrate_Mode": None, "main/Powerful_Mode_Time": None,
+    "main/DHW_Heat_Delta": "K", "main/Heat_Delta": "K", "main/Cool_Delta": "K",
+    "main/DHW_Holiday_Shift_Temp": "K", "main/Room_Holiday_Shift_Temp": "K",
+    "main/Heater_Start_Delta": "K", "main/Heater_Stop_Delta": "K", "main/Solar_On_Delta": "K",
+    "main/Solar_Off_Delta": "K", "main/Buffer_Tank_Delta": "K", "main/Solar_Frost_Protection": "°C",
+    "main/Solar_High_Limit": "°C", "main/Pump_Duty": None, "main/Max_Pump_Duty": None,
+    "main/Water_Pressure": "bar",
+}
+
+
+@pytest.mark.parametrize("key", UNITS)
+def test_units(key, cat):
+    assert cat.topic(key).get("unit") == UNITS[key]
+
+
+def test_heat_pump_model_category(cat):
+    assert cat.topic("main/Heat_Pump_Model")["category"] != "temperatures"
+
+
+SENTINELS = {
+    # unconnected NTC inputs read as -78; the decoder's no-data value is -128
+    **{f"main/{k}": {-78, -128} for k in (
+        "Buffer_Temp", "Pool_Temp", "Solar_Temp", "Z1_Water_Temp", "Z2_Water_Temp", "Z1_Temp", "Z2_Temp")},
+    # holiday shift not in use
+    "main/DHW_Holiday_Shift_Temp": {-127, -128}, "main/Room_Holiday_Shift_Temp": {-127, -128},
+    # decoder no-data value for scaled numbers
+    "main/Heat_Power_Production": {-200}, "main/Fan1_Motor_Speed": {-10}, "main/Pump_Speed": {-50},
+    "main/High_Pressure": {-0.2}, "main/Water_Pressure": {-0.02}, "main/Z1_Valve_PID": {-0.5},
+    # (value + 128) encodings: -1 is a real value and must not be a sentinel
+    "main/Heater_Start_Delta": {-128}, "main/DHW_Heat_Delta": {-128}, "main/Z1_Heat_Request_Temp": {-128},
+    "optional/Alarm_State": set(),
+}
+
+
+@pytest.mark.parametrize("key", SENTINELS)
+def test_sentinels(key, cat):
+    assert set(cat.topic(key)["sentinels"]) == SENTINELS[key]
+
+
+def test_real_capture_sentinels_and_enums(cat):
+    """Every enum value in the real capture has a label; known not-present readings are sentinels."""
+    data = _real_capture()
+    last = {m["topic"]: m["payload"] for m in data["messages"]}
+    for key, raw in last.items():
+        t = cat.topic(key)
+        if t is None or t["kind"] != "enum":
+            continue
+        assert raw in t["enum"] or float(raw) in t["sentinels"], (key, raw)
+    for key in ("main/Buffer_Temp", "main/Pool_Temp", "main/Solar_Temp", "main/Z1_Water_Temp",
+                "main/Z2_Water_Temp", "main/DHW_Holiday_Shift_Temp", "main/Water_Pressure"):
+        assert float(last[key]) in cat.topic(key)["sentinels"], key

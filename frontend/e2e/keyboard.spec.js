@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { up, down } from './stack.js';
-import { openScreen, otherThan, stateValue } from './helpers.js';
+import { commandRange, openScreen, otherThan, stateValue } from './helpers.js';
 
 // Keyboard-only: elements are reached with focus()/Tab and operated with key presses; no pointer clicks.
 test.describe('keyboard-only completion', () => {
@@ -10,7 +10,7 @@ test.describe('keyboard-only completion', () => {
   test('settings Apply', async ({ page }) => {
     await openScreen(page, 'settings');
     const control = page.getByTestId('control-SetMaxPumpDuty');
-    const next = otherThan(await stateValue('main/Max_Pump_Duty'), 0, 100);
+    const next = otherThan(await stateValue('main/Max_Pump_Duty'), commandRange('SetMaxPumpDuty').min, commandRange('SetMaxPumpDuty').max);
     const input = control.getByTestId('value-SetMaxPumpDuty');
     await input.focus();
     await page.keyboard.press('Control+A');

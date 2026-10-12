@@ -15,4 +15,5 @@ export default {
   hidden: 'Hidden',
   ignored: 'Ignored',
   section: '{name}',
+  name: 'Topic',
 };

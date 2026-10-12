@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { translate } from '../lib/i18n/index.js';
-  import { state as stateStore, profile as profileStore, prefs as prefsStore, language } from '../lib/stores.js';
+  import { state as stateStore, profile as profileStore, prefs as prefsStore, commands as commandsStore, language } from '../lib/stores.js';
   import { presentTopic } from '../lib/format.js';
   import { topicByKey } from '../lib/catalog.js';
   import { api } from '../lib/api.js';
@@ -187,43 +187,39 @@
     }
   }
 
-  // Load sparklines when state/profile are available
-  let loadingSparklines = $state(false);
+  // Sparklines: fetched once per tile set and refreshed every 5 minutes — never per live message.
+  const SPARKLINE_REFRESH_MS = 5 * 60 * 1000;
+  const ready = $derived(Boolean($stateStore && $profileStore));
+  const sparklineKeys = $derived(activeTiles.filter((id) => tileMap[id] && !tileMap[id].computed).join('|'));
 
   $effect(() => {
-    if ($stateStore && $profileStore && activeTiles.length > 0 && !loadingSparklines) {
-      loadingSparklines = true;
-      
+    const ids = sparklineKeys ? sparklineKeys.split('|') : [];
+    if (!ready || !ids.length) return undefined;
+    let alive = true;
+    const load = async () => {
       const now = Date.now();
-      const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
-      
-      Promise.all(
-        activeTiles.map(async (tileId) => {
-          const info = tileMap[tileId];
-          if (info.computed) {
-            sparklineData[tileId] = [];
-            return;
-          }
-          
-          if (info.key) {
-            try {
-              const values = await fetchSparklineValues(info.key, now);
-              sparklineData[tileId] = values;
-            } catch (error) {
-              sparklineData[tileId] = [];
-            }
-          }
-        })
-      ).finally(() => {
-        loadingSparklines = false;
-      });
-    }
+      const next = {};
+      await Promise.all(ids.map(async (tileId) => {
+        try {
+          next[tileId] = await fetchSparklineValues(tileMap[tileId].key, now);
+        } catch {
+          next[tileId] = [];
+        }
+      }));
+      if (alive) sparklineData = next;
+    };
+    load();
+    const timer = setInterval(load, SPARKLINE_REFRESH_MS);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
   });
 </script>
 
 <div class="overview" data-testid="screen-overview">
   {#if $stateStore && $profileStore}
-    <QuickControls profile={$profileStore} stateData={$stateStore} prefs={$prefsStore} lang={$language} />
+    <QuickControls profile={$profileStore} stateData={$stateStore} prefs={$prefsStore} lang={$language} commandMap={$commandsStore} />
 
     <div class="tiles" data-testid="tiles">
       {#each activeTiles as tileId}
@@ -254,8 +250,8 @@
     gap: 1rem;
   }
   .tiles {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(10.5rem, 45%), 1fr));
     gap: 0.75rem;
   }
   .loading {

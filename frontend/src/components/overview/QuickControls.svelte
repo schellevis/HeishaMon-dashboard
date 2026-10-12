@@ -1,410 +1,184 @@
 <script>
+  import CommandControl from '../settings/CommandControl.svelte';
+  import CurveSetpointControl from './CurveSetpointControl.svelte';
+  import { isCoupled } from '../../lib/curvegeom.js';
   import { translate } from '../../lib/i18n/index.js';
-  import ApplyButton from '../ApplyButton.svelte';
-  import { askConfirm } from '../../lib/stores.js';
-  import { api } from '../../lib/api.js';
-  import { encode, validate, resolveRange } from '../../lib/encoding.js';
-  import { commandByName } from '../../lib/catalog.js';
+  import { catalog as defaultCatalog } from '../../lib/catalog.js';
 
   let {
     profile = null,
     stateData = null,
     prefs = null,
     lang = 'en',
+    commandMap = {},
+    /** catalog override (tests); defaults to the build-time catalog */
+    catalogData = null,
   } = $props();
 
-  let eepromCount = $state(0);
-  let eepromLast = $state(0);
-  let pendingCommands = $state(new Set());
+  const source = $derived(catalogData ?? defaultCatalog);
+  const commandIndex = $derived(new Map((source.commands ?? []).map((entry) => [entry.name, entry])));
 
-  const HEATING_MODES = new Set([0, 2, 4, 6]);
-  const COOLING_MODES = new Set([1, 5, 7, 8]);
   const DHW_MODES = new Set([3, 4, 5, 6, 8]);
 
-  // Derive which controls are visible
-  const hasDhw = $derived(profile?.dhw_installed?.value === true);
-  const dhwInUse = $derived(profile?.dhw_in_use?.value === true);
-  const heatingControl = $derived(profile?.heating_control?.value ?? 'curve');
-  const coolingControl = $derived(profile?.cooling_control?.value ?? 'curve');
-  const zones = $derived(profile?.zones?.value ?? 'z1');
+  function known(field) {
+    return field && !field.unknown ? field.value : undefined;
+  }
+
+  const hasDhw = $derived(known(profile?.dhw_installed) === true);
+  const zones = $derived(known(profile?.zones) ?? 'z1');
   const z1Active = $derived(zones === 'z1' || zones === 'both');
   const z2Active = $derived(zones === 'z2' || zones === 'both');
+  const showHeat = $derived(known(profile?.heating_in_use) !== false);
+  const showCool = $derived(known(profile?.cooling_in_use) === true);
+  const heatingControl = $derived(known(profile?.heating_control));
+  const coolingControl = $derived(known(profile?.cooling_control));
 
-  // Check if current mode is DHW-capable
-  const isDhwCapableMode = $derived(() => {
-    const mode = profile?.operating_mode?.value ?? -1;
-    return DHW_MODES.has(mode);
+  const mode = $derived.by(() => {
+    const fromProfile = known(profile?.operating_mode);
+    if (typeof fromProfile === 'number') return fromProfile;
+    const topic = stateData?.topics?.['main/Operating_Mode_State'];
+    return topic && !topic.sentinel ? topic.value : null;
   });
+  const dhwCapable = $derived(mode != null && DHW_MODES.has(mode));
 
-  // Zone sensor types
-  const z1Sensor = $derived(profile?.zone?.z1?.sensor?.value ?? 'water');
-  const z2Sensor = $derived(profile?.zone?.z2?.sensor?.value ?? 'water');
-
-  // Get current values from state
-  function getTopicValue(key) {
-    return stateData?.topics?.[key]?.value ?? null;
+  function cmd(name) {
+    return commandIndex.get(name) ?? null;
   }
 
-  // Get range from catalog for a command, respecting conditional_ranges
-  function getCommandRange(commandName, profile) {
-    const cmd = commandByName(commandName);
-    if (!cmd) {
-      console.warn(`Command ${commandName} not found in catalog`);
-      return { min: 0, max: 100, step: 1 };
-    }
-    
-    return resolveRange(cmd, profile) ?? cmd.range ?? { min: 0, max: 100, step: 1 };
+  function signed(value) {
+    if (value > 0) return `+${value}`;
+    if (value < 0) return `−${Math.abs(value)}`;
+    return '0';
   }
 
-  // Get the effective range for a zone request based on mode and sensor
-  function getZoneRequestRange(zone, isHeat) {
-    const sensor = zone === 'z1' ? z1Sensor : z2Sensor;
-    const mode = isHeat ? heatingControl : coolingControl;
-    
-    // Get the command name - capitalize the zone identifier (z1 -> Z1)
-    const zoneCapitalized = zone.toUpperCase();
-    const cmdName = isHeat ? `Set${zoneCapitalized}HeatRequestTemperature` : `Set${zoneCapitalized}CoolRequestTemperature`;
-    
-    // Get the base range from catalog
-    const cmd = commandByName(cmdName);
-    const range = cmd ? resolveRange(cmd, profile) : null;
-    
-    // Apply conditional logic based on mode and sensor per spec Appendix A.2
-    if (mode === 'curve') {
-      // In curve mode, it's always -5..5 shift
-      return { ...(range ?? {}), min: -5, max: 5, step: 1, isShift: true };
-    } else {
-      // In direct mode, the range depends on the sensor
-      if (sensor === 'water') {
-        // Direct mode with water sensor: heat is 20..65, cool is 5..20
-        return { 
-          min: isHeat ? 20 : 5, 
-          max: isHeat ? 65 : 20, 
-          step: 1, 
-          isShift: false 
-        };
-      } else {
-        // Direct mode with room sensor: heat is 10..30, cool is 18..30
-        return { 
-          min: isHeat ? 10 : 18, 
-          max: 30, 
-          step: 1, 
-          isShift: false 
-        };
-      }
-    }
+  /** Zone request label and read-out: a shift on the curve, or an absolute setpoint. */
+  function requestLabel(zone, heat) {
+    const control = heat ? heatingControl : coolingControl;
+    const base = `${translate(lang, heat ? 'overview.heatRequest' : 'overview.coolRequest')} ${translate(lang, `overview.${zone}`)}`;
+    if (control === 'curve') return `${base} (${translate(lang, 'overview.requestShift')})`;
+    if (control === 'direct') return `${base} (${translate(lang, 'overview.requestSetpoint')})`;
+    return base;
   }
 
-  // Command submission with EEPROM rate limiting
-  async function submitCommand(name, value, risky = false) {
-    const now = Date.now();
-    const oneHour = 60 * 60 * 1000;
-
-    // EEPROM rate limiting: max 3 per 60 minutes
-    if (now - eepromLast < oneHour && eepromCount >= 3) {
-      const confirmed = await askConfirm({
-        title: translate(lang, 'overview.eepromWarningTitle'),
-        body: translate(lang, 'overview.eepromWarning'),
-      });
-      if (!confirmed) return;
-      if (now - eepromLast >= oneHour) {
-        eepromCount = 0;
-        eepromLast = now;
-      }
-    }
-
-    if (now - eepromLast >= oneHour) {
-      eepromCount = 0;
-      eepromLast = now;
-    }
-
-    const command = commandByName(name);
-    if (!command) return;
-
-    if (risky) {
-      const confirmed = await askConfirm({
-        title: translate(lang, 'common.confirmTitle'),
-        body: `${translate(lang, 'common.confirmBody')}\n\n${name}`,
-      });
-      if (!confirmed) return;
-    }
-
-    const entry = { type: command.type, ...command };
-    const validation = validate(entry, value, profile);
-    if (!validation.ok) {
-      console.warn(`Validation failed for ${name}: ${validation.error}`);
-      return;
-    }
-
-    pendingCommands.add(name);
-    pendingCommands = new Set(pendingCommands);
-    try {
-      const encoded = encode(command.type, value);
-      if (!encoded.ok) {
-        console.warn(`Encoding failed for ${name}: ${encoded.error}`);
-        return;
-      }
-
-      await api.command({ name, value, confirm: true });
-      eepromCount += 1;
-    } finally {
-      pendingCommands.delete(name);
-      pendingCommands = new Set(pendingCommands);
-    }
+  function requestFormatter(heat) {
+    const control = heat ? heatingControl : coolingControl;
+    if (control === 'curve') return (value) => `${signed(value)} °C`;
+    return (value) => `${value} °C`;
   }
 
-  // Heat pump on/off
-  const hpOn = $derived(getTopicValue('main/Operating_Mode_State') !== 0);
+  const zoneControls = $derived([
+    z1Active && showHeat && { zone: 'zone1', heat: true, name: 'SetZ1HeatRequestTemperature', testid: 'z1-heat' },
+    z1Active && showCool && { zone: 'zone1', heat: false, name: 'SetZ1CoolRequestTemperature', testid: 'z1-cool' },
+    z2Active && showHeat && { zone: 'zone2', heat: true, name: 'SetZ2HeatRequestTemperature', testid: 'z2-heat' },
+    z2Active && showCool && { zone: 'zone2', heat: false, name: 'SetZ2CoolRequestTemperature', testid: 'z2-cool' },
+  ].filter(Boolean).map((zc) => {
+    // coupled (direct + room sensor): the setpoint lives in the curve's cold-end target
+    const z = zc.zone === 'zone1' ? 'z1' : 'z2';
+    const mode = zc.heat ? 'heat' : 'cool';
+    return { ...zc, z, mode, coupled: isCoupled(profile, z, mode) };
+  }));
 
-  // Operating mode options - use labels from common.*
-  const modeOptions = $derived([
-    { value: 0, label: translate(lang, 'common.mode0') },
-    { value: 1, label: translate(lang, 'common.mode1') },
-    { value: 2, label: translate(lang, 'common.mode2') },
-    { value: 3, label: translate(lang, 'common.mode3') },
-    { value: 4, label: translate(lang, 'common.mode4') },
-    { value: 5, label: translate(lang, 'common.mode5') },
-    { value: 6, label: translate(lang, 'common.mode6') },
-  ]);
-
-  let draftValues = $state({});
-
-  function handleSliderInput(zone, isHeat, value) {
-    draftValues[`${zone}_${isHeat ? 'heat' : 'cool'}`] = Number(value);
-  }
-
-  function handleSliderApply(zone, isHeat) {
-    const key = `${zone}_${isHeat ? 'heat' : 'cool'}`;
-    const value = draftValues[key];
-    if (value === undefined) return;
-    
-    // Capitalize the zone identifier (z1 -> Z1)
-    const zoneCapitalized = zone.toUpperCase();
-    const cmdName = isHeat ? `Set${zoneCapitalized}HeatRequestTemperature` : `Set${zoneCapitalized}CoolRequestTemperature`;
-    submitCommand(cmdName, value);
-    const newDraft = { ...draftValues };
-    delete newDraft[key];
-    draftValues = newDraft;
-  }
-
-  // DHW setpoint range from catalog
-  const dhwRange = $derived(getCommandRange('SetDHWTemp', profile));
-  let dhwDraft = $state(null);
-
-  function handleDhwApply() {
-    if (dhwDraft === null) return;
-    submitCommand('SetDHWTemp', dhwDraft);
-    dhwDraft = null;
-  }
-
-  // Get current quiet/powerful mode values
-  // Note: Quiet_Mode_Level and Powerful_Mode_Time are used as state indicators
-  // Quiet mode is active when level > 0, Powerful mode when time > 0
-  const quietOn = $derived(getTopicValue('main/Quiet_Mode_Level') !== 0);
-  const powerfulOn = $derived(getTopicValue('main/Powerful_Mode_Time') !== 0);
+  const common = $derived({ profile, live: stateData, prefs, lang, commandMap, variant: 'compact', catalogData: source });
 </script>
 
-<div class="quick-controls" data-testid="quick-controls">
+<section class="quick-controls" data-testid="quick-controls">
   <h2>{translate(lang, 'overview.quickControls')}</h2>
-
-  <section data-testid="control-hp-power">
-    <label>
-      <input
-        type="checkbox"
-        checked={hpOn}
-        disabled={pendingCommands.has('SetOperationMode')}
-        onchange={(e) => submitCommand('SetOperationMode', e.target.checked ? 4 : 0)}
-      />
-      {translate(lang, hpOn ? 'overview.heatPumpOff' : 'overview.heatPumpOn')}
-    </label>
-  </section>
-
-  <section data-testid="control-mode">
-    <label>
-      {translate(lang, 'overview.operatingMode')}
-      <select
-        disabled={pendingCommands.has('SetOperationMode')}
-        onchange={(e) => submitCommand('SetOperationMode', Number(e.target.value))}
-      >
-        {#each modeOptions as opt}
-          <option value={opt.value} selected={getTopicValue('main/Operating_Mode_State') === opt.value}>
-            {opt.label}
-          </option>
-        {/each}
-      </select>
-    </label>
-  </section>
-
-  <section data-testid="control-quiet-powerful">
-    <label>
-      <input
-        type="checkbox"
-        checked={quietOn}
-        disabled={pendingCommands.has('SetQuietMode')}
-        onchange={(e) => submitCommand('SetQuietMode', e.target.checked ? 1 : 0)}
-      />
-      {translate(lang, 'overview.quietMode')}
-    </label>
-    <label>
-      <input
-        type="checkbox"
-        checked={powerfulOn}
-        disabled={pendingCommands.has('SetPowerfulMode')}
-        onchange={(e) => submitCommand('SetPowerfulMode', e.target.checked ? 1 : 0)}
-      />
-      {translate(lang, 'overview.powerfulMode')}
-    </label>
-  </section>
-
-  {#if hasDhw}
-    <section data-testid="control-force-dhw">
-      <label>
-        <input
-          type="checkbox"
-          disabled={!isDhwCapableMode() || pendingCommands.has('SetForceDHW')}
-          onchange={(e) => submitCommand('SetForceDHW', e.target.checked ? 1 : 0)}
+  <div class="grid">
+    {#if cmd('SetHeatpump')}
+      <div data-testid="control-hp-power">
+        <CommandControl entry={cmd('SetHeatpump')} {...common} labelText={translate(lang, 'overview.heatPump')} inputTestid="input-hp-power" applyTestid="apply-hp-power" />
+      </div>
+    {/if}
+    {#if cmd('SetOperationMode')}
+      <div data-testid="control-mode">
+        <CommandControl entry={cmd('SetOperationMode')} {...common} labelText={translate(lang, 'overview.operatingMode')} inputTestid="input-mode" applyTestid="apply-mode" />
+      </div>
+    {/if}
+    {#if cmd('SetQuietMode')}
+      <div data-testid="control-quiet">
+        <CommandControl entry={cmd('SetQuietMode')} {...common} labelText={translate(lang, 'overview.quietMode')} inputTestid="input-quiet" applyTestid="apply-quiet" />
+      </div>
+    {/if}
+    {#if cmd('SetPowerfulMode')}
+      <div data-testid="control-powerful">
+        <CommandControl entry={cmd('SetPowerfulMode')} {...common} labelText={translate(lang, 'overview.powerfulMode')} inputTestid="input-powerful" applyTestid="apply-powerful" />
+      </div>
+    {/if}
+    {#each zoneControls as zc (zc.name)}
+      {#if zc.coupled && cmd('SetCurves')}
+        <div data-testid={`control-${zc.testid}`} data-coupled="true">
+          <CurveSetpointControl
+            zone={zc.z}
+            mode={zc.mode}
+            entry={cmd('SetCurves')}
+            {profile}
+            live={stateData}
+            {prefs}
+            {lang}
+            {commandMap}
+            labelText={requestLabel(zc.zone, zc.heat)}
+            inputTestid={`slider-${zc.testid}`}
+            applyTestid={`apply-${zc.testid}`}
+            noteTestid={`coupled-note-${zc.testid}`}
+          />
+        </div>
+      {:else if cmd(zc.name)}
+        <div data-testid={`control-${zc.testid}`}>
+          <CommandControl
+            entry={cmd(zc.name)}
+            {...common}
+            widget="slider"
+            labelText={requestLabel(zc.zone, zc.heat)}
+            formatValue={requestFormatter(zc.heat)}
+            inputTestid={`slider-${zc.testid}`}
+            applyTestid={`apply-${zc.testid}`}
+          />
+        </div>
+      {/if}
+    {/each}
+    {#if hasDhw && cmd('SetDHWTemp')}
+      <div data-testid="control-dhw-setpoint">
+        <CommandControl entry={cmd('SetDHWTemp')} {...common} labelText={translate(lang, 'overview.dhwSetpoint')} inputTestid="input-dhw" applyTestid="apply-dhw" />
+      </div>
+    {/if}
+    {#if hasDhw && cmd('SetForceDHW')}
+      <div data-testid="control-force-dhw" data-enabled={dhwCapable ? 'true' : 'false'}>
+        <CommandControl
+          entry={cmd('SetForceDHW')}
+          {...common}
+          labelText={translate(lang, 'overview.forceDhw')}
+          blockedNote={dhwCapable ? null : translate(lang, 'overview.forceDhwNeedsMode')}
+          inputTestid="input-force-dhw"
+          applyTestid="apply-force-dhw"
         />
-        {translate(lang, 'overview.forceDhw')}
-      </label>
-    </section>
-  {/if}
-
-  {#if z1Active}
-    <section data-testid="control-z1-heat">
-      <label>
-        {translate(lang, 'overview.heatRequest')} {translate(lang, 'zone1')}
-        <input
-          type="range"
-          min={getZoneRequestRange('z1', true).min}
-          max={getZoneRequestRange('z1', true).max}
-          step={getZoneRequestRange('z1', true).step}
-          value={draftValues.z1_heat ?? getTopicValue(`main/Z1_Heat_Request_Temperature`) ?? 0}
-          oninput={(e) => handleSliderInput('z1', true, e.target.value)}
-          data-testid="slider-z1-heat"
-        />
-        <span class="slider-value">
-          {draftValues.z1_heat ?? getTopicValue(`main/Z1_Heat_Request_Temperature`) ?? 0}
-          {getZoneRequestRange('z1', true).isShift ? translate(lang, 'unitCelsius') : ''}
-        </span>
-      </label>
-      <ApplyButton testid="apply-z1-heat" disabled={pendingCommands.has('SetZ1HeatRequestTemperature')} onclick={() => handleSliderApply('z1', true)} />
-    </section>
-  {/if}
-
-  {#if z1Active && coolingControl === 'curve'}
-    <section data-testid="control-z1-cool">
-      <label>
-        {translate(lang, 'overview.coolRequest')} {translate(lang, 'zone1')}
-        <input
-          type="range"
-          min={getZoneRequestRange('z1', false).min}
-          max={getZoneRequestRange('z1', false).max}
-          step={getZoneRequestRange('z1', false).step}
-          value={draftValues.z1_cool ?? getTopicValue(`main/Z1_Cool_Request_Temperature`) ?? 0}
-          oninput={(e) => handleSliderInput('z1', false, e.target.value)}
-          data-testid="slider-z1-cool"
-        />
-        <span class="slider-value">
-          {draftValues.z1_cool ?? getTopicValue(`main/Z1_Cool_Request_Temperature`) ?? 0}
-        </span>
-      </label>
-      <ApplyButton testid="apply-z1-cool" disabled={pendingCommands.has('SetZ1CoolRequestTemperature')} onclick={() => handleSliderApply('z1', false)} />
-    </section>
-  {/if}
-
-  {#if z2Active}
-    <section data-testid="control-z2-heat">
-      <label>
-        {translate(lang, 'overview.heatRequest')} {translate(lang, 'zone2')}
-        <input
-          type="range"
-          min={getZoneRequestRange('z2', true).min}
-          max={getZoneRequestRange('z2', true).max}
-          step={getZoneRequestRange('z2', true).step}
-          value={draftValues.z2_heat ?? getTopicValue(`main/Z2_Heat_Request_Temperature`) ?? 0}
-          oninput={(e) => handleSliderInput('z2', true, e.target.value)}
-          data-testid="slider-z2-heat"
-        />
-        <span class="slider-value">
-          {draftValues.z2_heat ?? getTopicValue(`main/Z2_Heat_Request_Temperature`) ?? 0}
-          {getZoneRequestRange('z2', true).isShift ? translate(lang, 'unitCelsius') : ''}
-        </span>
-      </label>
-      <ApplyButton testid="apply-z2-heat" disabled={pendingCommands.has('SetZ2HeatRequestTemperature')} onclick={() => handleSliderApply('z2', true)} />
-    </section>
-  {/if}
-
-  {#if hasDhw}
-    <section data-testid="control-dhw-setpoint">
-      <label>
-        {translate(lang, 'overview.dhwSetpoint')}
-        <input
-          type="number"
-          min={dhwRange.min}
-          max={dhwRange.max}
-          step={dhwRange.step}
-          value={dhwDraft ?? getTopicValue('main/DHW_Temp_Setpoint') ?? 50}
-          oninput={(e) => { dhwDraft = Number(e.target.value); }}
-          data-testid="input-dhw"
-        />
-      </label>
-      <ApplyButton testid="apply-dhw" disabled={pendingCommands.has('SetDHWTemp')} onclick={handleDhwApply} />
-    </section>
-  {/if}
-</div>
+      </div>
+    {/if}
+  </div>
+</section>
 
 <style>
   .quick-controls {
-    background: #1a1a1a;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    color: #e5e5e5;
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    background: var(--bg);
+    padding: 0.5rem 1rem 0.75rem;
   }
   h2 {
-    margin: 0 0 1rem;
+    margin: 0.25rem 0 0.25rem;
     font-size: 1rem;
-    color: #ccc;
   }
-  section {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    align-items: center;
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    column-gap: 2rem;
   }
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 0.875rem;
-    min-width: 120px;
+  .grid > div {
+    border-bottom: 1px solid var(--border);
+    min-width: 0;
   }
-  input[type="range"] {
-    width: 100%;
-  }
-  .slider-value {
-    font-size: 0.75rem;
-    color: #888;
-    text-align: center;
-    display: block;
-  }
-  input[type="number"] {
-    width: 60px;
-    padding: 0.25rem;
-    border-radius: 4px;
-    border: 1px solid #444;
-    background: #2a2a2a;
-    color: #e5e5e5;
-  }
-  input[type="checkbox"] {
-    margin-right: 0.5rem;
-  }
-  select {
-    padding: 0.25rem;
-    border-radius: 4px;
-    border: 1px solid #444;
-    background: #2a2a2a;
-    color: #e5e5e5;
+  @media (max-width: 480px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

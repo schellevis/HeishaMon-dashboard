@@ -1,5 +1,7 @@
 import { expect } from '@playwright/test';
-import { URL } from './stack.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { ROOT, URL } from './stack.js';
 
 export const SCREENS = ['overview', 'charts', 'energy', 'curve', 'settings', 'topics', 'log', 'system'];
 
@@ -34,4 +36,11 @@ export async function noOverflow(page) {
   }));
   expect(sizes.doc[0], `documentElement ${sizes.doc}`).toBeLessThanOrEqual(sizes.doc[1]);
   expect(sizes.body[0], `body ${sizes.body}`).toBeLessThanOrEqual(sizes.body[1]);
+}
+
+/** Catalog range of a command (the catalog is the source of truth; it may change). */
+export function commandRange(name) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'backend/heishamon_dashboard/catalog.json'), 'utf8'));
+  const entry = catalog.commands.find((c) => c.name === name);
+  return entry?.range ?? { min: 0, max: 100 };
 }

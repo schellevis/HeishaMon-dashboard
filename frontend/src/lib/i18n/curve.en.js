@@ -47,6 +47,7 @@ export default {
   plus: '+1',
   stepRefused: 'This step would break a limit or the ordering rule, so it is not available.',
   invariantHint: 'The cold end must lie at least 1 °C left of the warm end, and the cold-end target may not be below the warm-end target.',
+  invariantHintCoupled: 'The cold end must lie at least 1 °C left of the warm end. In this mode the cold-end target is the setpoint and the warm-end target is not used, so the two targets may be in any order.',
   limitsHeat: 'Limits: outside −20..30 °C, target 15..75 °C.',
   limitsCool: 'Limits: outside 15..30 °C, target 5..20 °C.',
   draftTitle: 'Pending changes',

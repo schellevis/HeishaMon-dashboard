@@ -43,6 +43,8 @@ def mutate(fn):
     return d
 
 
+_HEX = "AA BB CC DD EE FF 00 11 22 33"
+
 VIOLATIONS = {
     "unknown top key": lambda d: d.update(extra=1),
     "bad schema version": lambda d: d.update(schema=2),
@@ -67,8 +69,21 @@ VIOLATIONS = {
     "bad input class": lambda d: d.update(inputs=[{"path": "p", "class": "x", "retain": False, "type": "int",
                                                    "range": {}, "range_source": "heishamon_fact",
                                                    "min_firmware": "3.2.3", "label": {"en": "a", "nl": "b"}}]),
-    "bad model series": lambda d: d.update(models=[{"hex": "AA", "name": "WH", "series": "Z"}]),
+    "bad model series": lambda d: d.update(models=[{"hex": _HEX, "name": "WH", "series": "Z"}]),
+    "short model hex": lambda d: d.update(models=[{"hex": "AA BB", "name": "WH", "series": "J"}]),
+    "lower-case model hex": lambda d: d.update(models=[{"hex": _HEX.lower(), "name": "WH", "series": "J"}]),
+    "duplicate model hex": lambda d: d.update(models=[{"hex": _HEX, "name": "A", "series": "J"},
+                                                      {"hex": _HEX, "name": "B", "series": "K"}]),
 }
+
+
+def test_model_lookup_normalises_payload():
+    data = mutate(lambda d: d.update(models=[{"hex": _HEX, "name": "WH-X", "series": "other"}]))
+    cat = catalog.parse(data)
+    assert cat.model(_HEX)["name"] == "WH-X"
+    assert cat.model("  " + _HEX.lower().replace(" ", "  ") + " ")["name"] == "WH-X"
+    assert cat.model("00 11 22 33 44 55 66 77 88 99") is None
+    assert cat.model(None) is None
 
 
 @pytest.mark.parametrize("name", VIOLATIONS)

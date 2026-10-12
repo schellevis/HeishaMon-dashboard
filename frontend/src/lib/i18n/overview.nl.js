@@ -27,6 +27,8 @@ export default {
   resetTiles: 'Terug naar standaard',
 
   // Quick controls
+  heatPump: 'Warmtepomp',
+  forceDhwNeedsMode: 'Alleen in een bedrijfsmodus met warm water.',
   quickControls: 'Snelbediening',
   heatPumpOn: 'Warmtepomp aan',
   heatPumpOff: 'Warmtepomp uit',
@@ -39,8 +41,10 @@ export default {
   // Zone request controls (mode-adaptive)
   heatRequest: 'Verwarmingsvraag',
   coolRequest: 'Koelvraag',
-  requestShift: 'Offset',
-  requestSetpoint: 'Instelpunt',
+  requestShift: 'verschuiving',
+  requestSetpoint: 'instelpunt',
+  coupledNote: 'Directe modus met kamerthermostaat of thermistor: de warmtepomp bewaart dit instelpunt in het doel van de koude kant van de stooklijn ({key}), niet in de gevraagde temperatuur. Toepassen wijzigt die stooklijnwaarde.',
+  coupledLink: 'Naar de stooklijn',
 
   // Unit labels
   unitCelsius: '°C',

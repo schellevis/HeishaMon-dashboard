@@ -14,6 +14,7 @@
     applyLeaves,
     curvePoints,
     diffRows,
+    isCoupled,
     leafKey,
     leavesOfJson,
     modelDisagrees,
@@ -74,7 +75,7 @@
   const control = $derived(tab.mode === 'heat' ? $profile?.heating_control?.value : $profile?.cooling_control?.value);
   const direct = $derived(control === 'direct');
   const sensor = $derived($profile?.zone?.[tab.zone]?.sensor?.value ?? null);
-  const coupled = $derived(direct && sensor !== null && sensor !== 'water');
+  const coupled = $derived(isCoupled($profile, tab.zone, tab.mode));
   const requestKey = $derived(`main/Z${zn}_${Mode}_Request_Temp`);
   const requestValue = $derived(num(requestKey));
   const requestCommand = $derived(`SetZ${zn}${Mode}RequestTemperature`);
@@ -400,6 +401,7 @@
     {switchMarkers}
     overlay={overlayData}
     {colorBy}
+    {coupled}
     onchange={setDraft}
     onthreshold={setThreshold}
   />
@@ -413,7 +415,7 @@
     </div>
   {/if}
 
-  <CurveEditor {lang} mode={tab.mode} {shown} onchange={setDraft} />
+  <CurveEditor {lang} mode={tab.mode} {shown} {coupled} onchange={setDraft} />
 
   <DraftPanel {lang} {groups} ondiscard={discard} {eepromWarning} />
   {#each groups as g (g.id)}

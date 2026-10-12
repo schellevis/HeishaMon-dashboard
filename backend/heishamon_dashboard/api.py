@@ -186,7 +186,7 @@ def system_info(svc) -> dict:
         "last_flush_error": store.last_error if failing else None,
         "flush_interval_s": svc.config.flush_interval_seconds,
         "buffer": {"samples": store.sample_count, "sample_bytes": store.sample_bytes,
-                   "protected": store.audit_count},
+                   "protected": store.audit_count()},
         "dropped": {"samples": overflow, "ingest": svc.ingest_dropped_total + svc.state.ingest_dropped},
     }
 
