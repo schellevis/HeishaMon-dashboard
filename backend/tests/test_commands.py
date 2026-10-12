@@ -677,6 +677,50 @@ async def test_setcurves_ordering_uses_merged_state(rig):
     assert (await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"low": 9}}}}))[0] == 201
 
 
+def coupled_profile(zone="z1", sensor="ext_thermostat", heat="direct", cool="curve"):
+    p = make_profile(heating_control=F(heat), cooling_control=F(cool))
+    p["zone"][zone]["sensor"] = F(sensor)
+    return p
+
+
+@pytest.mark.parametrize("sensor", ["ext_thermostat", "int_thermostat", "thermistor"])
+async def test_setcurves_coupled_mode_skips_target_ordering(rig, sensor):
+    # direct control + room sensor: the cold-end target is the setpoint, the warm-end target is unused
+    rig.profile = coupled_profile(sensor=sensor)
+    rig.feed(leaf("Target_Low"), "30")
+    rig.feed(leaf("Outside_High"), "10")
+    st, body = await rig.go("SetCurves", {"zone1": {"heat": {"target": {"high": 20}}}})
+    assert st == 201 and body["payload"] == '{"zone1":{"heat":{"target":{"high":20}}}}'
+    assert (await rig.go("SetCurves", {"zone1": {"heat": {"target": {"high": 18, "low": 40}}}}))[0] == 201
+    # limits and the outside ordering still apply
+    assert (await rig.go("SetCurves", {"zone1": {"heat": {"target": {"high": 14}}}}))[1]["error"] == "out_of_range"
+    assert (await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"low": 10}}}}))[0] == 422
+
+
+@pytest.mark.parametrize("profile", [
+    coupled_profile(sensor="water"),  # direct + water sensor
+    coupled_profile(heat="curve"),  # curve mode
+    coupled_profile(zone="z2"),  # the other zone is coupled, not this one
+    coupled_profile(heat="curve", cool="direct"),  # only cooling is coupled
+    make_profile(heating_control=F("direct", unknown=True),
+                 zone={"z1": {"active": F(True), "sensor": F("ext_thermostat")},
+                       "z2": {"active": F(True), "sensor": F("water")}}),  # unknown: keep the rule
+])
+async def test_setcurves_target_ordering_kept_when_not_coupled(rig, profile):
+    rig.profile = profile
+    rig.feed(leaf("Target_Low"), "30")
+    st, body = await rig.go("SetCurves", {"zone1": {"heat": {"target": {"high": 29}}}})
+    assert (st, body["error"], body["detail"]["rule"]) == (422, "out_of_range", "ordering")
+
+
+async def test_setcurves_coupled_cool_skips_cool_ordering_only(rig):
+    rig.profile = coupled_profile(heat="curve", cool="direct", sensor="thermistor")
+    rig.feed(leaf("Target_Low", mode="Cool"), "15")
+    rig.feed(leaf("Target_Low"), "30")
+    assert (await rig.go("SetCurves", {"zone1": {"cool": {"target": {"high": 10}}}}))[0] == 201
+    assert (await rig.go("SetCurves", {"zone1": {"heat": {"target": {"high": 29}}}}))[0] == 422
+
+
 # ------------------------------------------------------------------ classes
 
 

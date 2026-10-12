@@ -5,6 +5,8 @@
  * uPlot is imported dynamically to avoid breaking tests that don't need it.
  */
 
+import { axisFormatter } from './time.js';
+
 // Dynamic import of uplot to avoid module-level side effects
 let uplotPromise = null;
 
@@ -150,7 +152,7 @@ export function formatDate(ts, lang = 'en') {
  * @param {Object} catalog - Optional catalog for topic info
  * @returns {Object} uPlot options ready for chart creation
  */
-export function historyToUplot(history, catalog = null) {
+export function historyToUplot(history, catalog = null, { lang = 'en', timeZone } = {}) {
   const { series } = history;
 
   const uplotSeries = [];
@@ -171,7 +173,8 @@ export function historyToUplot(history, catalog = null) {
     const catalogTopic = catalog ? catalog.topics.find(t => t.key === key) : null;
     const isEnum = seriesData.kind === 'enum' || (catalogTopic && catalogTopic.kind === 'enum');
 
-    const label = catalogTopic ? (catalogTopic.label?.en || key) : key;
+    const name = catalogTopic ? (catalogTopic.label?.[lang] || catalogTopic.label?.en || key) : key;
+    const label = catalogTopic?.unit && !isEnum ? `${name} (${catalogTopic.unit})` : name;
     const color = COLORS[colorIndex % COLORS.length];
     colorIndex++;
 
@@ -223,7 +226,36 @@ export function historyToUplot(history, catalog = null) {
       x: false,
       y: false,
     },
+    axes: timeAxes(lang, timeZone),
+    padding: [12, 12, 0, 4],
   };
+}
+
+/**
+ * Axes with locale-aware, 24-hour (nl) time labels in the browser's (or a given) time zone.
+ * uPlot's built-in formatter uses 12-hour am/pm templates.
+ */
+export function timeAxes(lang = 'en', timeZone) {
+  const fmt = axisFormatter(lang, { timeZone });
+  const HOUR = 3600;
+  const DAY = 24 * HOUR;
+  return [
+    {
+      space: 70,
+      values: (u, splits, axisIdx, foundSpace, foundIncr) => splits.map((sec) => {
+        if (sec == null) return '';
+        const date = new Date(sec * 1000);
+        if (foundIncr < DAY) {
+          const time = fmt.time.format(date);
+          return time === '00:00' ? fmt.day.format(date) : time;
+        }
+        if (foundIncr < 28 * DAY) return fmt.day.format(date);
+        if (foundIncr < 365 * DAY) return fmt.month.format(date);
+        return fmt.year.format(date);
+      }),
+    },
+    { size: 50 },
+  ];
 }
 
 /** Get breaks as gaps in the data

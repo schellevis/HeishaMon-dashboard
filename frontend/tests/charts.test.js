@@ -641,8 +641,15 @@ describe('TimeRangeSelector', () => {
   it('renders zoom controls', () => {
     render(TimeRangeSelector);
 
-    expect(screen.getByText('+ Zoom')).toBeTruthy();
-    expect(screen.getByText('- Zoom')).toBeTruthy();
+    expect(screen.getByText('Zoom in')).toBeTruthy();
+    expect(screen.getByText('Zoom out')).toBeTruthy();
+  });
+
+  it('resolution select shows Auto when no resolution is set', () => {
+    render(TimeRangeSelector, { from: 0, to: 3_600_000, resolution: null, onRangeChange: vi.fn(), onResolutionChange: vi.fn() });
+    const select = screen.getByTestId('resolution-select');
+    expect(select.value).toBe('');
+    expect(select.selectedOptions[0].textContent.trim()).not.toBe('');
   });
 });
 
@@ -734,5 +741,25 @@ describe('ChartContainer regression: no effect loop', () => {
     // x-axis series placeholder + value series, no string draw hooks
     expect(uplotCtor.calls[0].options.series[0]).toEqual({});
     expect(uplotCtor.calls[0].options.series.every((s) => typeof s.draw !== 'string')).toBe(true);
+  });
+});
+
+describe('chart labels and local time axis (§7.2)', () => {
+  it('series use catalog labels in the UI language, with the unit', async () => {
+    const { historyToUplot: toUplot } = await import('../src/lib/uplot.js');
+    const history = { resolution: 'raw', partial: false, series: { 'main/Outside_Temp': { kind: 'number', points: [[1000, 5]], breaks: [] } } };
+    const cat = { topics: [{ key: 'main/Outside_Temp', kind: 'number', unit: '°C', label: { en: 'Outside temperature', nl: 'Buitentemperatuur' } }] };
+    expect(toUplot(history, cat, { lang: 'nl' }).series[0].label).toBe('Buitentemperatuur (°C)');
+    expect(toUplot(history, cat, { lang: 'en' }).series[0].label).toBe('Outside temperature (°C)');
+  });
+
+  it('time axis is 24-hour in the given time zone, not UTC am/pm', async () => {
+    const { timeAxes } = await import('../src/lib/uplot.js');
+    const [x] = timeAxes('nl', 'Europe/Amsterdam');
+    // 2026-10-12T07:43:00Z is 09:43 in Amsterdam (CEST)
+    const sec = Date.UTC(2026, 9, 12, 7, 43) / 1000;
+    expect(x.values(null, [sec], 0, 70, 3600)).toEqual(['09:43']);
+    const [xEn] = timeAxes('en', 'Europe/Amsterdam');
+    expect(xEn.values(null, [sec], 0, 70, 3600)[0]).not.toMatch(/am|pm/i);
   });
 });

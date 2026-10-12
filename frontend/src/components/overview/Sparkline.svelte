@@ -4,7 +4,7 @@
   // Filter out null values for min/max calculation, but keep them in the array for positioning
   const validData = $derived(data.filter((d) => d !== null && typeof d === 'number' && !isNaN(d)));
   
-  const points = $derived(() => {
+  const points = $derived.by(() => {
     if (data.length === 0) return [];
     
     const validValues = validData;
@@ -19,14 +19,14 @@
       if (d === null || typeof d !== 'number' || isNaN(d)) {
         return null; // gap
       }
-      const x = (i / (data.length - 1)) * width;
+      const x = data.length > 1 ? (i / (data.length - 1)) * width : 0;
       const y = height - ((d - min) / scale) * height;
       return { x, y };
     });
   });
 
   // Build SVG path with gaps (move command for nulls)
-  const path = $derived(() => {
+  const path = $derived.by(() => {
     const segments = [];
     let first = true;
     
@@ -49,6 +49,6 @@
   });
 </script>
 
-<svg {width} {height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" data-testid="sparkline">
+<svg width="100%" {height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" data-testid="sparkline">
   <path d={path} fill="none" {stroke} stroke-width="1.5" />
 </svg>

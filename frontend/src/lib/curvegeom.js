@@ -8,6 +8,8 @@ export const LIMITS = {
 };
 export const MODE_SETS = { heat: [0, 2, 4, 6], cool: [1, 5, 7, 8] };
 export const ROOM_SENSOR_VALUES = [1, 2, 3];
+/** Profile sensor values (profile.zone.zN.sensor) that are a room sensor (thermostat/thermistor). */
+export const ROOM_SENSORS = ['ext_thermostat', 'int_thermostat', 'thermistor'];
 export const SHIFT_RANGE = { min: -5, max: 5 };
 export const MODEL_TOLERANCE = 1;
 export const THRESHOLDS = {
@@ -73,8 +75,25 @@ export function modelDisagrees(curve, shift, outside, reported) {
   return Math.abs(modelTarget(curve, shift ?? 0, outside) - reported) > MODEL_TOLERANCE;
 }
 
-/** Error codes for a draft; empty when valid (ordering invariant and limits). */
-export function validateDraft(draft, mode) {
+const usable = (f) => !!f && !f.unknown && !f.stale;
+
+/**
+ * "Coupled" zone/mode: direct control with a room sensor (thermostat/thermistor). The firmware then
+ * stores the direct setpoint in the curve's cold-end target (Target_High) and does not use the
+ * warm-end target, so the target-ordering rule does not apply. False when anything is unknown/stale.
+ */
+export function isCoupled(profile, zone, mode) {
+  const m = modeOf(mode);
+  const ctl = m === 'heat' ? profile?.heating_control : profile?.cooling_control;
+  const sensor = profile?.zone?.[`z${zoneNum(zone)}`]?.sensor;
+  return usable(ctl) && ctl.value === 'direct' && usable(sensor) && ROOM_SENSORS.includes(sensor.value);
+}
+
+/**
+ * Error codes for a draft; empty when valid (ordering invariant and limits).
+ * `opts.coupled` drops the target-ordering rule (limits and outside ordering still apply).
+ */
+export function validateDraft(draft, mode, opts = {}) {
   const lim = LIMITS[modeOf(mode)];
   const errors = [];
   for (const end of ['cold', 'warm']) {
@@ -86,38 +105,40 @@ export function validateDraft(draft, mode) {
   }
   if (!errors.length) {
     if (draft.cold.outside + 1 > draft.warm.outside) errors.push('outside_order');
-    if (draft.cold.target < draft.warm.target) errors.push('target_order');
+    if (!opts.coupled && draft.cold.target < draft.warm.target) errors.push('target_order');
   }
   return errors;
 }
 
-function stepped(curve, mode, coldD, warmD) {
+function stepped(curve, mode, coldD, warmD, opts) {
   const next = {
     cold: { outside: curve.cold.outside, target: curve.cold.target + coldD },
     warm: { outside: curve.warm.outside, target: curve.warm.target + warmD },
   };
-  return validateDraft(next, mode).length ? null : next;
+  return validateDraft(next, mode, opts).length ? null : next;
 }
 
 /** Cold target +delta, warm target -delta (+1 steepens). null when refused as a whole. */
-export const slopeStep = (curve, mode, delta) => stepped(curve, mode, delta, -delta);
+export const slopeStep = (curve, mode, delta, opts = {}) => stepped(curve, mode, delta, -delta, opts);
 /** Both targets +delta. null when refused as a whole. */
-export const levelStep = (curve, mode, delta) => stepped(curve, mode, delta, delta);
+export const levelStep = (curve, mode, delta, opts = {}) => stepped(curve, mode, delta, delta, opts);
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 /**
  * Move one handle to a (possibly fractional) position. Snaps to 1 °C, and stops at the last valid
  * integer: limits and the ordering invariant. Returns a new curve (unchanged if nothing is valid).
- * `end` is 'cold' | 'warm'; `field` is 'outside' | 'target'.
+ * `end` is 'cold' | 'warm'; `field` is 'outside' | 'target'. `opts.coupled` drops target ordering.
  */
-export function moveHandle(curve, mode, end, field, value) {
+export function moveHandle(curve, mode, end, field, value, opts = {}) {
   const lim = LIMITS[modeOf(mode)][field];
   let lo = lim[0];
   let hi = lim[1];
   if (field === 'outside') {
     if (end === 'cold') hi = Math.min(hi, curve.warm.outside - 1);
     else lo = Math.max(lo, curve.cold.outside + 1);
+  } else if (opts.coupled) {
+    // coupled mode: the cold-end target is the setpoint; targets are independent
   } else if (end === 'cold') lo = Math.max(lo, curve.warm.target);
   else hi = Math.min(hi, curve.cold.target);
   if (lo > hi) return curve;

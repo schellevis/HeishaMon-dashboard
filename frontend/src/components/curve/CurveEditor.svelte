@@ -2,7 +2,7 @@
   import { translate } from '../../lib/i18n/index.js';
   import { LIMITS, levelStep, moveHandle, slopeStep } from '../../lib/curvegeom.js';
 
-  let { lang = 'en', mode = 'heat', shown = null, onchange = () => {} } = $props();
+  let { lang = 'en', mode = 'heat', shown = null, coupled = false, onchange = () => {} } = $props();
 
   let editorMode = $state('two-point');
   const t = (key, params) => translate(lang, `curve.${key}`, params);
@@ -15,7 +15,7 @@
       event.currentTarget.value = String(shown[end][field]);
       return;
     }
-    const next = moveHandle(shown, mode, end, field, parsed);
+    const next = moveHandle(shown, mode, end, field, parsed, { coupled });
     event.currentTarget.value = String(next[end][field]);
     if (next !== shown) onchange(next);
   }
@@ -23,10 +23,10 @@
   const steps = $derived(
     shown
       ? {
-          'level-minus': levelStep(shown, mode, -1),
-          'level-plus': levelStep(shown, mode, 1),
-          'slope-minus': slopeStep(shown, mode, -1),
-          'slope-plus': slopeStep(shown, mode, 1),
+          'level-minus': levelStep(shown, mode, -1, { coupled }),
+          'level-plus': levelStep(shown, mode, 1, { coupled }),
+          'slope-minus': slopeStep(shown, mode, -1, { coupled }),
+          'slope-plus': slopeStep(shown, mode, 1, { coupled }),
         }
       : {},
   );
@@ -82,6 +82,6 @@
         </div>
       {/each}
     {/if}
-    <p class="hint">{t('invariantHint')} {mode === 'heat' ? t('limitsHeat') : t('limitsCool')}</p>
+    <p class="hint" data-testid="editor-hint">{coupled ? t('invariantHintCoupled') : t('invariantHint')} {mode === 'heat' ? t('limitsHeat') : t('limitsCool')}</p>
   </div>
 {/if}

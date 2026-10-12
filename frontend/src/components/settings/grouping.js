@@ -73,33 +73,101 @@ export function categoryRelevant(id, profile) {
   return true;
 }
 
-export function draftValue(entry) {
+const CURVE_ZONES = { zone1: 'Z1', zone2: 'Z2' };
+const CURVE_MODES = { heat: 'Heat', cool: 'Cool' };
+const CURVE_LEAVES = [
+  ['target', 'high', 'Target_High'],
+  ['target', 'low', 'Target_Low'],
+  ['outside', 'high', 'Outside_High'],
+  ['outside', 'low', 'Outside_Low'],
+];
+
+function liveNumber(live, key) {
+  const topic = live?.topics?.[key];
+  if (!topic || topic.sentinel) return null;
+  return typeof topic.value === 'number' && Number.isFinite(topic.value) ? topic.value : null;
+}
+
+/** The read-back topic shown as "current value" (first catalog read-back, else the input's own path). */
+export function readbackKeyOf(entry, live = null) {
+  if (entry.readback?.length) return entry.readback[0];
+  if (entry.path && live?.topics?.[entry.path]) return entry.path;
+  return null;
+}
+
+/** Current curves as `SetCurves` JSON, built from the read-back topics. Only leaves with a value are included. */
+export function curvesFromLive(live) {
+  const out = {};
+  for (const [zone, z] of Object.entries(CURVE_ZONES)) {
+    for (const [mode, m] of Object.entries(CURVE_MODES)) {
+      for (const [group, leaf, suffix] of CURVE_LEAVES) {
+        const value = liveNumber(live, `main/${z}_${m}_Curve_${suffix}_Temp`);
+        if (value == null || !Number.isInteger(value)) continue;
+        out[zone] ??= {};
+        out[zone][mode] ??= {};
+        out[zone][mode][group] ??= {};
+        out[zone][mode][group][leaf] = value;
+      }
+    }
+  }
+  return out;
+}
+
+/** Leaves of `next` that differ from `base` (partial `SetCurves` JSON); `{}` when nothing changed. */
+export function jsonDiff(base, next) {
+  if (next === null || typeof next !== 'object' || Array.isArray(next)) return next;
+  const out = {};
+  for (const [key, value] of Object.entries(next)) {
+    const before = base && typeof base === 'object' ? base[key] : undefined;
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      const inner = jsonDiff(before, value);
+      if (inner && Object.keys(inner).length) out[key] = inner;
+    } else if (value !== before) {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+/** A trigger with a single allowed value (e.g. force defrost) is an action, not a setting. */
+export function isAction(entry) {
+  return entry.class === 'trigger' || (Array.isArray(entry.allowed) && entry.allowed.length === 1);
+}
+
+/**
+ * The draft a control starts from: the live read-back value, never a made-up default (spec §6, §7.5).
+ * Returns `null` when the current value is unknown, so the user has to choose one.
+ * Actions start from their only allowed value.
+ */
+export function draftValue(entry, live = null) {
+  if (entry.type === 'json') return curvesFromLive(live);
+  if (isAction(entry)) return entry.allowed?.[0] ?? 1;
+  const key = readbackKeyOf(entry, live);
+  if (!key) return null;
+  let value = liveNumber(live, key);
+  if (value == null) return null;
+  if (entry.compare === 'holiday' && value > 1) value = 1;
+  if (Array.isArray(entry.allowed) && !entry.allowed.includes(value)) return null;
+  return value;
+}
+
+/**
+ * The value to send for a draft: for `SetCurves` only the changed leaves.
+ * `null` when the draft is identical to the current value (Apply stays disabled).
+ */
+export function changedValue(entry, baseline, value) {
+  if (value == null) return null;
+  if (isAction(entry)) return value;
   if (entry.type === 'json') {
-    return {
-      zone1: {
-        heat: {
-          target: { high: 35, low: 25 },
-          outside: { high: 15, low: -5 },
-        },
-      },
-    };
+    const diff = jsonDiff(baseline ?? {}, value);
+    return diff && Object.keys(diff).length ? diff : null;
   }
-  if (entry.type === 'bool') {
-    const allowed = entry.allowed ?? [0, 1];
-    return allowed.includes(1) ? 1 : allowed[0];
-  }
-  if (Array.isArray(entry.allowed) && entry.allowed.length) return entry.allowed[0];
-  const range = entry.range;
-  if (!range) return 0;
-  const step = range.step ?? 1;
-  const origin = range.min ?? 0;
-  const steps = step ? Math.round((origin - origin) / step) : 0;
-  let value = origin + steps * step;
-  if (entry.type === 'int' || entry.type === 'int2' || entry.type === 'int12') value = Math.round(value);
+  if (baseline != null && Number(baseline) === Number(value)) return null;
   return value;
 }
 
 export function formatDraft(entry, value) {
+  if (value == null) return '';
   if (entry.type === 'json') return JSON.stringify(value);
   return String(value);
 }
@@ -119,15 +187,55 @@ export function parseDraft(entry, text) {
   return Number.isFinite(value) ? value : null;
 }
 
+const SELECT_MAX = 8;
+
+function enumerableRange(entry) {
+  const range = entry.range;
+  if (!range || entry.type === 'dec1' || entry.type === 'dec3' || entry.type === 'json') return null;
+  if (range.min == null || range.max == null || range.min < 0) return null;
+  const step = range.step || 1;
+  const count = Math.floor((range.max - range.min) / step) + 1;
+  if (count < 2 || count > SELECT_MAX) return null;
+  return Array.from({ length: count }, (_, index) => range.min + index * step);
+}
+
+/** Values offered in a select, or `null` when a free (validated) number input fits better. */
+export function selectValues(entry) {
+  if (entry.type === 'json') return null;
+  if (entry.type === 'bool') return entry.allowed ?? [0, 1];
+  if (Array.isArray(entry.allowed) && entry.allowed.length) return entry.allowed;
+  return enumerableRange(entry);
+}
+
 export function usesSelect(entry) {
-  if (entry.type === 'json' || entry.type === 'dec1' || entry.type === 'dec3') return false;
-  if (entry.type === 'bool') return true;
-  return Array.isArray(entry.allowed) && entry.allowed.length > 0 && entry.allowed.length <= 8;
+  return selectValues(entry) !== null;
 }
 
 export function selectOptions(entry) {
-  if (entry.type === 'bool') return entry.allowed ?? [0, 1];
-  return entry.allowed ?? [];
+  return selectValues(entry) ?? [];
+}
+
+/**
+ * Label for one command value. Sources, in order: labels on the catalog command (`value_labels`),
+ * the read-back topic's catalog enum, the UI string table (`settings.value_<Name>_<v>`), On/Off for
+ * booleans, and the number itself.
+ * @param {object} entry catalog command
+ * @param {number} value
+ * @param {string} lang
+ * @param {{topicByKey?: (key: string) => object | null, translate: Function}} helpers
+ */
+export function valueLabel(entry, value, lang, { topicByKey = () => null, translate }) {
+  const key = String(value);
+  const own = entry.value_labels?.[key] ?? entry.enum?.[key];
+  if (own) return own[lang] || own.en || key;
+  const readback = entry.readback?.[0] ? topicByKey(entry.readback[0]) : null;
+  const fromTopic = readback?.enum?.[key];
+  if (fromTopic) return fromTopic[lang] || fromTopic.en || key;
+  const tableKey = `settings.value_${entry.name || entry.path}_${key}`;
+  const text = translate(lang, tableKey);
+  if (text !== tableKey) return text;
+  if (entry.type === 'bool' && (value === 0 || value === 1)) return translate(lang, value ? 'settings.on' : 'settings.off');
+  return key;
 }
 
 /** Same risky rule as the backend command service (spec §6 step 2.9). */

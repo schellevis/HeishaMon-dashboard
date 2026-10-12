@@ -181,10 +181,10 @@
   
   <div class="range-controls">
     <button onclick={zoomIn} title={translate($language, 'charts.zoom_in')}>
-      + Zoom
+      {translate($language, 'charts.zoom_in')}
     </button>
     <button onclick={zoomOut} title={translate($language, 'charts.zoom_out')}>
-      - Zoom
+      {translate($language, 'charts.zoom_out')}
     </button>
     <button onclick={panLeft} title={translate($language, 'charts.pan_left')}>
       &lt;
@@ -193,18 +193,19 @@
       &gt;
     </button>
     <button onclick={resetZoom} title={translate($language, 'charts.reset_zoom')}>
-      Reset
+      {translate($language, 'charts.reset_zoom')}
     </button>
   </div>
   
   <div class="resolution-selector">
     <span>{translate($language, 'charts.resolution_label')}: </span>
-    <select 
-      bind:value={resolution} 
+    <select
+      value={resolution ?? ''}
       onchange={handleResolutionChange}
+      data-testid="resolution-select"
     >
       {#each resolutions as res}
-        <option value={res.key || ''}>{translate($language, 'charts.' + res.label)}</option>
+        <option value={res.key || ''} selected={(res.key || '') === (resolution ?? '')}>{translate($language, 'charts.' + res.label)}</option>
       {/each}
     </select>
   </div>

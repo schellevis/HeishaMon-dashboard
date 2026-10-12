@@ -145,12 +145,10 @@
     // Cleanup
   });
   
-  // Set chart height based on available space
+  // Chart plot height: smaller on phones; the legend is laid out below it by uPlot.
   $effect(() => {
-    // Adjust chart height based on UI state
-    const baseHeight = 400;
-    const selectorHeight = showTopicSelector ? 300 : 0;
-    chartHeight = baseHeight + (showTopicSelector ? selectorHeight : 0);
+    const narrow = typeof window !== 'undefined' && window.innerWidth < 640;
+    chartHeight = narrow ? 280 : 400;
   });
 </script>
 
@@ -227,7 +225,7 @@
 
 <style>
   .charts-screen {
-    padding: 16px;
+    padding: 0;
     height: 100%;
     display: flex;
     flex-direction: column;

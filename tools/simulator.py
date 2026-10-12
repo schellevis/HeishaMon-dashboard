@@ -46,7 +46,7 @@ def _top_index(topic_id: str) -> int | None:
 
 
 def _default_payload(topic: dict) -> str:
-    sentinels = {int(s) for s in topic.get("sentinels") or []}
+    sentinels = set(topic.get("sentinels") or [])  # may hold fractional values such as -0.2
     if topic["kind"] == "enum":
         for key in sorted(topic.get("enum") or {}, key=lambda item: int(item)):
             number = int(key)

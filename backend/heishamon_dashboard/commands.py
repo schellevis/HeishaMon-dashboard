@@ -387,8 +387,16 @@ class CommandService:
             if not lo <= v <= hi:
                 raise _Reject("out_of_range", f"{topic} {v} is outside {lo}..{hi}",
                               {"key": topic, "min": lo, "max": hi})
+        profile = self._profile_fn()
+        coupled = {k: _curve_coupled(profile, k) for k in {_curve_zone_mode(t) for t in meta}}
+
+        def skip(topic: str, group: str) -> bool:
+            # In coupled mode the cold-end target is the direct setpoint and the warm-end target is
+            # unused, so the target ordering does not apply (outside ordering and limits still do).
+            return group == "target" and coupled[_curve_zone_mode(topic)]
+
         for topic, (mode, group, end) in meta.items():  # ordering on the merged final state
-            if end != "high":
+            if end != "high" or skip(topic, group):
                 continue
             low_topic = topic.replace("_High_", "_Low_")
             high = leaves[topic]
@@ -401,7 +409,7 @@ class CommandService:
                               {"rule": "ordering", "key": topic})
         # a low leaf whose high leaf is omitted
         for topic, (mode, group, end) in meta.items():
-            if end != "low":
+            if end != "low" or skip(topic, group):
                 continue
             high_topic = topic.replace("_Low_", "_High_")
             if high_topic in leaves:
@@ -675,6 +683,23 @@ def _curve_topic(zone: str, mode: str, group: str, end: str) -> str:
 
 
 _CURVE_TOPIC = re.compile(r"^main/Z([12])_(Heat|Cool)_Curve_(Target|Outside)_(High|Low)_Temp$")
+_ROOM_SENSORS = {"ext_thermostat", "int_thermostat", "thermistor"}
+
+
+def _curve_zone_mode(topic: str) -> tuple[int, str]:
+    z, m, _, _ = _CURVE_TOPIC.match(topic).groups()
+    return int(z), m.lower()
+
+
+def _curve_coupled(profile: dict, zone_mode: tuple[int, str]) -> bool:
+    """Direct control with a room sensor (thermostat/thermistor) for this zone and mode: the
+    firmware then stores the direct setpoint in the curve's cold-end target (Target_High) and
+    the warm-end target is unused. False when either profile field is unknown or stale."""
+    zone, mode = zone_mode
+    ctl = _field(profile, "heating_control" if mode == "heat" else "cooling_control")
+    sensor = _field(profile, f"zone.z{zone}.sensor")
+    return (_usable(ctl) and ctl["value"] == "direct"
+            and _usable(sensor) and sensor["value"] in _ROOM_SENSORS)
 
 
 def _nest_curve_leaves(leaves: dict[str, int]) -> dict:

@@ -905,7 +905,7 @@ not what always appears.
      - operating mode (all modes, whatever the current one);
      - quiet and powerful mode;
      - force DHW (only with a DHW tank, enabled only in a DHW-capable mode);
-     - per active zone, the heat and/or cool request: a −5..+5 shift in curve mode, an absolute setpoint in direct mode, labelled accordingly;
+     - per active zone, the heat and/or cool request: a −5..+5 shift in curve mode, an absolute setpoint in direct mode, labelled accordingly. In **coupled** mode (direct control with a thermostat/thermistor zone sensor, §8) the control reads and writes the curve's cold-end target (`Z1/Z2_{Heat,Cool}_Curve_Target_High_Temp`) via a partial `SetCurves` with read-back on that leaf, and explains inline that the setpoint is stored there; the request-temperature read-back is not shown as the setpoint;
      - DHW setpoint (only with a DHW tank).
 2. **Charts**
    - Free topic selection plus presets: Temperatures, Power & COP, Compressor, Pump & pressure, DHW, Zones, Cooling.
@@ -954,7 +954,9 @@ not what always appears.
 - Each tab shows a mode badge from `Heating_Mode` / `Cooling_Mode`:
   - **Curve mode:** the request temperature is a −5..+5 shift on the curve.
   - **Direct mode:** the request temperature is an absolute setpoint. The curve is still editable, because it is stored and will apply when switching back, but it is marked "not active" — with the explicit exception of the coupled cold-end target in thermostat/thermistor sensor mode (next bullet), where editing the curve's cold-end target **is** editing the active setpoint, and the editor says so inline.
-  - **Thermostat/thermistor zone sensor in direct mode:** the direct temperature is stored in the curve's cold-end target. The UI shows it as the setpoint and explains this.
+  - **Thermostat/thermistor zone sensor in direct mode ("coupled"):** the direct temperature is stored in the curve's cold-end target. The UI shows it as the setpoint and explains this.
+    - Observed live on such an installation: `Z1/Z2_Heat_Request_Temp` stays 0 while the reported `Z1_Water_Target_Temp` follows `Z1_Heat_Curve_Target_High_Temp` through changes; the warm-end target (`Target_Low`) keeps an unrelated, higher value and has no effect.
+    - Coupled is decided per zone and mode from the profile: `heating_control`/`cooling_control` = direct and `zone.zN.sensor` ∈ {external thermostat, internal thermostat, thermistor}. When either field is unknown or stale, the zone/mode is treated as not coupled.
 
 **Chart** (x: outside °C, y: water °C):
 
@@ -980,6 +982,11 @@ not what always appears.
   - `outside.low + 1 ≤ outside.high`, so the cold end lies strictly left of the warm end;
   - `target.high ≥ target.low`, so the cold-end target is never below the warm-end target. Equality
     (a flat curve) is allowed.
+  - **Exception — coupled zone/mode** (direct control + thermostat/thermistor sensor, see Layout):
+    the target-ordering rule is dropped for that zone and mode, because the cold-end target is the
+    setpoint and the warm-end target is unused; real installations hold `target.high < target.low`
+    in this mode. The outside ordering and the limits still apply. This holds in the editor (drag,
+    inputs, slope/level) and in the backend `SetCurves` validation, and the editor hint says so.
 - **Limits:** heat outside −20..30 / target 15..75; cool outside 15..30 / target 5..20.
 - **Two-point mode:**
   - Drag handles snap to 1 °C and are mirrored in numeric inputs.
@@ -1136,7 +1143,7 @@ expiry, and never depend on sub-minute ordering.
 | A3 | Command lifecycle | under simulator fault modes: `echo` → `confirmed`; `drop_first` → `retried` then `confirmed`; `drop` → `failed` at exactly 20 s; `partial` → `failed` with per-key statuses; trigger → `sent`, never retried; supersede → old `superseded`, no stale retry published; device going offline before the retry → `failed` with `device_offline`, nothing published; no-op → `noop`, nothing published; `listen_only` → banner after 3 failures, statuses stay `failed`; a retained/stale cached match never confirms |
 | A4 | Log everything | samples, commands and events land in SQLite; history merges DB + RAM buffer under the replace rule; CSV export equals the history points for the same query |
 | A5 | Storage correctness | the T1–T9 timelines of §5.4 reproduce every listed number exactly. The overflow budget test runs a storage failure past every cap, with repeated offline/online transitions, repeated topic-scoped drop/re-establish and ignore/un-ignore cycles, and in-flight commands completing at the reserve boundary. It shows: bounded memory (record count never above `AUDIT_BUFFER_MAX`); topic-scoped `dropped` outages before saturation; exactly one saturation outage afterwards, with no further outage records; refused new commands (`storage_unavailable`); terminal updates still recorded; the aggregated events; and zero coverage for every topic during saturation. After raw expiry, history at `1m`/`1h` returns the same `covered_seconds` and `breaks` as before expiry, and a short (≤ 6 h) query on expired history is served at `1m`, never `raw` |
-| A6 | Heating curve | crosswise mapping; ordering invariant and limits (equal targets allowed, equal outside refused); slope/level refusal at bounds; per-key `SetCurves` confirmation; overlay minute/window rules on numeric fixtures, including the startup and DHW-settling 10-minute exclusions and the 12-of-15 rule |
+| A6 | Heating curve | crosswise mapping; ordering invariant and limits (equal targets allowed, equal outside refused; target ordering skipped for a coupled zone/mode); slope/level refusal at bounds; per-key `SetCurves` confirmation; overlay minute/window rules on numeric fixtures, including the startup and DHW-settling 10-minute exclusions and the 12-of-15 rule |
 | A7 | Installation-agnostic | every profile preset above passes; unknown/stale inputs show features and gate commands with `profile_unknown`; modes 7/8 are informational only; the `fw-3.2.3` preset disables exactly the commands with `min_firmware` > 3.2.3, as does a missing version |
 | A8 | Liveness | per the §4.1 rule list: `LWT=Online` heartbeats alone keep the device online; retained snapshots, `commands/#` echoes, an `s0/WatthourTotal` echo and `opentherm/read/#` never make an offline device online; a live `Offline` wins; the timeout is backdated to the last qualifying message; broker reconnect alone leaves the device `unknown` until a qualifying message |
 | A9 | Origin security | per §13: disallowed `Origin` → 403 on every mutation and at WebSocket handshake; `Origin: null` → 403; bad `Host` with `PUBLIC_ORIGINS` set → 403; form-encoded/`text/plain` mutations → 415; a legitimate HTTPS-proxy setup (`PUBLIC_ORIGINS=https://…`, backend reached over HTTP with the proxied `Host`) passes REST and WebSocket |
@@ -1316,8 +1323,8 @@ read-back is the `main/` topic (TOP index) that reflects the command; "—" mean
 | SetPump | no | U | bool | 0, 1 | — | 3.2.3 |
 | SetMaxPumpDuty | no | S | int | per range rule | Max_Pump_Duty (95) | 3.2.3 |
 | SetQuietMode | no | S | int | 0–3 | Quiet_Mode_Level (18) | 3.2.3 |
-| SetZ1HeatRequestTemperature | no | S | int | curve: −5..5; direct (water sensor): 20..65; direct (room sensor): 10..30 | Z1_Heat_Request_Temp (27) | 3.2.3 |
-| SetZ1CoolRequestTemperature | no | S | int | curve: −5..5; direct (water): 5..20; direct (room): 18..30 | Z1_Cool_Request_Temp (28) | 3.2.3 |
+| SetZ1HeatRequestTemperature | no | S | int | curve: −5..5; direct (water sensor): 20..65; direct (room sensor): 10..30 — in direct + room sensor (coupled, §8) the active setpoint is the curve's cold-end target and this read-back is observed to stay 0; the UI points to the curve leaf | Z1_Heat_Request_Temp (27) | 3.2.3 |
+| SetZ1CoolRequestTemperature | no | S | int | curve: −5..5; direct (water): 5..20; direct (room): 18..30 — coupled note as Z1 heat | Z1_Cool_Request_Temp (28) | 3.2.3 |
 | SetZ2HeatRequestTemperature | no | S | int | as Z1 heat | Z2_Heat_Request_Temp (34) | 3.2.3 |
 | SetZ2CoolRequestTemperature | no | S | int | as Z1 cool | Z2_Cool_Request_Temp (35) | 3.2.3 |
 | SetForceDHW | no | S | bool | 0, 1 | Force_DHW_State (2) | 3.2.3 |
@@ -1330,7 +1337,7 @@ read-back is the `main/` topic (TOP index) that reflects the command; "—" mean
 | SetPowerfulMode | no | S | int | 0–3 | Powerful_Mode_Time (17) | 3.2.3 |
 | SetOperationMode | no | S | int | 0–6 | Operating_Mode_State (4) | 3.2.3 |
 | SetDHWTemp | no | S | int | 40–75 | DHW_Target_Temp (9) | 3.2.3 |
-| SetCurves | no | S (curve-leaf) | json | §8 limits and ordering | TOP29–32, 72–75, 82–89 (16 leaves) | 3.2.3 |
+| SetCurves | no | S (curve-leaf) | json | §8 limits and ordering (merged state); target ordering skipped for a coupled zone/mode (§8) | TOP29–32, 72–75, 82–89 (16 leaves) | 3.2.3 |
 | SetZones | no | S | int | 0–2 | Zones_State (94) | 3.2.3 |
 | SetFloorHeatDelta | no | S | int | per range rule | Heat_Delta (23) | 3.2.3 |
 | SetFloorCoolDelta | no | S | int | per range rule | Cool_Delta (24) | 3.2.3 |

@@ -82,14 +82,15 @@ def derive(
             "cool_control": dict(cctl),
         }
 
-    # model / series: exact string match on the hex format only; numeric (pre-3.9) payloads give null
+    # model / series: exact match on the hex format (after whitespace/case normalisation) only;
+    # numeric (pre-3.9) payloads give null
     model = _f()
     series = _f()
     tv = values.get("main/Heat_Pump_Model")
     if tv is not None:
         stale = stale_of(tv)
         model, series = _f(stale=stale), _f(stale=stale)
-        hit = next((m for m in catalog.models if m["hex"] == tv.raw), None)
+        hit = catalog.model(tv.raw)
         if hit is not None and tv.valid:
             model = _f(hit["name"], False, stale)
             series = _f(hit["series"], False, stale)

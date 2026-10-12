@@ -58,7 +58,7 @@ export function errorText(state) {
   const topic = state?.topics?.['main/Error'];
   if (!topic) return null;
   const raw = topic.raw ?? '';
-  if (raw === '' || raw === '0' || topic.value === 0 || topic.value === null) return null;
+  if (raw === '' || raw === '0' || /^no error$/i.test(String(raw).trim()) || topic.value === 0 || topic.value === null) return null;
   return raw;
 }
 

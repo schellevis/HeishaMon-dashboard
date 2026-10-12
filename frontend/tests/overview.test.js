@@ -461,194 +461,310 @@ describe('Overview screen (§7.1)', () => {
 describe('Quick controls (§7.1)', () => {
   beforeEach(() => {
     language.set('en');
-    vi.spyOn(state, 'update').mockImplementation(() => {});
-    vi.spyOn(prefs, 'update').mockImplementation(() => {});
+  });
+
+  function num(value, extra = {}) {
+    return {
+      value, raw: String(value), kind: 'number', unit: '°C', decimals: 0, enum_label: null,
+      sentinel: false, last_seen: 1000, last_change: 1000, ...extra,
+    };
+  }
+
+  // Live values seen on a real installation: on, Heat+DHW, quiet 3, Z1 shift -1, DHW 40.
+  function liveTopics(overrides = {}) {
+    return {
+      'main/Heatpump_State': num(1, { kind: 'enum', unit: null }),
+      'main/Operating_Mode_State': num(4, { kind: 'enum', unit: null }),
+      'main/Quiet_Mode_Level': num(3, { kind: 'enum', unit: null }),
+      'main/Powerful_Mode_Time': num(0, { kind: 'enum', unit: null }),
+      'main/Z1_Heat_Request_Temp': num(-1),
+      'main/DHW_Target_Temp': num(40),
+      'main/Force_DHW_State': num(0, { kind: 'enum', unit: null }),
+      ...overrides,
+    };
+  }
+
+  function renderControls(profileValue, topics = liveTopics(), lang = 'en') {
+    const stateData = makeState({ topics });
+    state.set(stateData);
+    profile.set(profileValue);
+    prefs.set(makePrefs());
+    return render(QuickControls, {
+      profile: profileValue,
+      stateData,
+      prefs: makePrefs(),
+      lang,
+      catalogData: productionCatalog,
+    });
+  }
+
+  describe('controls start from the live read-back values', () => {
+    it('heat pump, mode, quiet and DHW setpoint show the live values; Apply is disabled while unchanged', () => {
+      renderControls(profileFixtures.heatPlusDhw);
+
+      const hp = screen.getByTestId('input-hp-power');
+      expect(hp.value).toBe('1');
+      expect(hp.selectedOptions[0].textContent.trim()).toBe('On');
+      expect(screen.getByTestId('control-hp-power').textContent).toContain('Heat pump');
+      expect(screen.getByTestId('control-hp-power').textContent).not.toContain('Heat pump off');
+
+      expect(screen.getByTestId('input-mode').value).toBe('4');
+      expect(screen.getByTestId('input-mode').selectedOptions[0].textContent.trim()).toBe('Heating + DHW');
+      expect(screen.getByTestId('input-quiet').value).toBe('3');
+      expect(screen.getByTestId('input-dhw').value).toBe('40');
+
+      for (const id of ['apply-hp-power', 'apply-mode', 'apply-quiet', 'apply-powerful', 'apply-z1-heat', 'apply-dhw']) {
+        expect(screen.getByTestId(id).disabled).toBe(true);
+      }
+    });
+
+    it('Z1 heat request slider shows the live shift (-1) with a °C read-out, not a missing i18n key', () => {
+      renderControls(profileFixtures.curveModeWater);
+      const slider = screen.getByTestId('slider-z1-heat');
+      expect(slider.value).toBe('-1');
+      const control = screen.getByTestId('control-z1-heat');
+      expect(control.textContent).toContain('−1 °C');
+      expect(control.textContent).toContain('shift');
+      expect(control.textContent).not.toContain('unitCelsius');
+    });
+
+    it('Apply buttons are translated (nl)', () => {
+      renderControls(profileFixtures.heatPlusDhw, liveTopics(), 'nl');
+      expect(screen.getByTestId('apply-dhw').textContent.trim()).toBe('Toepassen');
+      expect(screen.getByTestId('control-hp-power').textContent).toContain('Warmtepomp');
+      expect(screen.getByTestId('input-hp-power').selectedOptions[0].textContent.trim()).toBe('Aan');
+    });
+
+    it('a control without a live value has nothing pre-selected and cannot be applied', () => {
+      renderControls(profileFixtures.heatPlusDhw, {});
+      expect(screen.getByTestId('input-dhw').value).toBe('');
+      expect(screen.getByTestId('apply-dhw').disabled).toBe(true);
+      expect(screen.getByTestId('input-mode').value).toBe('');
+      expect(screen.getByTestId('apply-mode').disabled).toBe(true);
+    });
   });
 
   describe('mode-adaptive zone request controls', () => {
     it('Z1 heat request shows -5..5 range in curve mode with water sensor', () => {
-      state.set(makeState({
-        topics: {
-          'main/Z1_Heat_Request_Temperature': {
-            value: 0, raw: '0', kind: 'number', unit: '°C', decimals: 0,
-            sentinel: false, last_seen: 1000, last_change: 1000,
-          },
-        },
-      }));
-      profile.set(profileFixtures.curveModeWater);
-      prefs.set(makePrefs());
-
-      render(QuickControls, { profile: profileFixtures.curveModeWater, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+      renderControls(profileFixtures.curveModeWater);
       const slider = screen.getByTestId('slider-z1-heat');
-      expect(slider).toBeTruthy();
       expect(slider.min).toBe('-5');
       expect(slider.max).toBe('5');
       expect(slider.step).toBe('1');
     });
 
     it('Z1 heat request shows 20..65 range in direct mode with water sensor', () => {
-      state.set(makeState({
-        topics: {
-          'main/Z1_Heat_Request_Temperature': {
-            value: 40, raw: '40', kind: 'number', unit: '°C', decimals: 0,
-            sentinel: false, last_seen: 1000, last_change: 1000,
-          },
-        },
-      }));
-      profile.set(profileFixtures.directModeWater);
-      prefs.set(makePrefs());
-
-      render(QuickControls, { profile: profileFixtures.directModeWater, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+      renderControls(profileFixtures.directModeWater, liveTopics({ 'main/Z1_Heat_Request_Temp': num(40) }));
       const slider = screen.getByTestId('slider-z1-heat');
-      expect(slider).toBeTruthy();
       expect(slider.min).toBe('20');
       expect(slider.max).toBe('65');
-      expect(slider.step).toBe('1');
+      expect(slider.value).toBe('40');
+      expect(screen.getByTestId('control-z1-heat').textContent).toContain('setpoint');
     });
 
     it('DHW setpoint shows 40..75 range from catalog', () => {
-      state.set(makeState());
-      profile.set(profileFixtures.heatPlusDhw);
-      prefs.set(makePrefs());
-
-      // Verify the catalog has SetDHWTemp with range 40-75
-      const cmd = commandByName('SetDHWTemp');
-      expect(cmd).toBeTruthy();
-      expect(cmd.range.min).toBe(40);
-      expect(cmd.range.max).toBe(75);
-
-      render(QuickControls, { profile: profileFixtures.heatPlusDhw, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+      renderControls(profileFixtures.heatPlusDhw);
       const input = screen.getByTestId('input-dhw');
-      expect(input).toBeTruthy();
       expect(input.min).toBe('40');
       expect(input.max).toBe('75');
     });
 
-    it('nothing is sent on slider move', async () => {
-      state.set(makeState({
-        topics: {
-          'main/Z1_Heat_Request_Temperature': {
-            value: 0, raw: '0', kind: 'number', unit: '°C', decimals: 0,
-            sentinel: false, last_seen: 1000, last_change: 1000,
-          },
-        },
-      }));
-      profile.set(profileFixtures.curveModeWater);
-      prefs.set(makePrefs());
+    it('nothing is sent on slider move; Apply sends the moved value', async () => {
+      const command = vi.spyOn(api, 'command').mockResolvedValue({ id: 'z1', name: 'SetZ1HeatRequestTemperature', status: 'pending', submitted_ts: 1 });
+      renderControls(profileFixtures.curveModeWater);
 
-      const mockCommand = vi.spyOn(api, 'command').mockResolvedValue({});
-
-      render(QuickControls, { profile: profileFixtures.curveModeWater, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
-      const slider = screen.getByTestId('slider-z1-heat');
-      await fireEvent.input(slider, { target: { value: '3' } });
-
-      expect(mockCommand).not.toHaveBeenCalled();
+      await fireEvent.input(screen.getByTestId('slider-z1-heat'), { target: { value: '3' } });
+      expect(command).not.toHaveBeenCalled();
+      const apply = screen.getByTestId('apply-z1-heat');
+      expect(apply.disabled).toBe(false);
+      await fireEvent.click(apply);
+      await waitFor(() => expect(command).toHaveBeenCalledWith({ name: 'SetZ1HeatRequestTemperature', value: 3, confirm: false }));
     });
 
-    it('Apply button exists and can be clicked', async () => {
-      state.set(makeState({
-        topics: {
-          'main/Z1_Heat_Request_Temperature': {
-            value: 0, raw: '0', kind: 'number', unit: '°C', decimals: 0,
-            sentinel: false, last_seen: 1000, last_change: 1000,
-          },
-        },
-      }));
-      profile.set(profileFixtures.curveModeWater);
-      prefs.set(makePrefs());
+    it('DHW setpoint Apply sends the edited value, not a default', async () => {
+      const command = vi.spyOn(api, 'command').mockResolvedValue({ id: 'd', name: 'SetDHWTemp', status: 'pending', submitted_ts: 1 });
+      renderControls(profileFixtures.heatPlusDhw);
+      await fireEvent.input(screen.getByTestId('input-dhw'), { target: { value: '45' } });
+      await fireEvent.click(screen.getByTestId('apply-dhw'));
+      await waitFor(() => expect(command).toHaveBeenCalledWith({ name: 'SetDHWTemp', value: 45, confirm: false }));
+    });
 
-      vi.spyOn(api, 'command').mockResolvedValue({});
+    it('switching the heat pump off asks for confirmation (risky)', async () => {
+      const { confirmRequest, answerConfirm } = await import('../src/lib/stores.js');
+      const command = vi.spyOn(api, 'command').mockResolvedValue({ id: 'h', name: 'SetHeatpump', status: 'pending', submitted_ts: 1 });
+      renderControls(profileFixtures.heatPlusDhw);
+      await fireEvent.change(screen.getByTestId('input-hp-power'), { target: { value: '0' } });
+      const pending = fireEvent.click(screen.getByTestId('apply-hp-power'));
+      await tick();
+      expect(get(confirmRequest)).toBeTruthy();
+      expect(command).not.toHaveBeenCalled();
+      answerConfirm(true);
+      await pending;
+      await waitFor(() => expect(command).toHaveBeenCalledWith({ name: 'SetHeatpump', value: 0, confirm: true }));
+    });
+  });
 
-      render(QuickControls, { profile: profileFixtures.curveModeWater, stateData: get(state), prefs: get(prefs), lang: 'en' });
+  describe('coupled mode: direct control with a room thermostat (setpoint in the curve cold-end target)', () => {
+    const coupledProfile = {
+      ...profileFixtures.directModeWater,
+      zones: makeF('both'),
+      zone: { z1: makeZone(true, 'ext_thermostat'), z2: makeZone(true, 'water') },
+    };
+    // as observed live: request temperature stays 0, the cold-end target carries the setpoint
+    const coupledTopics = () => liveTopics({
+      'main/Z1_Heat_Request_Temp': num(0),
+      'main/Z1_Heat_Curve_Target_High_Temp': num(27),
+      'main/Z1_Heat_Curve_Target_Low_Temp': num(30),
+      'main/Z2_Heat_Request_Temp': num(35),
+    });
 
+    it('shows the cold-end target as setpoint with an inline explanation, not the 0 request', () => {
+      renderControls(coupledProfile, coupledTopics());
+      const box = screen.getByTestId('control-z1-heat');
+      expect(box.dataset.coupled).toBe('true');
       const slider = screen.getByTestId('slider-z1-heat');
-      await fireEvent.input(slider, { target: { value: '3' } });
-      
-      const apply = screen.getByTestId('apply-z1-heat');
-      expect(apply).toBeTruthy();
-      
-      await expect(fireEvent.click(apply)).resolves.not.toThrow();
+      expect(slider.value).toBe('27');
+      expect(slider.min).toBe('15');
+      expect(slider.max).toBe('75');
+      expect(box.textContent).toContain('27 °C');
+      expect(box.textContent).not.toContain('0 °C');
+      expect(screen.getByTestId('coupled-note-z1-heat').textContent).toContain('Z1_Heat_Curve_Target_High_Temp');
+      expect(screen.getByTestId('apply-z1-heat').disabled).toBe(true);
+      // zone 2 has a water sensor: still the request-temperature control
+      expect(screen.getByTestId('control-z2-heat').dataset.coupled).toBeUndefined();
+      expect(screen.getByTestId('slider-z2-heat').value).toBe('35');
+    });
+
+    it('explains it in Dutch', () => {
+      renderControls(coupledProfile, coupledTopics(), 'nl');
+      expect(screen.getByTestId('coupled-note-z1-heat').textContent).toContain('koude kant');
+      expect(screen.getByTestId('apply-z1-heat').textContent.trim()).toBe('Toepassen');
+    });
+
+    it('Apply sends a partial SetCurves on the cold-end target (below the warm-end target is allowed)', async () => {
+      const command = vi.spyOn(api, 'command').mockResolvedValue({
+        id: 'c', name: 'SetCurves', status: 'pending', submitted_ts: 1,
+        keys: { 'main/Z1_Heat_Curve_Target_High_Temp': { expected: 21, status: 'pending' } },
+      });
+      renderControls(coupledProfile, coupledTopics());
+      await fireEvent.input(screen.getByTestId('slider-z1-heat'), { target: { value: '21' } });
+      expect(command).not.toHaveBeenCalled();
+      await fireEvent.click(screen.getByTestId('apply-z1-heat'));
+      await waitFor(() => expect(command).toHaveBeenCalledWith({
+        name: 'SetCurves', value: { zone1: { heat: { target: { high: 21 } } } }, confirm: false,
+      }));
+      await waitFor(() => expect(screen.getByTestId('control-z1-heat').querySelector('[data-status]').dataset.status).toBe('pending'));
+    });
+
+    it('the read-back status of that leaf is shown from the command map', () => {
+      const stateData = makeState({ topics: coupledTopics() });
+      render(QuickControls, {
+        profile: coupledProfile, stateData, prefs: makePrefs(), lang: 'en', catalogData: productionCatalog,
+        commandMap: {
+          other: { id: 'other', name: 'SetCurves', submitted_ts: 9, status: 'pending', keys: { 'main/Z2_Heat_Curve_Target_High_Temp': { status: 'pending' } } },
+          mine: { id: 'mine', name: 'SetCurves', submitted_ts: 5, status: 'confirmed', keys: { 'main/Z1_Heat_Curve_Target_High_Temp': { status: 'confirmed' } } },
+        },
+      });
+      expect(screen.getByTestId('control-z1-heat').querySelector('[data-status]').dataset.status).toBe('confirmed');
+    });
+
+    it('write lock blocks Apply', async () => {
+      const stateData = makeState({ topics: coupledTopics() });
+      render(QuickControls, {
+        profile: coupledProfile, stateData, prefs: makePrefs({ write_lock: true }), lang: 'en', catalogData: productionCatalog,
+      });
+      await fireEvent.input(screen.getByTestId('slider-z1-heat'), { target: { value: '21' } });
+      expect(screen.getByTestId('apply-z1-heat').disabled).toBe(true);
+    });
+
+    it('settings: the request-temperature control points to the curve cold-end target', async () => {
+      const { default: CommandControl } = await import('../src/components/settings/CommandControl.svelte');
+      const stateData = makeState({ topics: coupledTopics() });
+      render(CommandControl, {
+        entry: productionCatalog.commands.find((c) => c.name === 'SetZ1HeatRequestTemperature'), profile: coupledProfile, live: stateData,
+        prefs: makePrefs(), lang: 'en', catalogData: productionCatalog,
+      });
+      expect(screen.getByTestId('coupled-current-SetZ1HeatRequestTemperature').textContent).toContain('27 °C');
+      expect(screen.getByTestId('coupled-note-SetZ1HeatRequestTemperature').textContent).toContain('Z1_Heat_Curve_Target_High_Temp');
+      expect(screen.getByTestId('coupled-note-SetZ1HeatRequestTemperature').querySelector('a').getAttribute('href')).toBe('#/curve');
+    });
+
+    it('settings: no coupled note with a water sensor', async () => {
+      const { default: CommandControl } = await import('../src/components/settings/CommandControl.svelte');
+      render(CommandControl, {
+        entry: productionCatalog.commands.find((c) => c.name === 'SetZ1HeatRequestTemperature'), profile: profileFixtures.directModeWater,
+        live: makeState({ topics: coupledTopics() }), prefs: makePrefs(), lang: 'en', catalogData: productionCatalog,
+      });
+      expect(screen.queryByTestId('coupled-note-SetZ1HeatRequestTemperature')).toBeNull();
     });
   });
 
   describe('DHW controls visibility', () => {
     it('shows DHW setpoint control when DHW tank is installed', () => {
-      state.set(makeState());
-      profile.set(profileFixtures.heatPlusDhw);
-      prefs.set(makePrefs());
-
-      render(QuickControls, { profile: profileFixtures.heatPlusDhw, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+      renderControls(profileFixtures.heatPlusDhw);
       expect(screen.getByTestId('control-dhw-setpoint')).toBeTruthy();
     });
 
     it('hides DHW setpoint control when no DHW tank', () => {
-      state.set(makeState());
-      profile.set(profileFixtures.heatOnly);
-      prefs.set(makePrefs());
-
-      render(QuickControls, { profile: profileFixtures.heatOnly, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+      renderControls(profileFixtures.heatOnly);
       expect(screen.queryByTestId('control-dhw-setpoint')).toBeFalsy();
     });
   });
 
-  describe('force DHW button', () => {
+  describe('force DHW', () => {
     it('shows force DHW only with DHW tank', () => {
-      state.set(makeState());
-      profile.set(profileFixtures.heatPlusDhw);
-      prefs.set(makePrefs());
-
-      render(QuickControls, { profile: profileFixtures.heatPlusDhw, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+      renderControls(profileFixtures.heatPlusDhw);
       expect(screen.getByTestId('control-force-dhw')).toBeTruthy();
     });
 
     it('hides force DHW without DHW tank', () => {
-      state.set(makeState());
-      profile.set(profileFixtures.heatOnly);
-      prefs.set(makePrefs());
-
-      render(QuickControls, { profile: profileFixtures.heatOnly, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+      renderControls(profileFixtures.heatOnly);
       expect(screen.queryByTestId('control-force-dhw')).toBeFalsy();
     });
 
-    it('force DHW is enabled in DHW-capable modes', async () => {
-      state.set(makeState());
-      profile.set(profileFixtures.heatPlusDhw);
-      prefs.set(makePrefs());
+    it('force DHW is enabled in DHW-capable modes and blocked otherwise', async () => {
+      renderControls(profileFixtures.heatPlusDhw);
+      expect(screen.getByTestId('control-force-dhw').dataset.enabled).toBe('true');
+      await fireEvent.change(screen.getByTestId('input-force-dhw'), { target: { value: '1' } });
+      expect(screen.getByTestId('apply-force-dhw').disabled).toBe(false);
+    });
 
-      render(QuickControls, { profile: profileFixtures.heatPlusDhw, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
-      const checkbox = screen.getByTestId('control-force-dhw').querySelector('input[type="checkbox"]');
-      expect(checkbox).toBeTruthy();
-      expect(checkbox.disabled).toBe(false);
+    it('force DHW is blocked in a mode without DHW', async () => {
+      renderControls({ ...profileFixtures.heatPlusDhw, operating_mode: makeF(0) }, liveTopics({ 'main/Operating_Mode_State': num(0) }));
+      expect(screen.getByTestId('control-force-dhw').dataset.enabled).toBe('false');
+      await fireEvent.change(screen.getByTestId('input-force-dhw'), { target: { value: '1' } });
+      expect(screen.getByTestId('apply-force-dhw').disabled).toBe(true);
     });
   });
 
-  describe('Apply-only and confirm for risky', () => {
-    it('risky Apply opens confirm dialog', async () => {
-      state.set(makeState());
-      profile.set(profileFixtures.heatOnly);
-      prefs.set(makePrefs());
-
-      vi.spyOn(api, 'command').mockResolvedValue({});
-
-      render(QuickControls, { profile: profileFixtures.heatOnly, stateData: get(state), prefs: get(prefs), lang: 'en' });
-
+  describe('EEPROM warning strings', () => {
+    it('EEPROM warning appears with title', () => {
       expect(translate('en', 'overview.eepromWarningTitle')).toBe('EEPROM wear warning');
       expect(translate('en', 'overview.eepromWarning')).toContain('20 minutes');
     });
+  });
+});
 
-    it('EEPROM warning appears with title', async () => {
-      expect(translate('en', 'overview.eepromWarningTitle')).toBe('EEPROM wear warning');
-      expect(translate('en', 'overview.eepromWarning')).toContain('20 minutes');
-    });
+describe('Overview sparklines (§7.1)', () => {
+  it('fetch history once per tile set, not on every live message', async () => {
+    language.set('en');
+    const history = vi.spyOn(api, 'history').mockResolvedValue({ series: {}, resolution: '1h' });
+    state.set(makeState({ topics: { 'main/Outside_Temp': { value: 5, raw: '5', kind: 'number', unit: '°C', decimals: 0, sentinel: false, last_seen: 1, last_change: 1 } } }));
+    profile.set(profileFixtures.heatOnly);
+    prefs.set(makePrefs());
+    render(Overview);
+    await waitFor(() => expect(history).toHaveBeenCalled());
+    const first = history.mock.calls.length;
+    for (let i = 0; i < 10; i += 1) {
+      state.update((current) => ({
+        ...current,
+        seq: current.seq + 1,
+        topics: { ...current.topics, 'main/Outside_Temp': { ...current.topics['main/Outside_Temp'], value: 5 + i, raw: String(5 + i) } },
+      }));
+      await tick();
+    }
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(history.mock.calls.length).toBe(first);
   });
 });
 

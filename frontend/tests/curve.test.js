@@ -17,6 +17,7 @@ import {
 import {
   curveLine,
   curvePoints,
+  isCoupled,
   levelStep,
   modelDisagrees,
   modelTarget,
@@ -106,6 +107,47 @@ describe('curvegeom mirrors the backend maths', () => {
     expect(moveHandle(c, 'heat', 'cold', 'outside', -40).cold.outside).toBe(-20);
     expect(moveHandle(c, 'heat', 'cold', 'target', 44.6).cold.target).toBe(45);
     expect(moveHandle(curve(16, 20, 30, 5), 'cool', 'warm', 'outside', 99).warm.outside).toBe(30);
+  });
+
+  it('coupled mode drops only the target-ordering rule', () => {
+    // live state seen on a direct-mode installation with a room thermostat: cold target 20 < warm 30
+    const live = curve(-5, 20, 15, 30);
+    expect(validateDraft(live, 'heat')).toEqual(['target_order']);
+    expect(validateDraft(live, 'heat', { coupled: true })).toEqual([]);
+    expect(validateDraft(curve(5, 20, 5, 30), 'heat', { coupled: true })).toEqual(['outside_order']);
+    expect(validateDraft(curve(-5, 14, 15, 30), 'heat', { coupled: true })).toContain('limit:cold.target');
+    expect(validateDraft(curve(16, 5, 30, 20), 'cool', { coupled: true })).toEqual([]);
+  });
+
+  it('coupled mode lets the cold-end target move below the warm-end target', () => {
+    const c = curve(-5, 28, 15, 30);
+    expect(moveHandle(c, 'heat', 'cold', 'target', 20).cold.target).toBe(30);
+    expect(moveHandle(c, 'heat', 'cold', 'target', 20, { coupled: true }).cold.target).toBe(20);
+    expect(moveHandle(c, 'heat', 'cold', 'target', 10, { coupled: true }).cold.target).toBe(15);
+    expect(moveHandle(c, 'heat', 'warm', 'target', 60, { coupled: true }).warm.target).toBe(60);
+    expect(moveHandle(c, 'heat', 'cold', 'outside', 40, { coupled: true }).cold.outside).toBe(14);
+    expect(levelStep(c, 'heat', -1)).toBeNull();
+    expect(levelStep(c, 'heat', -1, { coupled: true })).toEqual(curve(-5, 27, 15, 29));
+    expect(slopeStep(c, 'heat', -1, { coupled: true })).toEqual(curve(-5, 27, 15, 31));
+  });
+
+  it('isCoupled: direct control with a room sensor, per zone and mode', () => {
+    const G = (value, unknown = false, stale = false) => ({ value, unknown, stale });
+    const p = (heat, cool, s1, s2 = 'water') => ({
+      heating_control: G(heat), cooling_control: G(cool),
+      zone: { z1: { sensor: G(s1) }, z2: { sensor: G(s2) } },
+    });
+    for (const s of ['ext_thermostat', 'int_thermostat', 'thermistor']) expect(isCoupled(p('direct', 'curve', s), 'z1', 'heat')).toBe(true);
+    expect(isCoupled(p('direct', 'curve', 'water'), 'z1', 'heat')).toBe(false);
+    expect(isCoupled(p('curve', 'curve', 'ext_thermostat'), 'z1', 'heat')).toBe(false);
+    expect(isCoupled(p('direct', 'curve', 'ext_thermostat'), 'z1', 'cool')).toBe(false);
+    expect(isCoupled(p('curve', 'direct', 'thermistor'), 'z1', 'cool')).toBe(true);
+    expect(isCoupled(p('direct', 'curve', 'water', 'ext_thermostat'), 'z2', 'heat')).toBe(true);
+    expect(isCoupled(p('direct', 'curve', 'water', 'ext_thermostat'), 'z1', 'heat')).toBe(false);
+    const unknown = p('direct', 'curve', 'ext_thermostat');
+    unknown.zone.z1.sensor = G(null, true);
+    expect(isCoupled(unknown, 'z1', 'heat')).toBe(false);
+    expect(isCoupled(null, 'z1', 'heat')).toBe(false);
   });
 
   it('draws the line flat beyond both ends', () => {
@@ -326,6 +368,37 @@ describe('Curve screen', () => {
     });
     expect(screen.queryByTestId('not-active')).toBeNull();
     expect(screen.getByTestId('coupled-hint').textContent).toContain('45');
+  });
+
+  it('coupled mode: the cold-end target can be set below the warm-end target and is applied', async () => {
+    const command = vi.spyOn(api, 'command').mockResolvedValue({
+      id: 'c1', name: 'SetCurves', payload: '{}', status: 'pending', submitted_ts: Date.now(),
+      keys: { 'main/Z1_Heat_Curve_Target_High_Temp': { expected: 20, status: 'pending' } },
+    });
+    mount({
+      profile: makeProfile({
+        heating_control: F('direct'),
+        zone: { z1: { active: F(true), sensor: F('ext_thermostat') }, z2: { active: F(false), sensor: F('water') } },
+      }),
+      state: makeState({ 'main/Z1_Heat_Curve_Target_High_Temp': 28 }),
+    });
+    expect(screen.getByTestId('editor-hint').textContent).toBe(`${en.invariantHintCoupled} ${en.limitsHeat}`);
+    const input = screen.getByTestId('input-cold-target');
+    await fireEvent.change(input, { target: { value: '20' } });
+    expect(input.value).toBe('20');
+    await fireEvent.click(screen.getByTestId('apply-curve'));
+    await confirmNext(true);
+    await waitFor(() => expect(command).toHaveBeenCalledWith({
+      name: 'SetCurves', value: { zone1: { heat: { target: { high: 20 } } } }, confirm: false,
+    }));
+  });
+
+  it('not coupled: the cold-end target still stops at the warm-end target', async () => {
+    mount({ state: makeState({ 'main/Z1_Heat_Curve_Target_High_Temp': 40 }) });
+    expect(screen.getByTestId('editor-hint').textContent).toBe(`${en.invariantHint} ${en.limitsHeat}`);
+    const input = screen.getByTestId('input-cold-target');
+    await fireEvent.change(input, { target: { value: '20' } });
+    expect(input.value).toBe('30');
   });
 
   it('warns when the reported target differs from the model by more than 1 °C', () => {

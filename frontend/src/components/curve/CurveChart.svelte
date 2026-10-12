@@ -26,13 +26,14 @@
     switchMarkers = null, // { heatToCool, coolToHeat } read-only
     overlay = null, // { windows, median }
     colorBy = 'water_minus_target',
+    coupled = false, // direct mode + room sensor: no target-ordering rule
     onchange = () => {},
     onthreshold = () => {},
   } = $props();
 
   const W = 640;
   const H = 360;
-  const M = { left: 44, right: 14, top: 12, bottom: 34 };
+  const M = { left: 44, right: 14, top: 24, bottom: 34 };
   const xd = $derived(X_RANGE[mode]);
   const yd = $derived(Y_RANGE[mode]);
   const sx = $derived(makeScale(xd, [M.left, W - M.right]));
@@ -71,8 +72,8 @@
   function applyPoint(kind, x, y) {
     if (kind === 'curve:cold' || kind === 'curve:warm') {
       const end = kind.split(':')[1];
-      let next = moveHandle(shown, mode, end, 'outside', x);
-      next = moveHandle(next, mode, end, 'target', y);
+      let next = moveHandle(shown, mode, end, 'outside', x, { coupled });
+      next = moveHandle(next, mode, end, 'target', y, { coupled });
       onchange(next);
     } else if (kind.startsWith('threshold:')) {
       moveThreshold(kind.split(':')[1], x);
@@ -107,12 +108,14 @@
     if (!editable) return;
     const end = kind.split(':')[1];
     let next = shown;
-    if (dx) next = moveHandle(next, mode, end, 'outside', shown[end].outside + dx);
-    if (dy) next = moveHandle(next, mode, end, 'target', shown[end].target + dy);
+    if (dx) next = moveHandle(next, mode, end, 'outside', shown[end].outside + dx, { coupled });
+    if (dy) next = moveHandle(next, mode, end, 'target', shown[end].target + dy, { coupled });
     onchange(next);
   }
 
   const thresholdLabel = { heaterOn: 'heaterOnBelow', heatingOff: 'heatingOffAbove' };
+  /** Labels of markers in the right half are drawn to the left of the line, so they stay inside the chart. */
+  const flip = (value) => sx(value) > (M.left + W - M.right) / 2;
   const hasLive = $derived(Number.isFinite(outside));
 </script>
 
@@ -137,7 +140,7 @@
     <text x={M.left - 6} y={sy(v) + 3} text-anchor="end" class="tick">{v}</text>
   {/each}
   <text x={W / 2} y={H - 4} text-anchor="middle" class="axis">{t('axisOutside')}</text>
-  <text x="10" y={M.top + 8} class="axis">{t('axisWater')}</text>
+  <text x={M.left - 30} y={M.top - 10} class="axis" data-testid="axis-water">{t('axisWater')}</text>
 
   {#if overlay}
     {#each overlay.windows ?? [] as w (w.start_ts)}
@@ -205,7 +208,7 @@
   {/if}
 
   {#if thresholds}
-    {#each Object.keys(thresholds) as name (name)}
+    {#each Object.keys(thresholds) as name, index (name)}
       {#if Number.isFinite(thresholds[name].value)}
         <g>
           <line class="threshold" x1={sx(thresholds[name].value)} x2={sx(thresholds[name].value)} y1={M.top} y2={H - M.bottom} />
@@ -223,7 +226,13 @@
             onpointerdown={(e) => start(`threshold:${name}`, e)}
             onkeydown={(e) => key(`threshold:${name}`, e)}
           />
-          <text x={sx(thresholds[name].value) + 8} y={M.top + 12} class="tick">{t(thresholdLabel[name])} {thresholds[name].value}</text>
+          <text
+            data-testid="label-{name}"
+            x={sx(thresholds[name].value) + (flip(thresholds[name].value) ? -9 : 9)}
+            y={M.top + 12 + index * 14}
+            text-anchor={flip(thresholds[name].value) ? 'end' : 'start'}
+            class="tick label"
+          >{t(thresholdLabel[name])} {thresholds[name].value}</text>
         </g>
       {/if}
     {/each}
@@ -234,7 +243,7 @@
       {#if Number.isFinite(v)}
         <g data-testid="switch-{name}">
           <line class="threshold readonly" x1={sx(v)} x2={sx(v)} y1={M.top} y2={H - M.bottom} />
-          <text x={sx(v) + 4} y={H - M.bottom - 6} class="tick">{t(name)} {v} ({t('readOnly')})</text>
+          <text x={sx(v) + (flip(v) ? -4 : 4)} y={H - M.bottom - 6} text-anchor={flip(v) ? 'end' : 'start'} class="tick label">{t(name)} {v} ({t('readOnly')})</text>
         </g>
       {/if}
     {/each}
@@ -259,6 +268,7 @@
   .curve-chart { width: 100%; height: auto; touch-action: none; }
   .grid { stroke: #8884; stroke-width: 0.5; }
   .tick, .axis { font-size: 10px; fill: currentColor; }
+  .label { paint-order: stroke; stroke: var(--bg, #fff); stroke-width: 3px; stroke-linejoin: round; }
   .curve { fill: none; stroke: #1b6ec2; stroke-width: 2.5; }
   .curve.inactive-line { stroke-dasharray: 2 4; opacity: 0.6; }
   .ghost { fill: none; stroke: #888; stroke-width: 2; stroke-dasharray: 6 4; }

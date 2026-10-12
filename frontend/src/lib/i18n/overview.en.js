@@ -27,6 +27,8 @@ export default {
   resetTiles: 'Reset to defaults',
 
   // Quick controls
+  heatPump: 'Heat pump',
+  forceDhwNeedsMode: 'Only in an operating mode with DHW.',
   quickControls: 'Quick controls',
   heatPumpOn: 'Heat pump on',
   heatPumpOff: 'Heat pump off',
@@ -39,8 +41,10 @@ export default {
   // Zone request controls (mode-adaptive)
   heatRequest: 'Heat request',
   coolRequest: 'Cool request',
-  requestShift: 'Shift',
-  requestSetpoint: 'Setpoint',
+  requestShift: 'shift',
+  requestSetpoint: 'setpoint',
+  coupledNote: 'Direct mode with a room thermostat or thermistor: the heat pump keeps this setpoint in the curve\'s cold-end target ({key}), not in the request temperature. Apply changes that curve value.',
+  coupledLink: 'Open the curve',
 
   // Unit labels
   unitCelsius: '°C',

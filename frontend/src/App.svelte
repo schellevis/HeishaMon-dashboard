@@ -110,7 +110,6 @@
   }
   .frame[data-layout='bottom'] {
     flex-direction: column;
-    padding-bottom: 4.5rem;
   }
   main {
     flex: 1;

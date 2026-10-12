@@ -16,6 +16,20 @@
       "label": {
         "en": "Heat pump on/off",
         "nl": "Warmtepomp aan/uit"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -23,10 +37,8 @@
       "id": "TOP1",
       "kind": "number",
       "unit": "L/min",
-      "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "decimals": 2,
+      "sentinels": [],
       "category": "flow",
       "min_firmware": "3.2.3",
       "feature": null,
@@ -50,6 +62,20 @@
       "label": {
         "en": "Forced DHW",
         "nl": "Geforceerd warm tapwater"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -67,6 +93,20 @@
       "label": {
         "en": "Quiet mode schedule",
         "nl": "Schema stille modus"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -133,7 +173,7 @@
       "id": "TOP5",
       "kind": "number",
       "unit": "°C",
-      "decimals": 0,
+      "decimals": 2,
       "sentinels": [
         -128
       ],
@@ -150,7 +190,7 @@
       "id": "TOP6",
       "kind": "number",
       "unit": "°C",
-      "decimals": 0,
+      "decimals": 2,
       "sentinels": [
         -128
       ],
@@ -183,7 +223,7 @@
       "key": "main/Compressor_Freq",
       "id": "TOP8",
       "kind": "number",
-      "unit": null,
+      "unit": "Hz",
       "decimals": 0,
       "sentinels": [
         -1
@@ -279,6 +319,20 @@
       "label": {
         "en": "Weekly schedule active",
         "nl": "Weekschema actief"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -305,7 +359,7 @@
       "unit": "W",
       "decimals": 0,
       "sentinels": [
-        -1
+        -200
       ],
       "category": "power",
       "min_firmware": "3.2.3",
@@ -322,7 +376,7 @@
       "unit": "W",
       "decimals": 0,
       "sentinels": [
-        -1
+        -200
       ],
       "category": "power",
       "min_firmware": "3.2.3",
@@ -336,17 +390,39 @@
       "key": "main/Powerful_Mode_Time",
       "id": "TOP17",
       "kind": "enum",
-      "unit": "W",
+      "unit": null,
       "decimals": 0,
       "sentinels": [
         -1
       ],
-      "category": "power",
+      "category": "status",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
         "en": "Powerful mode time",
         "nl": "Tijd krachtige modus"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "30 min",
+          "nl": "30 min"
+        },
+        "2": {
+          "en": "60 min",
+          "nl": "60 min"
+        },
+        "3": {
+          "en": "90 min",
+          "nl": "90 min"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -364,6 +440,28 @@
       "label": {
         "en": "Quiet mode level",
         "nl": "Niveau stille modus"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "Level 1",
+          "nl": "Niveau 1"
+        },
+        "2": {
+          "en": "Level 2",
+          "nl": "Niveau 2"
+        },
+        "3": {
+          "en": "Level 3",
+          "nl": "Niveau 3"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -381,6 +479,24 @@
       "label": {
         "en": "Holiday mode",
         "nl": "Vakantiemodus"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "Scheduled",
+          "nl": "Gepland"
+        },
+        "2": {
+          "en": "Active",
+          "nl": "Actief"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -439,60 +555,61 @@
       "key": "main/DHW_Heat_Delta",
       "id": "TOP22",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "dhw",
       "min_firmware": "3.2.3",
       "feature": "dhw",
       "label": {
-        "en": "DHW heating hysteresis",
-        "nl": "Hysterese tapwaterverwarming"
+        "en": "DHW reheat ΔT",
+        "nl": "ΔT naverwarmen tapwater"
       }
     },
     {
       "key": "main/Heat_Delta",
       "id": "TOP23",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "settings",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
-        "en": "Heating hysteresis",
-        "nl": "Hysterese verwarmen"
+        "en": "Heating ΔT (flow − return)",
+        "nl": "ΔT verwarmen (aanvoer − retour)"
       }
     },
     {
       "key": "main/Cool_Delta",
       "id": "TOP24",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "settings",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
-        "en": "Cooling hysteresis",
-        "nl": "Hysterese koelen"
+        "en": "Cooling ΔT (flow − return)",
+        "nl": "ΔT koelen (aanvoer − retour)"
       }
     },
     {
       "key": "main/DHW_Holiday_Shift_Temp",
       "id": "TOP25",
       "kind": "number",
-      "unit": "°C",
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
+        -127,
         -128
       ],
       "category": "temperatures",
@@ -698,6 +815,7 @@
       "unit": "°C",
       "decimals": 0,
       "sentinels": [
+        -78,
         -128
       ],
       "category": "temperatures",
@@ -715,6 +833,7 @@
       "unit": "°C",
       "decimals": 0,
       "sentinels": [
+        -78,
         -128
       ],
       "category": "temperatures",
@@ -732,7 +851,7 @@
       "unit": "W",
       "decimals": 0,
       "sentinels": [
-        -1
+        -200
       ],
       "category": "power",
       "min_firmware": "3.2.3",
@@ -749,7 +868,7 @@
       "unit": "W",
       "decimals": 0,
       "sentinels": [
-        -1
+        -200
       ],
       "category": "power",
       "min_firmware": "3.2.3",
@@ -766,7 +885,7 @@
       "unit": "W",
       "decimals": 0,
       "sentinels": [
-        -1
+        -200
       ],
       "category": "power",
       "min_firmware": "3.2.3",
@@ -783,7 +902,7 @@
       "unit": "W",
       "decimals": 0,
       "sentinels": [
-        -1
+        -200
       ],
       "category": "power",
       "min_firmware": "3.2.3",
@@ -846,9 +965,10 @@
       "key": "main/Room_Holiday_Shift_Temp",
       "id": "TOP45",
       "kind": "number",
-      "unit": "°C",
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
+        -127,
         -128
       ],
       "category": "temperatures",
@@ -866,6 +986,7 @@
       "unit": "°C",
       "decimals": 0,
       "sentinels": [
+        -78,
         -128
       ],
       "category": "temperatures",
@@ -883,6 +1004,7 @@
       "unit": "°C",
       "decimals": 0,
       "sentinels": [
+        -78,
         -128
       ],
       "category": "temperatures",
@@ -900,6 +1022,7 @@
       "unit": "°C",
       "decimals": 0,
       "sentinels": [
+        -78,
         -128
       ],
       "category": "temperatures",
@@ -1080,6 +1203,20 @@
       "label": {
         "en": "DHW backup heater",
         "nl": "Bijverwarming tapwater"
+      },
+      "enum": {
+        "0": {
+          "en": "Blocked",
+          "nl": "Geblokkeerd"
+        },
+        "1": {
+          "en": "Allowed",
+          "nl": "Toegestaan"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -1097,6 +1234,20 @@
       "label": {
         "en": "Room backup heater",
         "nl": "Bijverwarming ruimte"
+      },
+      "enum": {
+        "0": {
+          "en": "Blocked",
+          "nl": "Geblokkeerd"
+        },
+        "1": {
+          "en": "Allowed",
+          "nl": "Toegestaan"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -1114,6 +1265,20 @@
       "label": {
         "en": "Internal heater",
         "nl": "Interne verwarmer"
+      },
+      "enum": {
+        "0": {
+          "en": "Inactive",
+          "nl": "Inactief"
+        },
+        "1": {
+          "en": "Active",
+          "nl": "Actief"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -1131,6 +1296,20 @@
       "label": {
         "en": "External heater",
         "nl": "Externe verwarmer"
+      },
+      "enum": {
+        "0": {
+          "en": "Inactive",
+          "nl": "Inactief"
+        },
+        "1": {
+          "en": "Active",
+          "nl": "Actief"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -1140,7 +1319,7 @@
       "unit": "rpm",
       "decimals": 0,
       "sentinels": [
-        -128
+        -10
       ],
       "category": "flow",
       "min_firmware": "3.2.3",
@@ -1157,7 +1336,7 @@
       "unit": "rpm",
       "decimals": 0,
       "sentinels": [
-        -128
+        -10
       ],
       "category": "flow",
       "min_firmware": "3.2.3",
@@ -1171,10 +1350,10 @@
       "key": "main/High_Pressure",
       "id": "TOP64",
       "kind": "number",
-      "unit": "bar",
+      "unit": "kgf/cm²",
       "decimals": 1,
       "sentinels": [
-        -128
+        -0.2
       ],
       "category": "pressure",
       "min_firmware": "3.2.3",
@@ -1191,7 +1370,7 @@
       "unit": "rpm",
       "decimals": 0,
       "sentinels": [
-        -128
+        -50
       ],
       "category": "flow",
       "min_firmware": "3.2.3",
@@ -1205,10 +1384,10 @@
       "key": "main/Low_Pressure",
       "id": "TOP66",
       "kind": "number",
-      "unit": "bar",
-      "decimals": 1,
+      "unit": null,
+      "decimals": 0,
       "sentinels": [
-        -128
+        -50
       ],
       "category": "pressure",
       "min_firmware": "3.2.3",
@@ -1225,9 +1404,9 @@
       "unit": "A",
       "decimals": 1,
       "sentinels": [
-        -128
+        -0.2
       ],
-      "category": "pressure",
+      "category": "compressor",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
@@ -1250,6 +1429,20 @@
       "label": {
         "en": "Forced heater",
         "nl": "Geforceerde verwarmer"
+      },
+      "enum": {
+        "0": {
+          "en": "Inactive",
+          "nl": "Inactief"
+        },
+        "1": {
+          "en": "Active",
+          "nl": "Actief"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -1267,6 +1460,20 @@
       "label": {
         "en": "Sterilization running",
         "nl": "Sterilisatie actief"
+      },
+      "enum": {
+        "0": {
+          "en": "Inactive",
+          "nl": "Inactief"
+        },
+        "1": {
+          "en": "Active",
+          "nl": "Actief"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -1654,7 +1861,7 @@
       "sentinels": [
         -1
       ],
-      "category": "status",
+      "category": "counters",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
@@ -1671,7 +1878,7 @@
       "sentinels": [
         -1
       ],
-      "category": "status",
+      "category": "counters",
       "min_firmware": "3.2.3",
       "feature": "dhw",
       "label": {
@@ -1686,7 +1893,7 @@
       "unit": null,
       "decimals": 0,
       "sentinels": [],
-      "category": "temperatures",
+      "category": "status",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
@@ -1698,7 +1905,7 @@
       "key": "main/Pump_Duty",
       "id": "TOP93",
       "kind": "number",
-      "unit": "%",
+      "unit": null,
       "decimals": 0,
       "sentinels": [
         -1
@@ -1750,7 +1957,7 @@
       "key": "main/Max_Pump_Duty",
       "id": "TOP95",
       "kind": "number",
-      "unit": "%",
+      "unit": null,
       "decimals": 0,
       "sentinels": [
         -1
@@ -1784,12 +1991,12 @@
       "key": "main/Heater_Start_Delta",
       "id": "TOP97",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "settings",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
@@ -1801,12 +2008,12 @@
       "key": "main/Heater_Stop_Delta",
       "id": "TOP98",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "settings",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
@@ -1915,12 +2122,12 @@
       "key": "main/Solar_On_Delta",
       "id": "TOP102",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "solar",
       "min_firmware": "3.2.3",
       "feature": "solar",
       "label": {
@@ -1932,12 +2139,12 @@
       "key": "main/Solar_Off_Delta",
       "id": "TOP103",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "solar",
       "min_firmware": "3.2.3",
       "feature": "solar",
       "label": {
@@ -1949,10 +2156,10 @@
       "key": "main/Solar_Frost_Protection",
       "id": "TOP104",
       "kind": "number",
-      "unit": null,
+      "unit": "°C",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
       "category": "solar",
       "min_firmware": "3.2.3",
@@ -1966,10 +2173,10 @@
       "key": "main/Solar_High_Limit",
       "id": "TOP105",
       "kind": "number",
-      "unit": null,
+      "unit": "°C",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
       "category": "solar",
       "min_firmware": "3.2.3",
@@ -1983,7 +2190,7 @@
       "key": "main/Pump_Flowrate_Mode",
       "id": "TOP106",
       "kind": "enum",
-      "unit": "L/min",
+      "unit": null,
       "decimals": 0,
       "sentinels": [
         -1
@@ -1994,6 +2201,20 @@
       "label": {
         "en": "Pump flow-rate mode",
         "nl": "Pompdebietmodus"
+      },
+      "enum": {
+        "0": {
+          "en": "ΔT",
+          "nl": "ΔT"
+        },
+        "1": {
+          "en": "Maximum flow",
+          "nl": "Maximaal debiet"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2002,9 +2223,7 @@
       "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "status",
       "min_firmware": "3.2.3",
       "feature": null,
@@ -2042,6 +2261,20 @@
       "label": {
         "en": "Alternative outdoor sensor",
         "nl": "Alternatieve buitensensor"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2059,6 +2292,20 @@
       "label": {
         "en": "Anti-freeze mode",
         "nl": "Antivriesmodus"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2166,12 +2413,12 @@
       "key": "main/Buffer_Tank_Delta",
       "id": "TOP113",
       "kind": "number",
-      "unit": null,
+      "unit": "K",
       "decimals": 0,
       "sentinels": [
-        -1
+        -128
       ],
-      "category": "curve",
+      "category": "settings",
       "min_firmware": "3.2.3",
       "feature": "buffer",
       "label": {
@@ -2182,7 +2429,7 @@
     {
       "key": "main/External_Pad_Heater",
       "id": "TOP114",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
       "sentinels": [
@@ -2194,6 +2441,24 @@
       "label": {
         "en": "External pad heater",
         "nl": "Externe verwarmingsmat"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Type A",
+          "nl": "Type A"
+        },
+        "2": {
+          "en": "Type B",
+          "nl": "Type B"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2201,9 +2466,9 @@
       "id": "TOP115",
       "kind": "number",
       "unit": "bar",
-      "decimals": 1,
+      "decimals": 2,
       "sentinels": [
-        -128
+        -0.02
       ],
       "category": "pressure",
       "min_firmware": "3.5",
@@ -2279,6 +2544,20 @@
       "label": {
         "en": "External control",
         "nl": "Externe sturing"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2296,6 +2575,20 @@
       "label": {
         "en": "External heat/cool switch",
         "nl": "Externe schakeling verwarmen/koelen"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2313,6 +2606,20 @@
       "label": {
         "en": "External error signal",
         "nl": "Extern foutsignaal"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2330,6 +2637,20 @@
       "label": {
         "en": "External compressor control",
         "nl": "Externe compressorsturing"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2347,6 +2668,20 @@
       "label": {
         "en": "Zone 2 pump",
         "nl": "Pomp zone 2"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2364,6 +2699,20 @@
       "label": {
         "en": "Zone 1 pump",
         "nl": "Pomp zone 1"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2381,6 +2730,20 @@
       "label": {
         "en": "2-way valve position",
         "nl": "Stand tweewegklep"
+      },
+      "enum": {
+        "0": {
+          "en": "Cooling",
+          "nl": "Koelen"
+        },
+        "1": {
+          "en": "Heating",
+          "nl": "Verwarmen"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2398,40 +2761,54 @@
       "label": {
         "en": "Second 3-way valve position",
         "nl": "Stand tweede driewegklep"
+      },
+      "enum": {
+        "0": {
+          "en": "Room",
+          "nl": "Ruimte"
+        },
+        "1": {
+          "en": "DHW",
+          "nl": "Tapwater"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
       "key": "main/Z1_Valve_PID",
       "id": "TOP127",
-      "kind": "enum",
-      "unit": null,
-      "decimals": 0,
+      "kind": "number",
+      "unit": "%",
+      "decimals": 1,
       "sentinels": [
-        -1
+        -0.5
       ],
       "category": "status",
       "min_firmware": "3.9",
       "feature": "zone1",
       "label": {
-        "en": "Zone 1 valve PID",
-        "nl": "PID-klep zone 1"
+        "en": "Zone 1 mixing valve PID output",
+        "nl": "PID-uitgang mengklep zone 1"
       }
     },
     {
       "key": "main/Z2_Valve_PID",
       "id": "TOP128",
-      "kind": "enum",
-      "unit": null,
-      "decimals": 0,
+      "kind": "number",
+      "unit": "%",
+      "decimals": 1,
       "sentinels": [
-        -1
+        -0.5
       ],
       "category": "status",
       "min_firmware": "3.9",
       "feature": "zone2",
       "label": {
-        "en": "Zone 2 valve PID",
-        "nl": "PID-klep zone 2"
+        "en": "Zone 2 mixing valve PID output",
+        "nl": "PID-uitgang mengklep zone 2"
       }
     },
     {
@@ -2480,6 +2857,24 @@
       "label": {
         "en": "Bivalent mode",
         "nl": "Bivalente modus"
+      },
+      "enum": {
+        "0": {
+          "en": "Alternative",
+          "nl": "Alternatief"
+        },
+        "1": {
+          "en": "Parallel",
+          "nl": "Parallel"
+        },
+        "2": {
+          "en": "Advanced parallel",
+          "nl": "Geavanceerd parallel"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2502,7 +2897,7 @@
     {
       "key": "main/Bivalent_Advanced_Heat",
       "id": "TOP132",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
       "sentinels": [
@@ -2514,12 +2909,26 @@
       "label": {
         "en": "Bivalent advanced heating",
         "nl": "Bivalent uitgebreid verwarmen"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
       "key": "main/Bivalent_Advanced_DHW",
       "id": "TOP133",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
       "sentinels": [
@@ -2531,6 +2940,20 @@
       "label": {
         "en": "Bivalent advanced DHW",
         "nl": "Bivalent uitgebreid tapwater"
+      },
+      "enum": {
+        "0": {
+          "en": "Disabled",
+          "nl": "Uitgeschakeld"
+        },
+        "1": {
+          "en": "Enabled",
+          "nl": "Ingeschakeld"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2633,12 +3056,26 @@
       "label": {
         "en": "Heating control",
         "nl": "Verwarmingsregeling"
+      },
+      "enum": {
+        "0": {
+          "en": "Comfort",
+          "nl": "Comfort"
+        },
+        "1": {
+          "en": "Efficiency",
+          "nl": "Efficiëntie"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
       "key": "main/Smart_DHW",
       "id": "TOP140",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
       "sentinels": [
@@ -2650,6 +3087,20 @@
       "label": {
         "en": "Smart DHW",
         "nl": "Slim tapwater"
+      },
+      "enum": {
+        "0": {
+          "en": "Variable",
+          "nl": "Variabel"
+        },
+        "1": {
+          "en": "Standard",
+          "nl": "Standaard"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2667,13 +3118,27 @@
       "label": {
         "en": "Quiet mode priority",
         "nl": "Prioriteit stille modus"
+      },
+      "enum": {
+        "0": {
+          "en": "Sound",
+          "nl": "Geluid"
+        },
+        "1": {
+          "en": "Capacity",
+          "nl": "Capaciteit"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
       "key": "main/Expansion_Valve",
       "id": "TOP142",
-      "kind": "enum",
-      "unit": null,
+      "kind": "number",
+      "unit": "steps",
       "decimals": 0,
       "sentinels": [
         -1
@@ -2682,8 +3147,8 @@
       "min_firmware": "4.0",
       "feature": null,
       "label": {
-        "en": "Expansion valve",
-        "nl": "Expansieklep"
+        "en": "Expansion valve position",
+        "nl": "Positie expansieventiel"
       }
     },
     {
@@ -2701,6 +3166,20 @@
       "label": {
         "en": "DHW sensor selection",
         "nl": "Keuze tapwatersensor"
+      },
+      "enum": {
+        "0": {
+          "en": "Top",
+          "nl": "Boven"
+        },
+        "1": {
+          "en": "Centre",
+          "nl": "Midden"
+        },
+        "-1": {
+          "en": "Unknown",
+          "nl": "Onbekend"
+        }
       }
     },
     {
@@ -2808,18 +3287,26 @@
     {
       "key": "optional/Z1_Water_Pump",
       "id": "OPT0",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "flow",
       "min_firmware": "3.2.3",
       "feature": "zone1",
       "label": {
         "en": "Zone 1 water pump",
         "nl": "Waterpomp zone 1"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        }
       }
     },
     {
@@ -2828,32 +3315,56 @@
       "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "status",
       "min_firmware": "3.2.3",
       "feature": "zone1",
       "label": {
         "en": "Zone 1 mixing valve",
         "nl": "Mengklep zone 1"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "Decreasing",
+          "nl": "Omlaag"
+        },
+        "2": {
+          "en": "Increasing",
+          "nl": "Omhoog"
+        },
+        "3": {
+          "en": "Invalid",
+          "nl": "Ongeldig"
+        }
       }
     },
     {
       "key": "optional/Z2_Water_Pump",
       "id": "OPT2",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "flow",
       "min_firmware": "3.2.3",
       "feature": "zone2",
       "label": {
         "en": "Zone 2 water pump",
         "nl": "Waterpomp zone 2"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        }
       }
     },
     {
@@ -2862,49 +3373,81 @@
       "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "status",
       "min_firmware": "3.2.3",
       "feature": "zone2",
       "label": {
         "en": "Zone 2 mixing valve",
         "nl": "Mengklep zone 2"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "Decreasing",
+          "nl": "Omlaag"
+        },
+        "2": {
+          "en": "Increasing",
+          "nl": "Omhoog"
+        },
+        "3": {
+          "en": "Invalid",
+          "nl": "Ongeldig"
+        }
       }
     },
     {
       "key": "optional/Pool_Water_Pump",
       "id": "OPT4",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "flow",
       "min_firmware": "3.2.3",
       "feature": "pool",
       "label": {
         "en": "Pool water pump",
         "nl": "Zwembadpomp"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        }
       }
     },
     {
       "key": "optional/Solar_Water_Pump",
       "id": "OPT5",
-      "kind": "number",
+      "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "flow",
       "min_firmware": "3.2.3",
       "feature": "solar",
       "label": {
         "en": "Solar water pump",
         "nl": "Zonnepomp"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        }
       }
     },
     {
@@ -2913,15 +3456,23 @@
       "kind": "enum",
       "unit": null,
       "decimals": 0,
-      "sentinels": [
-        -1
-      ],
+      "sentinels": [],
       "category": "status",
       "min_firmware": "3.2.3",
       "feature": null,
       "label": {
         "en": "Alarm",
         "nl": "Alarm"
+      },
+      "enum": {
+        "0": {
+          "en": "Off",
+          "nl": "Uit"
+        },
+        "1": {
+          "en": "On",
+          "nl": "Aan"
+        }
       }
     }
   ],
@@ -2974,7 +3525,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/Max_Pump_Duty"
       ],
@@ -2986,8 +3537,8 @@
         "nl": "Maximale pompbelasting"
       },
       "range": {
-        "min": 0,
-        "max": 100,
+        "min": 64,
+        "max": 254,
         "step": 1
       }
     },
@@ -3613,7 +4164,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/Heat_Delta"
       ],
@@ -3621,12 +4172,12 @@
       "min_firmware": "3.2.3",
       "category": "settings",
       "label": {
-        "en": "Heating hysteresis",
-        "nl": "Hysterese verwarmen"
+        "en": "Heating ΔT (flow − return)",
+        "nl": "ΔT verwarmen (aanvoer − retour)"
       },
       "range": {
-        "min": -10,
-        "max": 10,
+        "min": 1,
+        "max": 15,
         "step": 1
       }
     },
@@ -3636,7 +4187,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/Cool_Delta"
       ],
@@ -3644,12 +4195,12 @@
       "min_firmware": "3.2.3",
       "category": "settings",
       "label": {
-        "en": "Cooling hysteresis",
-        "nl": "Hysterese koelen"
+        "en": "Cooling ΔT (flow − return)",
+        "nl": "ΔT koelen (aanvoer − retour)"
       },
       "range": {
-        "min": -10,
-        "max": 10,
+        "min": 1,
+        "max": 15,
         "step": 1
       }
     },
@@ -3659,7 +4210,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/DHW_Heat_Delta"
       ],
@@ -3667,12 +4218,12 @@
       "min_firmware": "3.2.3",
       "category": "dhw",
       "label": {
-        "en": "DHW heating hysteresis",
-        "nl": "Hysterese tapwaterverwarming"
+        "en": "DHW reheat ΔT",
+        "nl": "ΔT naverwarmen tapwater"
       },
       "range": {
-        "min": -10,
-        "max": 10,
+        "min": -12,
+        "max": -2,
         "step": 1
       },
       "applicability": {
@@ -3843,7 +4394,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/Buffer_Tank_Delta"
       ],
@@ -3855,7 +4406,7 @@
         "nl": "Temperatuurverschil buffervat"
       },
       "range": {
-        "min": -10,
+        "min": 0,
         "max": 10,
         "step": 1
       },
@@ -4056,7 +4607,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/Bivalent_Start_Temp"
       ],
@@ -4068,8 +4619,8 @@
         "nl": "Bivalente starttemperatuur"
       },
       "range": {
-        "min": -20,
-        "max": 30,
+        "min": -15,
+        "max": 35,
         "step": 1
       },
       "applicability": {
@@ -4085,7 +4636,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/Bivalent_Advanced_Start_Temp"
       ],
@@ -4097,8 +4648,8 @@
         "nl": "Bivalent uitgebreid: starttemperatuur"
       },
       "range": {
-        "min": -20,
-        "max": 30,
+        "min": -15,
+        "max": 35,
         "step": 1
       },
       "applicability": {
@@ -4114,7 +4665,7 @@
       "class": "setting",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [
         "main/Bivalent_Advanced_Stop_Temp"
       ],
@@ -4126,8 +4677,8 @@
         "nl": "Bivalent uitgebreid: stoptemperatuur"
       },
       "range": {
-        "min": -20,
-        "max": 30,
+        "min": -15,
+        "max": 35,
         "step": 1
       },
       "applicability": {
@@ -4964,5 +5515,401 @@
       }
     }
   ],
-  "models": []
+  "models": [
+    {
+      "hex": "12 D7 0B 47 19 37 94 0E 83 10",
+      "name": "WH-ADC0316M9E83 + WH-WXG09ME8",
+      "series": "other"
+    },
+    {
+      "hex": "12 D7 0B 98 14 35 94 0D 83 10",
+      "name": "WH-SDC0316M9E8 + WH-WXG09ME8",
+      "series": "other"
+    },
+    {
+      "hex": "12 D7 0C 98 14 35 94 0D 83 10",
+      "name": "KIT-SDCWXG09 (WH-SDC0316M9E8 + WH-WXG09ME8)",
+      "series": "other"
+    },
+    {
+      "hex": "12 D7 0D 85 11 37 94 0E 84 10",
+      "name": "WH-WXG12ME8 (monoblock)",
+      "series": "other"
+    },
+    {
+      "hex": "12 D7 0D 98 11 33 94 0C 83 10",
+      "name": "WH-ADC0316M9E8AN2 + WH-WXG09ME8",
+      "series": "other"
+    },
+    {
+      "hex": "12 D7 0D 98 11 39 94 0F 84 10",
+      "name": "WH-ADC0316M9E8AN2 + WH-WXG12ME8",
+      "series": "other"
+    },
+    {
+      "hex": "12 D7 0D 98 14 37 94 0E 84 10",
+      "name": "KIT-SDCWXG12 (WH-SDC0316M9E8 + WH-WXG12ME8)",
+      "series": "other"
+    },
+    {
+      "hex": "32 D4 0B 00 78 62 90 0B 02 78",
+      "name": "WH-MXC12J6E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "32 D4 0B 87 84 73 90 0C 84 84",
+      "name": "WH-MXC09J3E8 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "32 D4 0B 88 84 73 90 0C 85 84",
+      "name": "WH-MXC12J9E8 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "32 D4 0B 89 84 73 90 0C 86 84",
+      "name": "WH-MXC16J9E8 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "32 D4 0B 99 77 62 90 0B 01 78",
+      "name": "WH-MXC09J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "42 D4 0B 15 76 12 D0 0B 10 11",
+      "name": "KIT-ADC12HE5C-CL (WH-ADC1216H6E5C + WH-UD12HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "42 D4 0B 83 71 32 D2 0C 44 55",
+      "name": "KIT-ADC03JE5C-S (WH-ADC0309J3E5C + WH-UD03JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "42 D4 0B 83 71 32 D2 0C 45 55",
+      "name": "KIT-ADC05JE5C (WH-ADC0309J3E5C + WH-UD05JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "42 D4 0B 83 71 42 D2 0C 46 55",
+      "name": "KIT-ADC07JE5C (WH-ADC0309J3E5C + WH-UD07JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "62 D2 0B 41 54 32 D2 0C 45 55",
+      "name": "KIT-WC05J3E5 (WH-SDC0305J3E5 + WH-UD05JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "62 D2 0B 43 54 42 D2 0B 72 66",
+      "name": "KIT-WC09J3E5 (WH-SDC0709J3E5 + WH-UD09JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "62 D2 0B 43 54 42 D2 0C 46 55",
+      "name": "KIT-WC07J3E5 (WH-SDC0709J3E5 + WH-UD07JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "62 D2 0B 45 54 32 D2 0C 45 55",
+      "name": "KIT-ADC05JE5 (WH-ADC0309J3E5 + WH-UD05JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "62 D2 0B 45 54 42 D2 0B 47 55",
+      "name": "KIT-ADC09JE5 (WH-ADC0309J3E5 + WH-UD09JE5)",
+      "series": "J"
+    },
+    {
+      "hex": "62 D2 0B 45 54 42 D2 0B 72 66",
+      "name": "KIT-ADC09JE5 (WH-ADC0309J3E5 + WH-UD09JE5-1)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0B 33 65 B2 D3 0B 94 65",
+      "name": "WH-MDC05J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0B 34 65 B2 D3 0B 95 65",
+      "name": "WH-MDC07J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0B 35 65 B2 D3 0B 96 65",
+      "name": "WH-MDC09J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0C 33 65 B2 D3 0B 94 65",
+      "name": "WH-MDC05J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0C 34 65 B2 D3 0B 95 65",
+      "name": "WH-MDC07J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0C 35 65 B2 D3 0B 96 65",
+      "name": "WH-MDC09J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0D 33 65 B2 D3 0B 94 65",
+      "name": "WH-MDC05J3E5 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "C2 D3 0D 35 65 B2 D3 0B 96 65",
+      "name": "WH-MDC09J3E5-1 (monoblock)",
+      "series": "J"
+    },
+    {
+      "hex": "E2 CE 0D 71 81 72 CE 0C 92 81",
+      "name": "KIT-WC05H3E5 (WH-SDC05H3E5 + WH-UD05HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 13 33 32 D1 0C 16 33",
+      "name": "WH-MDC05H3E5 (monoblock)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 14 33 42 D1 0B 17 33",
+      "name": "WH-MDC07H3E5 (monoblock)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 15 33 42 D1 0B 18 33",
+      "name": "WH-MDC09H3E5 (monoblock)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 41 34 82 D1 0B 31 35",
+      "name": "WH-MXC09H3E5 (monoblock)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 44 34 12 D0 0C 34 35",
+      "name": "WH-MXC12H9E8 (monoblock)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 75 09 12 D0 0C 06 11",
+      "name": "KIT-ADC12HE5 (WH-ADC1216H6E5 + WH-UD12HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 82 05 12 D0 0C 91 05",
+      "name": "KIT-WQC09H3E8 (WH-SQC09H3E8 + WH-UQ09HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 82 05 12 D0 0D 91 05",
+      "name": "KIT-WQC09H3E8 (WH-SQC09H3E8 + WH-UQ09HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 82 09 12 D0 0B 10 11",
+      "name": "KIT-WC012H6E5 (WH-SDC12H6E5 + WH-UD12HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 83 05 12 D0 0D 92 05",
+      "name": "KIT-WQC12H9E8 (WH-SQC12H9E8 + WH-UQ12HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0B 84 05 12 D0 0B 93 05",
+      "name": "KIT-WQC16H9E8 (WH-SQC16H9E8 + WH-UQ16HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 43 00 12 D0 0B 15 08",
+      "name": "KIT-ADC09HE5 (WH-ADC0309H3E5 + WH-UD09HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 54 14 12 D0 0B 14 08",
+      "name": "KIT-WC07H3E5-1 (WH-SDC07H3E5-1 + WH-UD07HE5-1)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 55 14 12 D0 0B 15 08",
+      "name": "KIT-WC09H3E5 (WH-SDC09H3E5 + WH-UD09HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 74 09 12 D0 0C 95 05",
+      "name": "KIT-AXC12HE8 (WH-ADC0916H9E8 + WH-UX12HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 74 09 12 D0 0C 96 05",
+      "name": "KIT-AXC16HE8 (WH-ADC0916H9E8 + WH-UX16HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 74 09 12 D0 0D 95 05",
+      "name": "KIT-AXC12HE8 (WH-ADC0916H9E8 + WH-UX12HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 74 09 12 D0 0E 94 05",
+      "name": "KIT-AXC9HE8 (WH-ADC0916H9E8 + WH-UX09HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 74 09 12 D0 0E 95 05",
+      "name": "KIT-AXC12HE8 (WH-ADC0912H9E8 + WH-UX12HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 77 09 12 D0 0B 05 11",
+      "name": "KIT-WXC09H3E5 (WH-SXC09H3E5 + WH-UX09HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 78 09 12 D0 0B 06 11",
+      "name": "KIT-WXC12H6E5 (WH-SXC12H6E5 + WH-UX12HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 88 05 12 D0 0B 97 05",
+      "name": "KIT-WC09H3E8 (WH-SDC09H3E8 + WH-UD09HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0C 89 05 12 D0 0C 98 05",
+      "name": "KIT-WC12H9E8 (WH-SDC12H9E8 + WH-UD12HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0D 77 09 12 D0 0B 05 11",
+      "name": "KIT-WXC09H3E5 (WH-SXC09H3E5 + WH-UX09HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0D 77 09 12 D0 0C 05 11",
+      "name": "KIT-WXC09H3E5 (WH-SXC09H3E5 + WH-UX09HE5)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0D 85 05 12 D0 0C 94 05",
+      "name": "KIT-WXC09H9E8 (WH-SXC09H3E8 + WH-UX09HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0D 85 05 12 D0 0E 94 05",
+      "name": "KIT-WXC09H3E8 (WH-SXC09H3E8 + WH-UX09HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0D 86 05 12 D0 0C 95 05",
+      "name": "KIT-WXC12H9E8 (WH-SXC12H9E8 + WH-UX12HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0D 86 05 12 D0 0E 95 05",
+      "name": "KIT-WXC12H9E8 (WH-SXC12H9E8 + WH-UX12HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 CF 0D 87 05 12 D0 0C 96 05",
+      "name": "KIT-WXC16H9E8 (WH-SXC16H9E8 + WH-UX16HE8)",
+      "series": "other"
+    },
+    {
+      "hex": "E2 D5 0B 08 95 02 D6 0E 66 95",
+      "name": "KIT-WC05K3E5 (WH-SDC0309K3E5 + WH-UDZ05KE5)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0B 08 95 02 D6 0E 67 95",
+      "name": "KIT-WC07K3E5 (WH-SDC0309K3E5 + WH-UDZ07KE5)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0B 08 95 02 D6 0F 67 95",
+      "name": "KIT-SDC07KE5 (WH-SDC0309K3E5 + WH-UDZ07KE5)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0B 34 99 83 92 0C 27 98",
+      "name": "KIT-WC05L3E5 (WH-SDC0509L3E5 + WH-WDG05LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0B 34 99 83 92 0C 28 98",
+      "name": "KIT-WC07L3E5 (WH-SDC0509L3E5 + WH-WDG07LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0B 34 99 83 92 0C 29 98",
+      "name": "KIT-WC09L3E5 (WH-SDC0509L3E5 + WH-WDG09LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0B 34 99 83 92 0D 29 98",
+      "name": "KIT-WC09L3E5 (WH-SDC0509L3E5 + WH-WDG09LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0B 35 99 83 92 0D 29 98",
+      "name": "KIT-WC09L6E5 (WH-SDC0509L6E5 + WH-WDG09LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0C 08 95 02 D6 10 67 95",
+      "name": "KIT-SDC07KE5 (WH-SDC0309K3E5 + WH-UDZ07KE5)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0C 29 99 83 92 0C 28 98",
+      "name": "KIT-ADC07L3E5 (WH-ADC0509L3E5 + WH-WDG07LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0C 29 99 83 92 0C 29 98",
+      "name": "KIT-ADC09L3E5 (WH-ADC0509L3E5 + WH-WDG09LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0C 67 00 83 92 0C 27 98",
+      "name": "KIT-ADC05L3E5AN (WH-ADC0509L3E5AN + WH-WDG05LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0C 67 00 83 92 0C 28 98",
+      "name": "KIT-ADC07L3E5AN (WH-ADC0509L3E5AN + WH-WDG07LE5)",
+      "series": "L"
+    },
+    {
+      "hex": "E2 D5 0D 00 09 43 D6 0E 07 09",
+      "name": "KIT-WC09K3E8 (WH-SDC09K3E8 + WH-UDZ09KE8)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0D 36 99 02 D6 0F 67 95",
+      "name": "KIT-ADC07K3E5AN (WH-ADC0309K3E5AN + WH-UDZ07KE5)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0D 36 99 02 D6 10 66 95",
+      "name": "KIT-ADC05K3E5AN (WH-ADC0309K3E5AN + WH-UDZ05KE5)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0D 99 94 02 D6 0D 68 95",
+      "name": "KIT-ADC09K3E5 (WH-ADC0309K3E5 + WH-UDZ09KE5)",
+      "series": "K"
+    },
+    {
+      "hex": "E2 D5 0F 99 94 02 D6 10 68 95",
+      "name": "KIT-ADC09K3E5 (WH-ADC0309K3E5 + WH-UDZ09KE5)",
+      "series": "K"
+    }
+  ]
 }
