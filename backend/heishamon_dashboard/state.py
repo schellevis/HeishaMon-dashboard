@@ -7,6 +7,7 @@ from heishamon_dashboard.types import Liveness, Message, Receipt, TopicValue
 
 TOPIC_MAX_BYTES = 256
 PAYLOAD_MAX_BYTES = 64 * 1024
+UNKNOWN_TOPIC_MAX = 2000
 LIVENESS_FLOOR_MS = 30_000
 PRESENCE_HOLD_MS = 360_000
 PRESENCE_KEYS = ("extra", "optional", "1wire", "s0", "opentherm")
@@ -21,6 +22,8 @@ _QUALIFYING_PREFIXES = (
     "s0/Watthour/",
     "opentherm/write/",
 )
+_ALWAYS_ACCEPTED_PREFIXES = ("1wire/", "s0/", "opentherm/")
+_ALWAYS_ACCEPTED_EXACT = frozenset({"stats", "LWT", "ip"})
 _WRITABLE_EXACT = frozenset({"s0/WatthourTotal/1", "s0/WatthourTotal/2"})
 
 
@@ -99,6 +102,7 @@ class State:
         self._last_live: dict[str, int] = {}
         self._presence_ts: dict[str, int | None] = {key: None for key in PRESENCE_KEYS}
         self._reconnect_ts: int | None = None
+        self._uncatalogued: set[str] = set()
         self._now: int | None = None
         self._on_offline: list[Callable[[int], None]] = []
         self._on_online: list[Callable[[int], None]] = []
@@ -147,6 +151,14 @@ class State:
             and now >= self.last_qualifying_ts + self.liveness_timeout_ms
         ):
             self._enter_offline(self.last_qualifying_ts)
+        elif (
+            self.device_online == "unknown"
+            and self._reconnect_ts is not None
+            and self.last_qualifying_ts is not None
+            and now >= self._reconnect_ts + self.liveness_timeout_ms
+        ):
+            # no qualifying live message since the reconnect: same backdate as from online
+            self._enter_offline(self.last_qualifying_ts)
 
     def presence(self) -> dict[str, bool]:
         """§4.3 presence. Keys: extra, optional, 1wire, s0, opentherm."""
@@ -175,8 +187,13 @@ class State:
             self.ingest_dropped += 1
             return None
 
-        self._now = message.ts
         meta = self._catalog.topic(message.topic)
+        if meta is None and message.topic not in self.values and not self._always_accepted(message.topic):
+            if len(self._uncatalogued) >= UNKNOWN_TOPIC_MAX:
+                self.ingest_dropped += 1
+                return None
+            self._uncatalogued.add(message.topic)
+        self._now = message.ts
         value, kind, valid = self._interpret(message.payload, meta)
         previous = self.values.get(message.topic)
         changed = previous is None or previous.raw != message.payload
@@ -217,6 +234,10 @@ class State:
             qualifying=qualifying,
             changed=changed,
         )
+
+    @staticmethod
+    def _always_accepted(topic: str) -> bool:
+        return topic in _ALWAYS_ACCEPTED_EXACT or topic.startswith(_ALWAYS_ACCEPTED_PREFIXES)
 
     def _interpret(self, raw: str, meta: dict | None) -> tuple[int | float | str | None, str, bool]:
         if meta is None:

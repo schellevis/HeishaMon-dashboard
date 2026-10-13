@@ -13,7 +13,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from heishamon_dashboard import api, catalog as catalog_mod
+from heishamon_dashboard import api, catalog as catalog_mod, rules
 from heishamon_dashboard.commands import AsyncioScheduler, CommandService
 from heishamon_dashboard.config import Config
 from heishamon_dashboard.derived import EventDetector
@@ -107,6 +107,7 @@ class Services:
             catalog, self.mqtt, self.state, _EventingStore(self.store, self.emit_event), self.clock,
             scheduler or AsyncioScheduler(), self.profile,
             on_status=self._on_command, on_listen_only=lambda on: None,
+            rate_max=config.command_rate_max, rate_window_s=config.command_rate_window_s,
         )
         self.flushing = False
         self.ingest_dropped_total = 0
@@ -311,6 +312,7 @@ def build(config: Config, mqtt_factory=None, clock=None, *, scheduler=None,
           static_dir: str | Path | None = None, catalog=None, store: Store | None = None,
           tick_interval: float = 1.0) -> FastAPI:
     """Create the ASGI app. `mqtt_factory` builds the MQTT client (a fake in tests)."""
+    rules.load()  # fail at startup when rules.json is missing or invalid
     cat = catalog or catalog_mod.load(CATALOG_PATH)
     services = Services(config, cat, mqtt_factory, clock, scheduler, store, tick_interval)
 

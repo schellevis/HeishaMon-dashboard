@@ -25,6 +25,12 @@ def test_defaults():
     assert c.http_port == 8000
     assert c.tz == "UTC"
     assert c.public_origins == () and c.allowed_origins == ()
+    assert (c.command_rate_max, c.command_rate_window_s) == (6, 3600)
+
+
+def test_command_rate_values_parsed():
+    c = load(env(COMMAND_RATE_MAX="3", COMMAND_RATE_WINDOW_S="600"))
+    assert (c.command_rate_max, c.command_rate_window_s) == (3, 600)
 
 
 def test_host_required():
@@ -47,6 +53,8 @@ def test_host_invalid():
     ("BUFFER_MAX_BYTES", ["16777216"], ["1000", "16777215"]),
     ("AUDIT_BUFFER_MAX", ["100", "100000"], ["99", "100001"]),
     ("RAW_RETENTION_DAYS", ["1", "365"], ["0", "-1", "x"]),
+    ("COMMAND_RATE_MAX", ["1", "100"], ["0", "-1", "x"]),
+    ("COMMAND_RATE_WINDOW_S", ["1", "86400"], ["0", "-1", "x"]),
 ])
 def test_int_bounds(name, good, bad):
     for v in good:
@@ -116,3 +124,13 @@ def test_origins():
 def test_origins_invalid(name, bad):
     with pytest.raises(ConfigError, match=name):
         load(env(**{name: bad}))
+
+
+def test_mqtt_ca_file(tmp_path):
+    assert load(BASE).mqtt_ca_file is None
+    assert load(env(MQTT_CA_FILE="  ")).mqtt_ca_file is None
+    ca = tmp_path / "ca.pem"
+    ca.write_text("pem")
+    assert load(env(MQTT_CA_FILE=str(ca), MQTT_TLS="true")).mqtt_ca_file == str(ca)
+    with pytest.raises(ConfigError, match="MQTT_CA_FILE"):
+        load(env(MQTT_CA_FILE=str(tmp_path / "missing.pem")))

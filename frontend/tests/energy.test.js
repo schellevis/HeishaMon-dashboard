@@ -1,388 +1,101 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { get } from 'svelte/store';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { tick } from 'svelte';
-import { render, screen } from '@testing-library/svelte';
-import Energy from '../src/screens/Energy.svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import Energy from '../src/features/energy/EnergyScreen.svelte';
 import { api } from '../src/lib/api.js';
-import { language, profile, resetClientState, state } from '../src/lib/stores.js';
+import { applyHello, language, resetClientState } from '../src/lib/stores.js';
 import { translate } from '../src/lib/i18n/index.js';
 
-// Mock date for consistent testing
-const mockDate = new Date('2026-10-11T03:00:00.000Z');
-const fromTs = mockDate.getTime() - 2 * 60 * 60 * 1000; // 01:00:00
-const toTs = mockDate.getTime(); // 03:00:00
-
-beforeEach(() => {
-  vi.useFakeTimers();
-  vi.setSystemTime(mockDate);
-});
-
 afterEach(() => {
-  vi.useRealTimers();
   resetClientState();
   vi.restoreAllMocks();
 });
 
-// Helper to create a T2-like history response
-// T2: one sample at 500W at 01:00:00, unchanged until flush at 03:00:00
-// Energy = 500 * 7200 = 3,600,000 J = 1.0 kWh
-function createT2History() {
-  // 01:00:00 to 03:00:00 = 2 hours = 7200 seconds
-  // At 1h resolution, we have 2 buckets of 3600 seconds each
-  // bucket_start_ts for 01:00 = fromTs, for 02:00 = fromTs + 3600000
-  const prodPoints = [
-    [fromTs, 500, 3600],  // 01:00-02:00: 500W avg, 3600s covered
-    [fromTs + 3600000, 500, 3600],  // 02:00-03:00: 500W avg, 3600s covered
-  ];
-  
-  return {
-    resolution: '1h',
-    partial: false,
-    series: {
-      'main/Heat_Power_Production': {
-        kind: 'number',
-        points: prodPoints,
-        coverage: null,
-        breaks: [],
+const flag = (value) => ({ value, unknown: false, stale: false });
+
+function energyBody(period = 'day', periods = {}) {
+  return { tz: 'UTC', period, from: 0, to: 1, estimate: true, periods };
+}
+
+const DAY_ROWS = {
+  '2026-10-11': { heat: { production_kwh: 3, consumption_kwh: 1 } },
+  '2026-10-10': { dhw: { production_kwh: 2, consumption_kwh: 1 }, heat: { production_kwh: 1, consumption_kwh: 1 } },
+};
+
+function hello(topics = {}, hasExtra = false) {
+  applyHello({
+    type: 'hello',
+    state: { seq: 1, topics, device_online: 'online' },
+    profile: { has_extra: flag(hasExtra) },
+  });
+}
+
+describe('Energy screen', () => {
+  it('has matching EN and NL strings', () => {
+    expect(translate('en', 'energy.title')).toBe('Energy');
+    expect(translate('nl', 'energy.title')).toBe('Energie');
+  });
+
+  it('mounts before hello, then loads', async () => {
+    const energy = vi.spyOn(api, 'energy').mockResolvedValue(energyBody('day', DAY_ROWS));
+    render(Energy);
+    await tick();
+    expect(energy).not.toHaveBeenCalled();
+    hello();
+    await waitFor(() => expect(screen.getByTestId('energy-table')).toBeTruthy());
+    expect(energy).toHaveBeenCalledWith({ period: 'day' });
+    expect(screen.getByTestId('prod-2026-10-11-heat').textContent).toContain('3.00 kWh');
+    expect(screen.getByTestId('cop-2026-10-11-heat').textContent).toBe('3.00');
+    expect(screen.getByTestId('total-prod').textContent).toContain('6.00 kWh');
+    // empty modes are omitted
+    expect(screen.queryByTestId('energy-row-2026-10-11-cool')).toBeNull();
+  });
+
+  it('re-renders text when the language switches', async () => {
+    vi.spyOn(api, 'energy').mockResolvedValue(energyBody('day', DAY_ROWS));
+    language.set('en');
+    hello();
+    render(Energy);
+    await waitFor(() => expect(screen.getByTestId('energy-table')).toBeTruthy());
+    expect(screen.getByTestId('period-day').textContent.trim()).toBe('Day');
+    language.set('nl');
+    await waitFor(() => expect(screen.getByTestId('period-day').textContent.trim()).toBe('Dag'));
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Energie');
+  });
+
+  it('shows S0 WatthourTotal as cumulative kWh', async () => {
+    vi.spyOn(api, 'energy').mockResolvedValue(energyBody());
+    hello({
+      's0/WatthourTotal/1': {
+        value: 1000, raw: '1000', kind: 'number', unit: 'Wh', decimals: 0, enum_label: null,
+        catalogued: true, sentinel: false, last_change: 1, last_seen: 1, retained_only: false,
       },
-      'main/Heat_Power_Consumption': {
-        kind: 'number',
-        points: prodPoints.map(([ts, avg, cov]) => [ts, avg, cov]),
-        coverage: null,
-        breaks: [],
-      },
-    },
-  };
-}
-
-// Profile without extra (uses main/ topics)
-function createProfileWithoutExtra() {
-  return {
-    computed_at: mockDate.getTime(),
-    has_extra: { value: false, unknown: false, stale: false },
-    operating_mode: { value: 4, unknown: false, stale: false }, // Heat + DHW
-    heating_in_use: { value: true, unknown: false, stale: false },
-    cooling_in_use: { value: false, unknown: false, stale: false },
-    dhw_in_use: { value: true, unknown: false, stale: false },
-  };
-}
-
-// Profile with extra (uses extra/ topics)
-function createProfileWithExtra() {
-  return {
-    computed_at: mockDate.getTime(),
-    has_extra: { value: true, unknown: false, stale: false },
-    operating_mode: { value: 4, unknown: false, stale: false },
-    heating_in_use: { value: true, unknown: false, stale: false },
-    cooling_in_use: { value: false, unknown: false, stale: false },
-    dhw_in_use: { value: true, unknown: false, stale: false },
-  };
-}
-
-describe('Energy screen (T16)', () => {
-  describe('i18n strings', () => {
-    it('has matching EN and NL string keys', () => {
-      // This is tested by the i18n.test.js glob test, but we verify the module loads
-      expect(translate('en', 'energy.title')).toBe('Energy');
-      expect(translate('nl', 'energy.title')).toBe('Energie');
     });
+    render(Energy);
+    await waitFor(() => expect(screen.getByTestId('s0-section')).toBeTruthy());
+    expect(screen.getByTestId('s0-s0-WatthourTotal-1').textContent).toContain('1.0 kWh');
+    expect(screen.getByTestId('s0-section').textContent).toContain('Cumulative meter reading');
   });
 
-  describe('T2-like fixture energy equals 1.0 kWh', () => {
-    it('computes 1.0 kWh from T2-like fixture (500W for 2 hours)', async () => {
-      const t2History = createT2History();
-      
-      // Mock the API
-      vi.spyOn(api, 'history').mockResolvedValue(t2History);
-      
-      // Set up stores
-      profile.set(createProfileWithoutExtra());
-      state.set({
-        seq: 1,
-        topics: {
-          'main/Heat_Power_Production': {
-            value: 500, raw: '500', kind: 'number', unit: 'W', decimals: 0,
-            enum_label: null, catalogued: true, sentinel: false,
-            last_change: mockDate.getTime(), last_seen: mockDate.getTime(), retained_only: false,
-          },
-          'main/Heat_Power_Consumption': {
-            value: 500, raw: '500', kind: 'number', unit: 'W', decimals: 0,
-            enum_label: null, catalogued: true, sentinel: false,
-            last_change: mockDate.getTime(), last_seen: mockDate.getTime(), retained_only: false,
-          },
-        },
-        device_online: 'online',
-        last_device_message: mockDate.getTime(),
-        broker_connected: true,
-        listen_only_suspected: false,
-      });
-      language.set('en');
-      
-      render(Energy);
-      
-      // Wait for the async load to complete
-      await tick();
-      await vi.waitFor(() => {
-        // The loading state should be false
-        expect(screen.queryByTestId('loading')).toBeNull();
-      });
-      
-      // The energy should be computed from the history
-      // T2: 500 * 7200 = 3,600,000 J = 1.0 kWh
-      // Check that the production value shows "1.00" (toFixed(2) for values < 10)
-      const prodCell = screen.getByTestId('prod-heat');
-      expect(prodCell.textContent).toContain('1.00');
-      
-      // Also check the consumption
-      const consCell = screen.getByTestId('cons-heat');
-      expect(consCell.textContent).toContain('1.00');
-    });
+  it('requests the chosen period', async () => {
+    const energy = vi.spyOn(api, 'energy').mockImplementation(async ({ period }) =>
+      energyBody(period, { [period === 'month' ? '2026-10' : '2026']: { heat: { production_kwh: 4, consumption_kwh: 2 } } }));
+    hello();
+    render(Energy);
+    await waitFor(() => expect(energy).toHaveBeenCalledWith({ period: 'day' }));
+    await fireEvent.click(screen.getByTestId('period-month'));
+    await waitFor(() => expect(energy).toHaveBeenCalledWith({ period: 'month' }));
+    await waitFor(() => expect(screen.getByTestId('energy-row-2026-10-heat')).toBeTruthy());
+    await fireEvent.click(screen.getByTestId('period-year'));
+    await waitFor(() => expect(energy).toHaveBeenCalledWith({ period: 'year' }));
+    await waitFor(() => expect(screen.getByTestId('energy-row-2026-heat')).toBeTruthy());
   });
 
-  describe('estimate label', () => {
-    it('shows estimate label when using main/ topics (no extra)', async () => {
-      vi.spyOn(api, 'history').mockResolvedValue({
-        resolution: '1h',
-        partial: false,
-        series: {
-          'main/Heat_Power_Production': {
-            kind: 'number',
-            points: [[fromTs, 500, 3600]],
-            coverage: null,
-            breaks: [],
-          },
-          'main/Heat_Power_Consumption': {
-            kind: 'number',
-            points: [[fromTs, 500, 3600]],
-            coverage: null,
-            breaks: [],
-          },
-        },
-      });
-      
-      profile.set(createProfileWithoutExtra());
-      state.set({
-        seq: 1,
-        topics: {},
-        device_online: 'online',
-        last_device_message: mockDate.getTime(),
-        broker_connected: true,
-        listen_only_suspected: false,
-      });
-      language.set('en');
-      
-      render(Energy);
-      
-      await tick();
-      await vi.waitFor(() => {
-        expect(screen.queryByTestId('loading')).toBeNull();
-      });
-      
-      // Should show estimate label (because we're using main/ topics)
-      expect(screen.getByTestId('estimate-label')).toBeTruthy();
-    });
-
-    it('does not show estimate label when using extra/ topics', async () => {
-      vi.spyOn(api, 'history').mockResolvedValue({
-        resolution: '1h',
-        partial: false,
-        series: {},
-      });
-      
-      profile.set(createProfileWithExtra());
-      state.set({
-        seq: 1,
-        topics: {},
-        device_online: 'online',
-        last_device_message: mockDate.getTime(),
-        broker_connected: true,
-        listen_only_suspected: false,
-      });
-      language.set('en');
-      
-      render(Energy);
-      
-      await tick();
-      await vi.waitFor(() => {
-        expect(screen.queryByTestId('loading')).toBeNull();
-      });
-      
-      // Should NOT show estimate note
-      expect(screen.queryByTestId('estimate-note')).toBeNull();
-      // Should NOT show estimate label
-      expect(screen.queryByTestId('estimate-label')).toBeNull();
-    });
-  });
-
-  describe('S0 display', () => {
-    it('shows S0 section when S0 topics are present', async () => {
-      vi.spyOn(api, 'history').mockResolvedValue({
-        resolution: '1h',
-        partial: false,
-        series: {},
-      });
-      
-      const s0Value = 1500.5;
-      profile.set(createProfileWithoutExtra());
-      state.set({
-        seq: 1,
-        topics: {
-          's0/WatthourTotal/1': {
-            value: s0Value, raw: '1500.5', kind: 'number', unit: 'kWh', decimals: 1,
-            enum_label: null, catalogued: true, sentinel: false,
-            last_change: mockDate.getTime(), last_seen: mockDate.getTime(), retained_only: false,
-          },
-        },
-        device_online: 'online',
-        last_device_message: mockDate.getTime(),
-        broker_connected: true,
-        listen_only_suspected: false,
-      });
-      language.set('en');
-      
-      render(Energy);
-      
-      await tick();
-      await vi.waitFor(() => {
-        expect(screen.queryByTestId('loading')).toBeNull();
-      });
-      
-      // Should show S0 section
-      expect(screen.getByTestId('s0-section')).toBeTruthy();
-      // Should show the S0 value
-      expect(screen.getByTestId('s0-s0-WatthourTotal-1')).toBeTruthy();
-    });
-
-    it('omits S0 section when no S0 topics', async () => {
-      vi.spyOn(api, 'history').mockResolvedValue({
-        resolution: '1h',
-        partial: false,
-        series: {},
-      });
-      
-      profile.set(createProfileWithoutExtra());
-      state.set({
-        seq: 1,
-        topics: {},
-        device_online: 'online',
-        last_device_message: mockDate.getTime(),
-        broker_connected: true,
-        listen_only_suspected: false,
-      });
-      language.set('en');
-      
-      render(Energy);
-      
-      await tick();
-      await vi.waitFor(() => {
-        expect(screen.queryByTestId('loading')).toBeNull();
-      });
-      
-      // Should NOT show S0 section
-      expect(screen.queryByTestId('s0-section')).toBeNull();
-    });
-  });
-
-  describe('empty splits', () => {
-    it('omits modes with no data', async () => {
-      vi.spyOn(api, 'history').mockResolvedValue({
-        resolution: '1h',
-        partial: false,
-        series: {
-          // Only heat production and consumption have data
-          'main/Heat_Power_Production': {
-            kind: 'number',
-            points: [[fromTs, 500, 3600]],
-            coverage: null,
-            breaks: [],
-          },
-          'main/Heat_Power_Consumption': {
-            kind: 'number',
-            points: [[fromTs, 500, 3600]],
-            coverage: null,
-            breaks: [],
-          },
-          // Cool and DHW have no data (empty points)
-          'main/Cool_Power_Production': {
-            kind: 'number',
-            points: [],
-            coverage: null,
-            breaks: [],
-          },
-          'main/Cool_Power_Consumption': {
-            kind: 'number',
-            points: [],
-            coverage: null,
-            breaks: [],
-          },
-          'main/DHW_Power_Production': {
-            kind: 'number',
-            points: [],
-            coverage: null,
-            breaks: [],
-          },
-          'main/DHW_Power_Consumption': {
-            kind: 'number',
-            points: [],
-            coverage: null,
-            breaks: [],
-          },
-        },
-      });
-      
-      profile.set(createProfileWithoutExtra());
-      state.set({
-        seq: 1,
-        topics: {},
-        device_online: 'online',
-        last_device_message: mockDate.getTime(),
-        broker_connected: true,
-        listen_only_suspected: false,
-      });
-      language.set('en');
-      
-      render(Energy);
-      
-      await tick();
-      await vi.waitFor(() => {
-        expect(screen.queryByTestId('loading')).toBeNull();
-      });
-      
-      // Should show heat row
-      expect(screen.getByTestId('energy-row-heat')).toBeTruthy();
-      // Should NOT show cool row (empty)
-      expect(screen.queryByTestId('energy-row-cool')).toBeNull();
-      // Should NOT show dhw row (empty)
-      expect(screen.queryByTestId('energy-row-dhw')).toBeNull();
-    });
-  });
-
-  describe('period selector', () => {
-    it('renders all period buttons when data exists', async () => {
-      vi.spyOn(api, 'history').mockResolvedValue(createT2History());
-      
-      profile.set(createProfileWithoutExtra());
-      state.set({
-        seq: 1,
-        topics: {},
-        device_online: 'online',
-        last_device_message: mockDate.getTime(),
-        broker_connected: true,
-        listen_only_suspected: false,
-      });
-      language.set('en');
-      
-      render(Energy);
-      
-      await tick();
-      await vi.waitFor(() => {
-        expect(screen.queryByTestId('loading')).toBeNull();
-      });
-      
-      expect(screen.getByTestId('period-selector')).toBeTruthy();
-      expect(screen.getByTestId('period-day')).toBeTruthy();
-      expect(screen.getByTestId('period-month')).toBeTruthy();
-      expect(screen.getByTestId('period-year')).toBeTruthy();
-    });
+  it('labels main/ based values as an estimate only without extra', async () => {
+    vi.spyOn(api, 'energy').mockResolvedValue({ ...energyBody('day', DAY_ROWS), estimate: false });
+    hello({}, true);
+    render(Energy);
+    await waitFor(() => expect(screen.getByTestId('energy-table')).toBeTruthy());
+    expect(screen.queryByTestId('estimate-label')).toBeNull();
   });
 });

@@ -1,4 +1,5 @@
 """Environment configuration (spec §12)."""
+import os
 import re
 from dataclasses import dataclass
 from typing import Mapping
@@ -27,6 +28,9 @@ class Config:
     tz: str
     public_origins: tuple[str, ...]
     allowed_origins: tuple[str, ...]
+    mqtt_ca_file: str | None = None
+    command_rate_max: int = 6
+    command_rate_window_s: int = 3600
 
 
 _HOST = re.compile(r"^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$|^\[[0-9A-Fa-f:.]+\]$|^[0-9A-Fa-f:]+:[0-9A-Fa-f:]*$")
@@ -96,12 +100,17 @@ def load(env: Mapping[str, str]) -> Config:
     raw_ret = (env.get("RAW_RETENTION_DAYS") or "").strip()
     retention = _int(env, "RAW_RETENTION_DAYS", 0, 1) if raw_ret else None
 
+    ca_file = (env.get("MQTT_CA_FILE") or "").strip() or None
+    if ca_file is not None and not os.path.isfile(ca_file):
+        raise ConfigError(f"MQTT_CA_FILE: {ca_file!r} is not a readable file")
+
     return Config(
         mqtt_host=host,
         mqtt_port=_int(env, "MQTT_PORT", 1883, 1, 65535),
         mqtt_user=env.get("MQTT_USER") or None,
         mqtt_password=env.get("MQTT_PASSWORD") or None,
         mqtt_tls=(env.get("MQTT_TLS") or "").strip().lower() in ("1", "true", "yes"),
+        mqtt_ca_file=ca_file,
         mqtt_base_topic=base,
         data_dir=env.get("DATA_DIR") or "/data",
         flush_interval_seconds=_int(env, "FLUSH_INTERVAL_SECONDS", 900, 10, 86400),
@@ -113,4 +122,6 @@ def load(env: Mapping[str, str]) -> Config:
         tz=tz,
         public_origins=_origins(env, "PUBLIC_ORIGINS"),
         allowed_origins=_origins(env, "ALLOWED_ORIGINS"),
+        command_rate_max=_int(env, "COMMAND_RATE_MAX", 6, 1),
+        command_rate_window_s=_int(env, "COMMAND_RATE_WINDOW_S", 3600, 1),
     )

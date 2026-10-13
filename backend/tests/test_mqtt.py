@@ -1,4 +1,5 @@
 """Publish allowlist and reconnect backoff, against a fake aiomqtt client."""
+import dataclasses
 from pathlib import Path
 
 import pytest
@@ -244,3 +245,29 @@ async def test_successful_connect_resets_backoff_and_dispatches():
     assert seen == [Message("main/Outside_Temp", "21", False, 1_700_000_000_000)]
     assert connects == ["up", "down"]
     assert mqtt.connected is False
+
+
+async def test_publish_translates_mqtt_error():
+    import aiomqtt
+
+    class Broken(FakeClient):
+        async def publish(self, *a, **k):
+            raise aiomqtt.MqttError("connection lost")
+
+    mqtt = Mqtt(config(), CATALOG)
+    mqtt.attach(Broken())
+    with pytest.raises(PublishError):
+        await mqtt.publish_command("SetDHWTemp", "50")
+
+
+def test_default_factory_passes_the_ca_file(monkeypatch):
+    import aiomqtt
+
+    from heishamon_dashboard.mqtt import Mqtt
+
+    seen = {}
+    monkeypatch.setattr(aiomqtt, "TLSParameters", lambda **kw: seen.update(kw) or "tls")
+    monkeypatch.setattr(aiomqtt, "Client", lambda host, **kw: seen.update(client=kw))
+    cfg = dataclasses.replace(config(), mqtt_tls=True, mqtt_ca_file="/etc/ca.pem")
+    Mqtt(cfg, CATALOG)._default_factory()
+    assert seen["ca_certs"] == "/etc/ca.pem" and seen["client"]["tls_params"] == "tls"

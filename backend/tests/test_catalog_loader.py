@@ -33,7 +33,8 @@ def test_input_lookup():
     d = raw()
     d["inputs"] = [{"path": "s0/WatthourTotal/1", "class": "retained_exception", "retain": True,
                     "type": "dec3", "range": {"min": 0}, "range_source": "heishamon_fact",
-                    "min_firmware": "3.2.3", "label": {"en": "S0 total", "nl": "S0 totaal"}}]
+                    "min_firmware": "3.2.3", "ui_group": "s0",
+                    "label": {"en": "S0 total", "nl": "S0 totaal"}}]
     assert catalog.parse(d).input("s0/WatthourTotal/1")["retain"] is True
 
 
@@ -68,7 +69,16 @@ VIOLATIONS = {
     "duplicate topic": lambda d: d["topics"].append(copy.deepcopy(d["topics"][0])),
     "bad input class": lambda d: d.update(inputs=[{"path": "p", "class": "x", "retain": False, "type": "int",
                                                    "range": {}, "range_source": "heishamon_fact",
-                                                   "min_firmware": "3.2.3", "label": {"en": "a", "nl": "b"}}]),
+                                                   "min_firmware": "3.2.3", "ui_group": "s0", "label": {"en": "a", "nl": "b"}}]),
+    "missing command ui_group": lambda d: d["commands"][0].pop("ui_group"),
+    "unknown command ui_group": lambda d: d["commands"][0].update(ui_group="misc"),
+    "unknown input ui_group": lambda d: d.update(inputs=[{"path": "p", "class": "input", "retain": False, "type": "int",
+                                                          "range": {}, "range_source": "heishamon_fact",
+                                                          "min_firmware": "3.2.3", "ui_group": "misc",
+                                                          "label": {"en": "a", "nl": "b"}}]),
+    "missing input ui_group": lambda d: d.update(inputs=[{"path": "p", "class": "input", "retain": False, "type": "int",
+                                                          "range": {}, "range_source": "heishamon_fact",
+                                                          "min_firmware": "3.2.3", "label": {"en": "a", "nl": "b"}}]),
     "bad model series": lambda d: d.update(models=[{"hex": _HEX, "name": "WH", "series": "Z"}]),
     "short model hex": lambda d: d.update(models=[{"hex": "AA BB", "name": "WH", "series": "J"}]),
     "lower-case model hex": lambda d: d.update(models=[{"hex": _HEX.lower(), "name": "WH", "series": "J"}]),
@@ -97,3 +107,12 @@ def test_invalid_json(tmp_path):
     p.write_text("{nope")
     with pytest.raises(CatalogError):
         catalog.load(p)
+
+
+def test_applicability_series_is_a_string_list():
+    r = raw()
+    r["commands"][0]["applicability"] = {"series": ["J"]}
+    assert catalog.parse(r).commands[0]["applicability"] == {"series": ["J"]}
+    r["commands"][0]["applicability"] = {"series": "J"}
+    with pytest.raises(CatalogError):
+        catalog.parse(r)

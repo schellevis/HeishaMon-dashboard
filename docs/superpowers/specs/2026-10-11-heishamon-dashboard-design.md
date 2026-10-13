@@ -4,7 +4,8 @@ Date: 2026-10-11
 Status: revision 4.2 — revision 4.1 plus the plan-review interface additions (overlay route, catalog
 in the frontend build, real-capture replay deferred); firmware facts in
 Appendix A. Implemented and independently verified; deviations the build introduced are noted in §4.4
-(error codes) and §12 (`STATIC_DIR`)
+(error codes) and §12 (`STATIC_DIR`). Amended after the review-fixes refactor (command lifecycle,
+catalog conformity, `rules.json`, module split; see §11)
 
 **Where the authority lives:** this document fixes every behaviour, contract, schema and rule. Three
 artefacts are *data* produced during the build and are test-enforced against this document, not
@@ -238,6 +239,9 @@ Each module is a separate unit with a narrow interface.
     `opentherm/read/<name>` inputs listed in Appendix A.2.
   - **Publish allowlist:** these three are the only publish paths. Any other topic, or a topic
     sent through the wrong path, raises an error. A test enforces this for every catalog entry.
+  - **Uncatalogued topics:** `State` keeps at most `UNKNOWN_TOPIC_MAX = 2000` uncatalogued topics.
+    Messages for further new uncatalogued topics are dropped and counted in `ingest_dropped`.
+    Catalogued, `1wire/`, `s0/`, `opentherm/`, `stats`, `LWT` and `ip` topics are always accepted.
   - **Ingest limits:** a message whose topic exceeds 256 bytes or whose payload exceeds 64 KiB is
     dropped before parsing. It is counted in a per-flush `ingest_dropped` counter, written as one
     aggregated event per flush.
@@ -268,6 +272,10 @@ Each module is a separate unit with a narrow interface.
       HeishaMon's heartbeat follows its configurable `waitTime` (Appendix A.1).
     - The timeout case is **backdated**: the outage starts at the last qualifying message's
       timestamp.
+    - **Reconnect from `unknown`:** a broker reconnect leaves the state `unknown`, and a retained
+      `Offline` (the broker's will) never changes liveness. When no qualifying live message has
+      arrived `liveness timeout` after the reconnect, the state becomes `offline` with the same
+      backdate: `offline_since` is the last qualifying timestamp, so coverage ends there.
     - After `offline`, only a qualifying message (rules 4–5) returns the state to `online`.
   - Echo policy is topic-based, not content-based. The dashboard never needs to recognise its own
     messages; it only needs to never publish outside the dashboard-writable set, which the `mqtt`
@@ -415,6 +423,7 @@ REST endpoints (all under `/api`). Shapes use the record types defined after the
 | `PUT /api/prefs` | replace preferences | full `Prefs` object | `200 Prefs`; `422 Error` on unknown key or wrong type |
 | `GET /api/system` | system status | — | `System` |
 | `GET /api/overlay?zone=z1\|z2&mode=heat\|cool&from=ts&to=ts` | measured-data overlay (§8) | range ≤ 400 days | `Overlay` |
+| `GET /api/energy?period=day\|month\|year` | kWh per local day/month/year per mode, calendar ranges computed in the server `TZ` (day = 14 local days, month = 12 local months, year = from 1 Jan four years ago); unknown period → `422 bad_param` | – | `{tz, period, from, to, estimate, periods}` |
 | `POST /api/system/flush` | flush now | `{}` | `202 {"flush_id": uuid}`; `409 Error` (`flush_in_progress`); result arrives as a `flush` event |
 
 **Value encoding (submission → MQTT payload):**
@@ -454,7 +463,12 @@ REST endpoints (all under `/api`). Shapes use the record types defined after the
     […]}`. Text is always served at raw resolution regardless of the range. After raw expiry, text
     history older than the cutoff is unavailable, apart from the anchor.
   - `partial` is true when `max_points` truncated any series. In that case the newest points are
-    kept.
+    kept, and each trimmed series additionally carries `"truncated": true` (the key is absent
+    otherwise).
+  - **Bounded scans:** a text series reads at most `max_points × 4` rows from the database (the
+    newest; its coverage then starts at the oldest row read) and is flagged `truncated`. Numeric raw
+    series are served only when they already fit `max_points`. The energy sums
+    (`/api/energy`) bypass this thinning and add up every rollup bucket.
 - **CSV:** header `topic,ts,resolution,value,covered_seconds`; one row per point; `covered_seconds`
   is empty at raw resolution; text values are RFC 4180-quoted. The CSV export and `History` for the
   same query contain the same points (A4).
@@ -486,8 +500,8 @@ REST endpoints (all under `/api`). Shapes use the record types defined after the
 - `Error`: `{"error": code, "message": str, "detail": object|null}`.
   - Codes: `out_of_range`, `bad_step`, `not_allowed_value`, `bad_type`, `unknown_command`,
     `write_lock`, `pcb_disabled`, `pcb_emulation_inactive`, `device_offline`,
-    `broker_disconnected`, `firmware_too_old`, `profile_unknown`, `read_only_value`,
-    `confirm_required`, `storage_unavailable`, `bad_origin`, `bad_host`, `flush_in_progress`,
+    `broker_disconnected`, `firmware_too_old`, `not_applicable` (422, series mismatch, detail `{"series"}`), `profile_unknown`, `read_only_value`,
+    `confirm_required`, `storage_unavailable`, `rate_limited` (429), `bad_origin`, `bad_host`, `flush_in_progress`,
     `bad_request` (400, malformed JSON), `not_found` (404, unknown route or command id),
     `method_not_allowed` (405). Any other framework HTTP error is reported as `http_error`.
 
@@ -514,9 +528,14 @@ REST endpoints (all under `/api`). Shapes use the record types defined after the
 - `404` for unknown routes and unknown command ids.
 - `415` for a non-JSON mutation body.
 - `422` for validation and gate rejections.
+- `429 rate_limited` when a command name exceeded `COMMAND_RATE_MAX` publish attempts in the last
+  `COMMAND_RATE_WINDOW_S`; `detail` is `{"retry_after_s": n}`.
 - `503` with `broker_disconnected` or `storage_unavailable`.
-- `409 flush_in_progress` only for `POST /api/system/flush`. There is no `409` for commands. A newer command for the same read-back topic always succeeds;
-  the older record moves to `superseded` and is pushed over the WebSocket (§6).
+- `409 flush_in_progress` only for `POST /api/system/flush`. There is no `409` for commands. A newer command
+  that conflicts with an in-flight one (§6 step 3) succeeds once the rate limit allows it; the older record
+  moves to `superseded` and is pushed over the WebSocket (§6). A command identical to an in-flight one
+  returns that record with `200` and publishes nothing.
+- Every `Command` record carries `eeprom_warning` (boolean, §6 "EEPROM protection").
 
 ## 5. Storage
 
@@ -692,6 +711,20 @@ History queries choose their resolution from the requested range and `max_points
 Results merge DB rows with the unflushed RAM buffer under the replace rule above, so the latest
 minutes are always visible.
 
+**Concurrency.** The store keeps exactly one writer connection and one transaction per flush. Reads
+(history, rollups, events, commands, outages, the overlay's `last_confirmed_setcurves`) use a second
+connection on the same `/data` file with `PRAGMA query_only=ON`. It is not a `mode=ro` URI, which fails
+when the `-shm` file cannot be created. The API runs them in `asyncio.to_thread`. A read takes the store
+lock only to (a) copy what it needs from RAM: the buffered samples of the requested topics up to the
+query end, the outage list and the pending command/event records, and (b) open a database read
+snapshot. A flush holds the same lock for its whole transaction, so the RAM copy and the snapshot always
+describe the same instant: a flush that commits mid-read neither duplicates nor loses a sample or an
+outage. The scan itself runs without the lock, so a slow read never delays `observe()` or a flush.
+Readers are serialised among themselves on their one connection. The code lives in the package
+`backend/heishamon_dashboard/store/`: `buffer` (RAM samples), `outages`, `records` (commands, events,
+prefs, budget), `rollups`, `queries`, `sqlite` (connections, flush transaction, purge) and `__init__`
+(the `Store` facade).
+
 ### 5.4 Worked timelines (normative: the A5 fixtures must reproduce these numbers)
 
 Times are `hh:mm:ss` on one UTC day. The topic is `main/Heat_Power_Production` (W). Every
@@ -810,24 +843,47 @@ record; it is returned as an `Error` and logged as a `command_rejected` event.
    5. PCB command while `profile.pcb_emulation_active` is not true → `422 pcb_emulation_inactive`;
    6. `min_firmware` above the detected version (or above 3.2.3 when the version is unknown) →
       `422 firmware_too_old`;
+   6a. a command with `applicability.series` and a known series (stale or not) outside that list →
+      `422 not_applicable`, detail `{"series"}`; an unknown series makes the command need `confirm: true`
+      (gate 9 `confirm_required`), as for the J-series heater settings;
    7. an applicability condition depends on a profile field that is unknown or stale, and the
       catalog entry is not `safe_under_unknown` → `422 profile_unknown`, naming the field;
    8. a value that is read-only on the write side (operation modes 7/8) → `422 read_only_value`;
    9. a risky command without `confirm: true` → `422 confirm_required`.
       - Risky commands: heat pump off, all triggers, all PCB commands, both retained exceptions.
    10. the protected-record budget is full (§5.1) → `503 storage_unavailable`.
-3. **No-op check** (settings only): if the read-back topic's current value equals the requested
-   value, and that value was received live (not `retained_only`) within the last 660 s, nothing is
-   published.
+3. **Conflicting flights, rate limit and no-op check.** The order is: plan → gates → identical-flight check →
+   conflicting flights → publish-or-noop decision → rate limit (only for a submission that would publish)
+   → persist the new record → supersede.
+   - A *conflicting flight* is an in-flight command whose **expected keys being published**
+     intersect the new plan's expected keys with a different expected value.
+   - An identical in-flight submission (same name, same values) returns that record with `200`.
+   - **Rate limit:** at most `COMMAND_RATE_MAX` (default 6) real publish attempts per command name in
+     a sliding `COMMAND_RATE_WINDOW_S` (default 3600); retries count. A new submission over the cap is
+     rejected with `429 rate_limited` (`detail.retry_after_s`); a retry over the cap does not publish
+     and its record finishes `failed` with detail `rate_limited`.
+   - **No-op** (settings only): if the read-back topic's current value equals the requested value, it
+     was received live (not `retained_only`) within the last 660 s, **and no conflicting flight exists**,
+     nothing is published. While a conflicting flight is non-terminal, the value is published, because
+     the earlier value may still land.
    - A record with `status: noop` is created and returned with `200`.
    - This avoids needless EEPROM writes and false failures from change-only publishing.
    - For `SetCurves`, keys whose current value already matches are removed from the payload. If no
      key remains, the result is a no-op.
-4. **Supersede:** at most one in-flight record per read-back topic.
-   - A new record whose read-back topics intersect those of an in-flight record moves that older
-     record to `superseded`, atomically. Its retry timer is cancelled, and for `SetCurves` all its
-     keys stop, including those not repeated in the new command.
-   - The new command then proceeds. The status change is pushed over the WebSocket.
+4. **Supersede:** only after the new record is persisted.
+   - Conflicting flights (step 3) move to `superseded`, atomically (no await between selecting and
+     marking). Their retry and terminal timers are cancelled, and for `SetCurves` all their keys stop,
+     including those not repeated in the new command. A `storage_unavailable` rejection therefore
+     leaves the old flight running.
+   - `SetCurves` flights that touch only disjoint leaves of the same zone/mode stay in flight. Ordering
+     and range checks use the *resulting* curve: read-back leaves, overlaid with the unconfirmed leaves
+     of in-flight `SetCurves` flights on that zone/mode, overlaid with the submitted leaves. A leaf that
+     is absent, invalid or older than 660 s counts as missing (a retained snapshot is fine here: it is
+     the last known state, and only confirmation and no-op need a live message): if the check needs it,
+     the result is `422 profile_unknown` naming the topic.
+   - A `SetCurves` retry fails with `meaning_changed` when the control mode or room-sensor status of a
+     touched zone/mode changed since submission.
+   - The status change is pushed over the WebSocket.
 5. **Publish:**
    - Settings, triggers and unverifiable commands are published non-retained, QoS 0, through
      `publish_command`.
@@ -882,8 +938,10 @@ record; it is returned as an `Error` and logged as a `command_rejected` event.
 **EEPROM protection:**
 
 - Sliders and drag handles never send while moving; only an explicit **Apply** sends.
-- The UI warns when the same setting has been changed **3 or more times in the last 60 minutes**
-  (counted from records with status `confirmed`, `retried` or `failed`).
+- The UI warns when the same setting has been published **3 or more times in the last 60 minutes**:
+  the sum of real publish attempts for that command name, retries and `superseded` records included.
+  The backend reports it as the boolean `eeprom_warning` on every command record, so the warning
+  shows before the hard `429 rate_limited` stop of step 3. The count is kept in memory.
 
 ## 7. Screens
 
@@ -900,6 +958,7 @@ not what always appears.
      - The default set covers outside temperature, flow/return temperature and ΔT, compressor frequency, power in/out, live COP, three-way valve and defrost.
      - Each tile has a 24 h sparkline.
      - The user can pin, unpin and reorder tiles, with any catalogued topic as a tile. This is stored as a pref.
+     - A stored tile is either a built-in tile id (the `tiles` list in `rules.json`) or a catalogued topic key such as `main/DHW_Temp`. A catalogued-key tile shows the catalog label, unit and live value. `PUT /api/prefs` rejects any other entry with `422 bad_type`; stored entries that fail the check are dropped on load with a warning. The Overview derives its pinned tiles from the shared prefs, and skips an unknown id instead of failing.
    - **Quick controls**, adapting live to the profile:
      - heat pump on/off;
      - operating mode (all modes, whatever the current one);
@@ -1045,6 +1104,9 @@ expiry, and never depend on sub-minute ordering.
   - Windows are aligned to UTC quarter-hours.
   - A window is **eligible** when at least 12 of its 15 minutes are eligible (80 %). Otherwise it
     is dropped; partial windows are never guessed.
+  - The overlay processes its range in chunks of at most 7 days (a whole number of windows). Each
+    chunk also reads the 10 minutes before it, so conditions 6 and 7 behave exactly as in an
+    unchunked run; only the 15-minute aggregates are kept between chunks.
   - Each window value is the mean, over its eligible minutes, of those minutes' `avg`.
 - **Scatter:** eligible windows' (outside, water) pairs over 7, 14 or 30 days or a custom range,
   on the curve's axes.
@@ -1145,7 +1207,7 @@ expiry, and never depend on sub-minute ordering.
 | A5 | Storage correctness | the T1–T9 timelines of §5.4 reproduce every listed number exactly. The overflow budget test runs a storage failure past every cap, with repeated offline/online transitions, repeated topic-scoped drop/re-establish and ignore/un-ignore cycles, and in-flight commands completing at the reserve boundary. It shows: bounded memory (record count never above `AUDIT_BUFFER_MAX`); topic-scoped `dropped` outages before saturation; exactly one saturation outage afterwards, with no further outage records; refused new commands (`storage_unavailable`); terminal updates still recorded; the aggregated events; and zero coverage for every topic during saturation. After raw expiry, history at `1m`/`1h` returns the same `covered_seconds` and `breaks` as before expiry, and a short (≤ 6 h) query on expired history is served at `1m`, never `raw` |
 | A6 | Heating curve | crosswise mapping; ordering invariant and limits (equal targets allowed, equal outside refused; target ordering skipped for a coupled zone/mode); slope/level refusal at bounds; per-key `SetCurves` confirmation; overlay minute/window rules on numeric fixtures, including the startup and DHW-settling 10-minute exclusions and the 12-of-15 rule |
 | A7 | Installation-agnostic | every profile preset above passes; unknown/stale inputs show features and gate commands with `profile_unknown`; modes 7/8 are informational only; the `fw-3.2.3` preset disables exactly the commands with `min_firmware` > 3.2.3, as does a missing version |
-| A8 | Liveness | per the §4.1 rule list: `LWT=Online` heartbeats alone keep the device online; retained snapshots, `commands/#` echoes, an `s0/WatthourTotal` echo and `opentherm/read/#` never make an offline device online; a live `Offline` wins; the timeout is backdated to the last qualifying message; broker reconnect alone leaves the device `unknown` until a qualifying message |
+| A8 | Liveness | per the §4.1 rule list: `LWT=Online` heartbeats alone keep the device online; retained snapshots, `commands/#` echoes, an `s0/WatthourTotal` echo and `opentherm/read/#` never make an offline device online; a live `Offline` wins; the timeout is backdated to the last qualifying message; broker reconnect alone leaves the device `unknown` (a retained `Offline` changes nothing) until a qualifying message, or until the liveness timeout passes after the reconnect, which enters `offline` backdated to the last qualifying message |
 | A9 | Origin security | per §13: disallowed `Origin` → 403 on every mutation and at WebSocket handshake; `Origin: null` → 403; bad `Host` with `PUBLIC_ORIGINS` set → 403; form-encoded/`text/plain` mutations → 415; a legitimate HTTPS-proxy setup (`PUBLIC_ORIGINS=https://…`, backend reached over HTTP with the proxied `Host`) passes REST and WebSocket |
 | A10 | i18n and responsive | every UI string and catalog label exists in EN and NL (test-enforced); at 390 px and 1280 px no page scrolls horizontally (`scrollWidth ≤ clientWidth`) and every control is reachable and operable; every Apply flow (settings, curve, thresholds) can be completed by keyboard alone |
 | A11 | Deployment | the process flushes on SIGTERM within 60 s and the data is present after a restart on the same `DATA_DIR` (automated); the Docker image builds and `docker stop` / start on the `/data` volume preserves data (release check); the README carries the loud no-auth warning and the reverse-proxy recipe of §13 |
@@ -1154,12 +1216,17 @@ expiry, and never depend on sub-minute ordering.
 ## 11. Repo layout (indicative)
 
 ```
-backend/heishamon_dashboard/   config, catalog, mqtt, state, store, commands, derived, api
-backend/heishamon_dashboard/catalog.json
+backend/heishamon_dashboard/   config, catalog, rules, mqtt, state, derived, curve, profile, origin, db
+  commands/                    planner, gates, lifecycle, transport, service
+  store/                       buffer, outages, records, rollups, queries, sqlite
+  api/                         common, state, history, commands, events, prefs, system, curve, energy, static
+  catalog.json                 topic/command/input/model catalog (data, schema in Appendix A.3)
+  rules.json                   shared domain rules (curve limits and leaves, mode sets, power pairs, tiles)
 backend/tests/
-frontend/                      Svelte + Vite app
+frontend/src/                  Svelte + Vite app: app/ (shell, registry), features/<id>/, lib/ (stores, api,
+                               domain/, commands/, i18n/, ui/)
 tools/simulator.py, tools/presets.py, tools/capture.py
-Dockerfile, docker-compose.example.yml, .env.example, README.md
+Dockerfile, .dockerignore, docker-compose.example.yml, .env.example, README.md
 ```
 
 ## 12. Configuration reference (exact)
@@ -1186,6 +1253,9 @@ message naming the variable.
 | `TZ` | IANA timezone name (e.g. `Europe/Amsterdam`); invalid → startup error | `UTC` | no |
 | `PUBLIC_ORIGINS` | comma-separated origins (`scheme://host[:port]`) at which users reach the dashboard (§13); empty = derive from `Host` | empty | no |
 | `ALLOWED_ORIGINS` | comma-separated *additional* origins allowed to call the API cross-origin (embedding) | empty | no |
+| `MQTT_CA_FILE` | path to a PEM CA bundle used to verify the broker when `MQTT_TLS` is on; the file must exist | empty (system CAs) | no |
+| `COMMAND_RATE_MAX` | integer ≥ 1; publish attempts per command name per window (retries count; §6) | `6` | no |
+| `COMMAND_RATE_WINDOW_S` | integer ≥ 1; sliding window in seconds | `3600` | no |
 
 `STATIC_DIR` (optional, deployment plumbing, not a user-facing setting): directory of the built SPA.
 Unset, the process serves `<repo>/frontend/dist`; the container image sets `/app/static`. If the
@@ -1212,6 +1282,13 @@ browser-driven writes from foreign origins, and it refuses DNS-rebinding hosts w
 - **Host check:** when `PUBLIC_ORIGINS` is set, a request whose `Host` matches none of its
   `host[:port]` values gets `403 bad_host`. This is the DNS-rebinding protection. The README
   recommends always setting `PUBLIC_ORIGINS`, and startup logs a warning when it is empty.
+- **Host policy without `PUBLIC_ORIGINS`:** state-changing requests (`POST`, `PUT`, `PATCH`,
+  `DELETE`) and the WebSocket handshake are accepted only when the `Host` header, after removing a
+  trailing `:port`, is exactly `localhost` or an IPv4/IPv6 literal. Any DNS name, including
+  `localhost.example`, gets `403 bad_host` with a message to set `PUBLIC_ORIGINS`. `GET` is
+  unaffected.
+- **Body size:** request bodies above 64 KiB get `413 body_too_large` before parsing. Command names
+  longer than 64 bytes get `422 unknown_command` without being echoed.
 - **Mutations** (`POST /api/command`, `PUT /api/prefs`, `POST /api/system/flush`), enforced
   server-side before any processing:
   - `Origin` present and trusted → allowed.
@@ -1343,7 +1420,7 @@ read-back is the `main/` topic (TOP index) that reflects the command; "—" mean
 | SetFloorCoolDelta | no | S | int | per range rule | Cool_Delta (24) | 3.2.3 |
 | SetDHWHeatDelta | no | S | int | per range rule | DHW_Heat_Delta (22) | 3.2.3 |
 | SetReset | no | T (risky) | bool | 1 | — | 3.2.3 |
-| SetHeaterDelayTime | no | S | int | per range rule | Heater_Delay_Time (96) | 3.2.3 |
+| SetHeaterDelayTime (J series only, `applicability.series`) | no | S | int | per range rule | Heater_Delay_Time (96) | 3.2.3 |
 | SetHeaterStartDelta | no | S | int | per range rule | Heater_Start_Delta (97) | 3.2.3 |
 | SetHeaterStopDelta | no | S | int | per range rule | Heater_Stop_Delta (98) | 3.2.3 |
 | SetMainSchedule | no | S | bool | 0, 1 | Main_Schedule_State (13) | 3.2.3 |
@@ -1374,7 +1451,7 @@ read-back is the `main/` topic (TOP index) that reflects the command; "—" mean
 | SetSmartGridMode | yes | U | int | 0–3 | — | 3.2.3 |
 | SetExternalThermostat1State | yes | U | int | 0–3 | — | 3.2.3 |
 | SetExternalThermostat2State | yes | U | int | 0–3 | — | 3.2.3 |
-| SetDemandControl | yes | U | int | per range rule | — | 3.2.3 |
+| SetDemandControl | yes | U | int | 43–234 (heishamon_fact) | — | 3.2.3 |
 | SetPoolTemp | yes | U | dec1 | −30.0–90.0, step 0.5 | — (approximate: Pool_Temp 48) | 3.2.3 |
 | SetBufferTemp | yes | U | dec1 | −30.0–90.0, step 0.5 | — (approximate: Buffer_Temp 46) | 3.2.3 |
 | SetZ1RoomTemp | yes | U | dec1 | −30.0–90.0, step 0.5 | — (approximate: Z1_Temp 56) | 3.2.3 |
@@ -1392,9 +1469,9 @@ copied.
 | Path | Class | Payload | Range | min |
 |---|---|---|---|---|
 | `s0/WatthourTotal/1`, `s0/WatthourTotal/2` | retained exception | dec3 | ≥ 0 | 3.2.3 |
-| `opentherm/read/dhwSetUppBound`, `dhwSetLowBound`, `chSetUppBound`, `chSetLowBound` | retained exception | int | per range rule | 3.5 |
+| `opentherm/read/dhwSetUppBound`, `dhwSetLowBound`, `chSetUppBound`, `chSetLowBound` | retained exception | int | 0–127 (signed int8) | 3.5 |
 | `opentherm/read/dhwSetpoint`, `maxTSet` | input (non-retained) | dec1 | per range rule | 3.5 |
-| `opentherm/read/outsideTemp`, `inletTemp`, `outletTemp`, `dhwTemp`, `roomSetOverride` | input (non-retained) | dec1 | per range rule | 3.5 |
+| `opentherm/read/outsideTemp`, `inletTemp`, `outletTemp`, `dhwTemp` | input (non-retained) | dec1 | per range rule | 3.5 |
 | `opentherm/read/chPressure` (bar), `relativeModulation` (%) | input (non-retained) | dec1 | per range rule | 3.5 |
 | `opentherm/read/flameState`, `chState`, `dhwState`, `coolingState` | input (non-retained) | bool | 0, 1 | 3.5 |
 
@@ -1434,13 +1511,17 @@ copied.
                 "range_source": "panasonic_manual|heishamon_fact|encoding_domain",
                 "readback": ["main/DHW_Target_Temp"], "compare": "equal|holiday|curve_leaf",
                 "applicability": {"requires": ["profile.dhw_installed"]}, "safe_under_unknown": false,
-                "min_firmware": "3.2.3", "category": "dhw", "label": {"en": "…", "nl": "…"}}],
+                "min_firmware": "3.2.3", "category": "dhw", "label": {"en": "…", "nl": "…"},
+                "ui_group": "operation|zones|dhw|sterilization|heaters|bivalent|solar|pump|quiet|opentherm|s0|pcb"}],
   "inputs": [{"path": "s0/WatthourTotal/1", "class": "retained_exception|input", "retain": true,
               "type": "dec3|dec1|int|bool", "range": {"min": 0}, "range_source": "…", "min_firmware": "3.2.3",
-              "label": {"en": "…", "nl": "…"}}],
+              "label": {"en": "…", "nl": "…"}, "ui_group": "(same ids as for commands)"}],
   "models": [{"hex": "E2 CF 0B …", "name": "WH-…", "series": "J|K|L|other"}]
 }
 ```
+
+**`ui_group`** is required on every command and input (one of the ids shown) and absent on topics and
+models; the loader rejects a catalog that omits it or uses another id.
 
 **`models` table:** series is the generation letter in the Panasonic model name. Entries are
 factual identifiers (byte pattern and model code) and are added as they become known. An unknown

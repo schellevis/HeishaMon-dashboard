@@ -159,13 +159,25 @@ def test_cop_zero_denominator_is_none():
 
 
 def test_extra_power_preferred_when_present():
+    """extra/ is chosen because the profile says so (has_extra), never because of rollup data."""
+    s = build(-10, 60)  # main/ 3000 / 1000 -> COP 3.0
+    b = H // MIN
+    s["extra/Heat_Power_Production_Extra"] = [row(b + i, 1600.0) for i in range(-10, 60)]
+    s["extra/Heat_Power_Consumption_Extra"] = [row(b + i, 800.0) for i in range(-10, 60)]
+    assert run(s, has_extra=True)["windows"][0]["cop"] == 2.0
+
+
+def test_overlay_power_source_from_profile():
     s = build(-10, 60)
     b = H // MIN
-    s["extra/Heat_Power_Production_Extra"] = [row(b + i, 2400.0) for i in range(-10, 60)]
+    # extra topics carry data, but the profile says no extra block: main/ stays
+    s["extra/Heat_Power_Production_Extra"] = [row(b + i, 1600.0) for i in range(-10, 60)]
     s["extra/Heat_Power_Consumption_Extra"] = [row(b + i, 800.0) for i in range(-10, 60)]
     assert run(s)["windows"][0]["cop"] == 3.0
-    s["extra/Heat_Power_Production_Extra"] = [row(b + i, 1600.0) for i in range(-10, 60)]
-    assert run(s)["windows"][0]["cop"] == 2.0
+    assert run(s, has_extra=False)["windows"][0]["cop"] == 3.0
+    # has_extra but no extra coverage yet: no COP from main/ (the window has no power rows at all)
+    bare = build(-10, 60)
+    assert run(bare, has_extra=True)["windows"] == []
 
 
 def test_boundary_sides():
@@ -200,3 +212,59 @@ def test_median_two_vs_three_windows():
     r = two([2.0, 3.0, 3.9, 7.0])
     assert r["median"] == [{"band_lo": 2, "value": 32.0, "n": 3}]
     assert [h["band_lo"] for h in r["histogram"]] == [2, 6]
+
+
+# ---------------------------------------------------------------- chunking (B1)
+
+class LazyStore(FakeStore):
+    """Generates minute rows on demand from a rule, so a 400-day range is never held in memory."""
+
+    def __init__(self, boundary=None, sparse=False):
+        super().__init__({}, boundary)
+        self.sparse = sparse  # data on one day in fourteen only (keeps the 400-day test quick)
+
+    def rollups_1m(self, topics, from_ts, to_ts, now, liveness=None):
+        out = {}
+        for t in topics:
+            out[t] = [row(b, self.value(t, b)) for b in range(from_ts // MIN, min(to_ts, now) // MIN)
+                      if not self.sparse or (b // 1440) % 14 == 0]
+        return out
+
+    @staticmethod
+    def value(topic, b):
+        base = {"main/Outside_Temp": 2.0 + (b // 97) % 9, "main/Main_Outlet_Temp": 35.0,
+                "main/Z1_Water_Target_Temp": 33.0, "main/Operating_Mode_State": 0,
+                "main/ThreeWay_Valve_State": 1 if b % 523 < 40 else 0,  # DHW runs: settling exclusion
+                "main/Defrosting_State": 1 if b % 311 == 0 else 0,
+                "main/Compressor_Freq": 0 if b % 700 < 25 else 40, "main/Heat_Power_Production": 3000.0,
+                "main/Heat_Power_Consumption": 1000.0, "main/Z1_Sensor_Settings": 0}
+        return base.get(topic, 0.0)
+
+
+def test_overlay_chunked_equals_unchunked(monkeypatch):
+    import heishamon_dashboard.curve as c
+
+    month = 30 * 24 * 60 * MIN
+    a, b = H + 7 * MIN, H + month  # unaligned start, chunk edges fall inside the month
+    kw = dict(boundary=H + 11 * 24 * 60 * MIN + 5 * MIN)
+    monkeypatch.setattr(c, "CHUNK_MS", 7 * 86_400_000)
+    chunked = overlay(LazyStore(**kw), "z1", "heat", a, b, b + MIN)
+    monkeypatch.setattr(c, "CHUNK_MS", 10**15)
+    whole = overlay(LazyStore(**kw), "z1", "heat", a, b, b + MIN)
+    assert chunked == whole
+    assert len(whole["windows"]) > 1000
+    assert {w["side"] for w in whole["windows"]} == {"before", "boundary", "after"}
+
+
+def test_overlay_400d_memory_bound():
+    import tracemalloc
+
+    span = 400 * 24 * 60 * MIN
+    tracemalloc.start()
+    try:
+        result = overlay(LazyStore(sparse=True), "z1", "heat", H, H + span, H + span + MIN)
+        peak = tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+    assert result["windows"]
+    assert peak < 100 * 1024 * 1024

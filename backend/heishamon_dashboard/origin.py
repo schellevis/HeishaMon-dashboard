@@ -3,6 +3,7 @@
 It runs before routing, so every rule is enforced before any request processing, and the same
 rules apply at the WebSocket handshake.
 """
+import ipaddress
 import json
 from urllib.parse import urlsplit
 
@@ -13,6 +14,29 @@ _PREFLIGHT_METHODS = "GET, POST, PUT, OPTIONS"
 
 def _hostport(origin: str) -> str:
     return urlsplit(origin).netloc.lower()
+
+
+def _bare_host(host: str | None) -> str:
+    """The raw Host header without a trailing `:port` (`[::1]:8000` -> `::1`), lower-cased."""
+    text = (host or "").strip().lower()
+    if text.startswith("["):
+        end = text.find("]")
+        return text[1:end] if end > 0 else text
+    if text.count(":") == 1:
+        return text.split(":", 1)[0]
+    return text  # a bare IPv6 literal has several colons and no port
+
+
+def literal_or_localhost(host: str | None) -> bool:
+    """True for `localhost` and any IPv4/IPv6 literal (the Host policy without PUBLIC_ORIGINS)."""
+    name = _bare_host(host)
+    if name == "localhost":
+        return True
+    try:
+        ipaddress.ip_address(name)
+    except ValueError:
+        return False
+    return True
 
 
 def _norm(origin: str) -> str:
@@ -31,6 +55,10 @@ class OriginPolicy:
         if not self.public:
             return True
         return (host or "").lower() in self._public_hosts
+
+    def write_host_ok(self, host: str | None) -> bool:
+        """Without PUBLIC_ORIGINS, writes and WebSockets need a localhost or IP-literal Host."""
+        return bool(self.public) or literal_or_localhost(host)
 
     def trusted(self, origin: str, host: str | None) -> bool:
         """`origin` is a present, non-"null" Origin header value."""
@@ -74,6 +102,11 @@ class OriginMiddleware:
         cors = policy.cors_origin(origin)
         method = scope.get("method", "GET")
         path = scope["path"]
+
+        if (kind == "websocket" or method in MUTATION_METHODS) and not policy.write_host_ok(host):
+            await self._reject(scope, send, 403, "bad_host",
+                               "this Host is not accepted for writes; set PUBLIC_ORIGINS to serve a DNS name", cors)
+            return
 
         if kind == "websocket":
             if origin is not None and (origin == "null" or not policy.trusted(origin, host)):

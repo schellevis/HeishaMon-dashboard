@@ -1,0 +1,10 @@
+.env*
+!.env.example
+.git
+.paseo-autopilot
+data/
+**/node_modules
+frontend/dist
+.venv
+**/__pycache__
+*.swp

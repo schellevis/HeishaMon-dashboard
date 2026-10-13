@@ -1,6 +1,6 @@
 // Starts / stops the test stack: embedded broker (ephemeral port) -> simulator -> app on 8765.
 // Teardown runs in reverse order. Nothing here reads `.env`.
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -95,6 +95,22 @@ export async function up(preset, faults = []) {
     const s = await (await fetch(`${URL}/api/state`)).json();
     return Object.keys(s.topics ?? {}).length > 10 && s.device_online === 'online';
   }, 20_000, 'state ingest and device online');
+  await expectPresetActive(preset);
+}
+
+/** Fail unless the running stack shows the profile topics of `preset` (the requested preset is really active). */
+export async function expectPresetActive(preset) {
+  const script = 'import json,sys; from presets import resolve_preset, PROFILE_KEYS; '
+    + 'p = resolve_preset(sys.argv[1]); print(json.dumps({k: v for k, v in p.topics.items() if k in PROFILE_KEYS}))';
+  const expected = JSON.parse(execFileSync(PYTHON, ['-c', script, preset], {
+    cwd: path.join(ROOT, 'tools'), env: { PATH: process.env.PATH, PYTHONPATH: path.join(ROOT, 'tools') + path.delimiter + path.join(ROOT, 'backend') },
+  }).toString());
+  const state = await (await fetch(`${URL}/api/state`)).json();
+  for (const [topic, value] of Object.entries(expected)) {
+    const entry = state.topics?.[topic];
+    const actual = entry?.raw ?? entry?.value;
+    if (String(actual) !== String(value)) throw new Error(`preset ${preset} not active: ${topic} is ${actual}, expected ${value}`);
+  }
 }
 
 /** Stop in reverse start order (app, simulator, broker). */

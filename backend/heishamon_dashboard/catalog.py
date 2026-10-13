@@ -8,6 +8,9 @@ CMD_CLASSES = {"setting", "trigger", "unverifiable"}
 CMD_TYPES = {"int", "bool", "dec1", "dec3", "json", "int2", "int12"}
 INPUT_TYPES = {"dec3", "dec1", "int", "bool"}
 INPUT_CLASSES = {"retained_exception", "input"}
+# Settings groups in design spec §7.5 order; the frontend groups commands and inputs by this field.
+UI_GROUPS = {"operation", "zones", "dhw", "sterilization", "heaters", "bivalent", "solar", "pump", "quiet",
+             "opentherm", "s0", "pcb"}
 KINDS = {"number", "enum", "text"}
 RANGE_SOURCES = {"panasonic_manual", "heishamon_fact", "encoding_domain"}
 COMPARE = {"equal", "holiday", "curve_leaf"}
@@ -15,9 +18,9 @@ COMPARE = {"equal", "holiday", "curve_leaf"}
 _TOP = {"schema", "topics", "commands", "inputs", "models"}
 _TOPIC_REQ = {"key", "id", "kind", "category", "label", "min_firmware"}
 _TOPIC_OPT = {"unit", "decimals", "enum", "sentinels", "feature"}
-_CMD_REQ = {"name", "pcb", "class", "risky", "type", "range_source", "min_firmware", "category", "label"}
+_CMD_REQ = {"name", "pcb", "class", "risky", "type", "range_source", "min_firmware", "category", "label", "ui_group"}
 _CMD_OPT = {"range", "allowed", "conditional_ranges", "readback", "compare", "applicability", "safe_under_unknown"}
-_INPUT_REQ = {"path", "class", "retain", "type", "range", "range_source", "min_firmware", "label"}
+_INPUT_REQ = {"path", "class", "retain", "type", "range", "range_source", "min_firmware", "label", "ui_group"}
 _MODEL_REQ = {"hex", "name", "series"}
 _RANGE_KEYS = {"min", "max", "step"}
 # TOP92 as HeishaMon publishes it: ten bytes as upper-case hex pairs separated by single spaces.
@@ -130,6 +133,7 @@ def _validate_command(c, i):
     _choice(c["range_source"], RANGE_SOURCES, f"{w}.range_source")
     _str(c["min_firmware"], f"{w}.min_firmware")
     _str(c["category"], f"{w}.category")
+    _choice(c["ui_group"], UI_GROUPS, f"{w}.ui_group")
     _label(c["label"], f"{w}.label")
     if c.get("range") is not None:
         _range(c["range"], f"{w}.range")
@@ -150,10 +154,11 @@ def _validate_command(c, i):
     if "compare" in c:
         _choice(c["compare"], COMPARE, f"{w}.compare")
     if "applicability" in c:
-        _keys(c["applicability"], f"{w}.applicability", set(), {"requires"})
-        req = c["applicability"].get("requires", [])
-        if not isinstance(req, list) or not all(isinstance(r, str) for r in req):
-            raise CatalogError(f"{w}.applicability.requires: must be a list of strings")
+        _keys(c["applicability"], f"{w}.applicability", set(), {"requires", "series"})
+        for key in ("requires", "series"):
+            val = c["applicability"].get(key, [])
+            if not isinstance(val, list) or not all(isinstance(r, str) for r in val):
+                raise CatalogError(f"{w}.applicability.{key}: must be a list of strings")
     if "safe_under_unknown" in c:
         _bool(c["safe_under_unknown"], f"{w}.safe_under_unknown")
 
@@ -168,6 +173,7 @@ def _validate_input(x, i):
     _range(x["range"], f"{w}.range")
     _choice(x["range_source"], RANGE_SOURCES, f"{w}.range_source")
     _str(x["min_firmware"], f"{w}.min_firmware")
+    _choice(x["ui_group"], UI_GROUPS, f"{w}.ui_group")
     _label(x["label"], f"{w}.label")
 
 

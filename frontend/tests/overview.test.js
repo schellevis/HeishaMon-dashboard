@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import Overview from '../src/screens/Overview.svelte';
-import QuickControls from '../src/components/overview/QuickControls.svelte';
-import Tile from '../src/components/overview/Tile.svelte';
-import Sparkline from '../src/components/overview/Sparkline.svelte';
+import Overview from '../src/features/overview/OverviewScreen.svelte';
+import QuickControls from '../src/features/overview/QuickControls.svelte';
+import Tile from '../src/features/overview/Tile.svelte';
+import Sparkline from '../src/features/overview/Sparkline.svelte';
 import {
   language,
   profile,
@@ -19,6 +19,13 @@ import { commandByName, topicByKey } from '../src/lib/catalog.js';
 
 // Import production catalog for tile key validation
 import productionCatalog from '../../backend/heishamon_dashboard/catalog.json';
+
+// The vitest `$catalog` alias is a minimal fixture; catalogued-key tiles need the real topics.
+vi.mock('../src/lib/catalog.js', async (importOriginal) => {
+  const original = await importOriginal();
+  const full = (await import('../../backend/heishamon_dashboard/catalog.json')).default;
+  return { ...original, topicByKey: (key) => full.topics.find((t) => t.key === key) ?? original.topicByKey(key) };
+});
 
 // Profile fixtures per spec §7.1 and §4.3
 function makeF(value, unknown = false, stale = false) {
@@ -285,6 +292,80 @@ describe('Overview screen (§7.1)', () => {
       for (const key of usedKeys) {
         expect(catalogTopicKeys).toContain(key);
       }
+    });
+  });
+
+  describe('power source follows the profile (F4)', () => {
+    const tv = (value) => ({
+      value, raw: String(value), kind: 'number', unit: 'W', decimals: 0, enum_label: null,
+      catalogued: true, sentinel: false, last_change: 1, last_seen: 1, retained_only: false,
+    });
+    const topics = {
+      'main/Heat_Power_Production': tv(1000), 'main/Heat_Power_Consumption': tv(200),
+      'extra/Heat_Power_Production_Extra': tv(2000), 'extra/Heat_Power_Consumption_Extra': tv(1000),
+    };
+
+    it('uses extra/ for the COP and power tiles when has_extra is true', () => {
+      state.set(makeState({ topics }));
+      profile.set({ ...profileFixtures.heatOnly, has_extra: makeF(true) });
+      prefs.set(makePrefs());
+      render(Overview);
+      expect(screen.getByTestId('tile-cop').textContent).toContain('2.00');
+      expect(screen.getByTestId('tile-heatPowerProduction').textContent).toContain('2000');
+    });
+
+    it('uses main/ when has_extra is false, even if extra/ topics exist', () => {
+      state.set(makeState({ topics }));
+      profile.set(profileFixtures.heatOnly);
+      prefs.set(makePrefs());
+      render(Overview);
+      expect(screen.getByTestId('tile-cop').textContent).toContain('5.00');
+    });
+  });
+
+  describe('catalogued-key tiles (B8)', () => {
+    const dhw = {
+      value: 47, raw: '47', kind: 'number', unit: '°C', decimals: 0, enum_label: null,
+      catalogued: true, sentinel: false, last_change: 1, last_seen: 1, retained_only: false,
+    };
+
+    it('renders main/DHW_Temp with the catalog label, unit and value', () => {
+      state.set(makeState({ topics: { 'main/DHW_Temp': dhw } }));
+      profile.set(profileFixtures.heatOnly);
+      prefs.set(makePrefs({ tiles: ['main/DHW_Temp'] }));
+      render(Overview);
+      const tile = screen.getByTestId('tile-main/DHW_Temp');
+      expect(tile.textContent).toContain('DHW tank temperature');
+      expect(tile.textContent).toContain('47 °C');
+    });
+
+    it('uses the catalog unit when the live value carries none', () => {
+      render(Tile, { key: 'main/DHW_Temp', topic: { ...dhw, unit: '' }, lang: 'nl', isPinned: true });
+      expect(screen.getByTestId('tile-main/DHW_Temp').textContent).toContain('Tapwatertemperatuur');
+      expect(screen.getByTestId('tile-main/DHW_Temp').textContent).toContain('47 °C');
+    });
+
+    it('skips a stored id that is neither a built-in tile nor catalogued', () => {
+      state.set(makeState());
+      profile.set(profileFixtures.heatOnly);
+      prefs.set(makePrefs({ tiles: ['nonsense', 'main/Nope'] }));
+      render(Overview);
+      expect(screen.queryByTestId('tile-nonsense')).toBeNull();
+      expect(screen.queryByTestId('tile-main/Nope')).toBeNull();
+      expect(screen.getByTestId('tile-outsideTemp')).toBeTruthy();
+    });
+
+    it('follows a prefs update made elsewhere (shared store)', async () => {
+      state.set(makeState({ topics: { 'main/DHW_Temp': dhw } }));
+      profile.set(profileFixtures.heatOnly);
+      prefs.set(makePrefs());
+      render(Overview);
+      expect(screen.getByTestId('tile-outsideTemp').dataset.pinned).toBe('false');
+      expect(screen.queryByTestId('tile-main/DHW_Temp')).toBeNull();
+      prefs.set(makePrefs({ tiles: ['outsideTemp', 'main/DHW_Temp'] }));
+      await tick();
+      expect(screen.getByTestId('tile-outsideTemp').dataset.pinned).toBe('true');
+      expect(screen.getByTestId('tile-main/DHW_Temp')).toBeTruthy();
     });
   });
 
@@ -678,7 +759,7 @@ describe('Quick controls (§7.1)', () => {
     });
 
     it('settings: the request-temperature control points to the curve cold-end target', async () => {
-      const { default: CommandControl } = await import('../src/components/settings/CommandControl.svelte');
+      const { default: CommandControl } = await import('../src/features/settings/CommandControl.svelte');
       const stateData = makeState({ topics: coupledTopics() });
       render(CommandControl, {
         entry: productionCatalog.commands.find((c) => c.name === 'SetZ1HeatRequestTemperature'), profile: coupledProfile, live: stateData,
@@ -690,7 +771,7 @@ describe('Quick controls (§7.1)', () => {
     });
 
     it('settings: no coupled note with a water sensor', async () => {
-      const { default: CommandControl } = await import('../src/components/settings/CommandControl.svelte');
+      const { default: CommandControl } = await import('../src/features/settings/CommandControl.svelte');
       render(CommandControl, {
         entry: productionCatalog.commands.find((c) => c.name === 'SetZ1HeatRequestTemperature'), profile: profileFixtures.directModeWater,
         live: makeState({ topics: coupledTopics() }), prefs: makePrefs(), lang: 'en', catalogData: productionCatalog,
@@ -774,5 +855,14 @@ describe('i18n translation keys', () => {
     expect(translate('nl', 'overview.quickControls')).toBe('Snelbediening');
     expect(translate('en', 'overview.outsideTemp')).toBe('Outside temperature');
     expect(translate('nl', 'overview.outsideTemp')).toBe('Buitentemperatuur');
+  });
+});
+
+describe('command wear warning and rate limit (R4)', () => {
+  it('maps a 429 to a translated message with the wait', async () => {
+    const { errorMessage } = await import('../src/lib/commands/controller.js');
+    expect(errorMessage({ code: 'rate_limited', retryAfter: 30 }, 'en')).toContain('30');
+    expect(errorMessage({ code: 'rate_limited', retryAfter: 30 }, 'nl')).toContain('30');
+    expect(errorMessage({ code: 'out_of_range', retryAfter: null }, 'en')).toBe('out_of_range');
   });
 });

@@ -1,8 +1,10 @@
 import { translate } from './i18n/index.js';
 
-const HEATING_MODES = new Set([0, 2, 4, 6]);
-const COOLING_MODES = new Set([1, 5, 7, 8]);
-const DHW_MODES = new Set([3, 4, 5, 6, 8]);
+import { modeSets } from './domain/rules.js';
+
+const HEATING_MODES = new Set(modeSets.heating);
+const COOLING_MODES = new Set(modeSets.cooling);
+const DHW_MODES = new Set(modeSets.dhw);
 
 /** Age of a timestamp, for the status bar and for stale values (§9). */
 export function formatAge(ms, lang = 'en') {

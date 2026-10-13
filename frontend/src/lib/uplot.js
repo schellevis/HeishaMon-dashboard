@@ -147,6 +147,24 @@ export function formatDate(ts, lang = 'en') {
   return `${year}-${month}-${day}`;
 }
 
+/** Place one series on the shared x axis. Missing timestamps repeat the series' last value (LOCF)
+ * only while the series has a value there: never before its first point, after a null
+ * (zero-coverage) point, or across one of its breaks. */
+function alignSeries(points, axisMs, breaks, locf) {
+  const sorted = [...points].sort((a, b) => a[0] - b[0]);
+  let i = 0;
+  let last = null;
+  return axisMs.map((ms) => {
+    while (i < sorted.length && sorted[i][0] <= ms) last = sorted[i++];
+    if (!last) return null;
+    if (last[0] === ms) return last[1];
+    if (!locf || last[1] === null) return null;
+    // a break overlapping (last point, ms] means the value was not held
+    if (breaks.some(([start, end]) => start <= ms && end > last[0])) return null;
+    return last[1];
+  });
+}
+
 /** Convert History API series to uPlot data
  * @param {Object} history - History response from API
  * @param {Object} catalog - Optional catalog for topic info
@@ -167,6 +185,8 @@ export function historyToUplot(history, catalog = null, { lang = 'en', timeZone 
   const timeData = msAxis.map((ms) => ms / 1000);
   const uplotData = msAxis.length || Object.keys(series).length ? [timeData] : [];
 
+  // Raw points are change-only (LOCF); rollup buckets are real samples and stay as they are.
+  const locf = !history.resolution || history.resolution === 'raw';
   let colorIndex = 0;
 
   for (const [key, seriesData] of Object.entries(series)) {
@@ -178,14 +198,14 @@ export function historyToUplot(history, catalog = null, { lang = 'en', timeZone 
     const color = COLORS[colorIndex % COLORS.length];
     colorIndex++;
 
-    const byTs = new Map();
+    const pts = [];
     for (const point of seriesData.points) {
       let v = point[1];
       if (seriesData.kind === 'text') v = null; // text cannot be plotted numerically
       else if (point.length > 2 && point[2] === 0) v = null; // zero-coverage rollup bucket
-      byTs.set(point[0], v === undefined ? null : v);
+      pts.push([point[0], v === undefined ? null : v]);
     }
-    uplotData.push(msAxis.map((ms) => (byTs.has(ms) ? byTs.get(ms) : null)));
+    uplotData.push(alignSeries(pts, msAxis, seriesData.breaks || [], locf));
     for (const br of seriesData.breaks || []) allBreaks.push(br);
 
     const seriesOpts = { label, width: 2, spanGaps: false };

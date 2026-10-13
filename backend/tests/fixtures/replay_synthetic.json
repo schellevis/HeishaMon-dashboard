@@ -842,7 +842,7 @@
   {
    "t": 5000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -854,7 +854,7 @@
   {
    "t": 10000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -866,7 +866,7 @@
   {
    "t": 15000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -878,7 +878,7 @@
   {
    "t": 20000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -890,7 +890,7 @@
   {
    "t": 25000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -902,7 +902,7 @@
   {
    "t": 30000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -914,7 +914,7 @@
   {
    "t": 35000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -926,7 +926,7 @@
   {
    "t": 40000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -938,7 +938,7 @@
   {
    "t": 45000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -950,7 +950,7 @@
   {
    "t": 50000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -962,7 +962,7 @@
   {
    "t": 55000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -974,7 +974,7 @@
   {
    "t": 60000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -992,7 +992,7 @@
   {
    "t": 65000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1004,7 +1004,7 @@
   {
    "t": 70000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1016,7 +1016,7 @@
   {
    "t": 75000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1028,7 +1028,7 @@
   {
    "t": 80000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1040,7 +1040,7 @@
   {
    "t": 85000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1052,7 +1052,7 @@
   {
    "t": 90000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1064,7 +1064,7 @@
   {
    "t": 95000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1076,7 +1076,7 @@
   {
    "t": 100000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1088,7 +1088,7 @@
   {
    "t": 105000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1100,7 +1100,7 @@
   {
    "t": 110000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1112,7 +1112,7 @@
   {
    "t": 115000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1124,7 +1124,7 @@
   {
    "t": 120000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1142,7 +1142,7 @@
   {
    "t": 125000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1154,7 +1154,7 @@
   {
    "t": 130000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1166,7 +1166,7 @@
   {
    "t": 135000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1178,7 +1178,7 @@
   {
    "t": 140000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1190,7 +1190,7 @@
   {
    "t": 145000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1202,7 +1202,7 @@
   {
    "t": 150000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1214,7 +1214,7 @@
   {
    "t": 155000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1226,7 +1226,7 @@
   {
    "t": 160000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1238,7 +1238,7 @@
   {
    "t": 165000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1250,7 +1250,7 @@
   {
    "t": 170000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1262,7 +1262,7 @@
   {
    "t": 175000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1274,7 +1274,7 @@
   {
    "t": 180000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1292,7 +1292,7 @@
   {
    "t": 185000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1304,7 +1304,7 @@
   {
    "t": 190000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1316,7 +1316,7 @@
   {
    "t": 195000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1328,7 +1328,7 @@
   {
    "t": 200000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1340,7 +1340,7 @@
   {
    "t": 205000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1352,7 +1352,7 @@
   {
    "t": 210000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1364,7 +1364,7 @@
   {
    "t": 215000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1376,7 +1376,7 @@
   {
    "t": 220000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1388,7 +1388,7 @@
   {
    "t": 225000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1400,7 +1400,7 @@
   {
    "t": 230000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1412,7 +1412,7 @@
   {
    "t": 235000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1424,7 +1424,7 @@
   {
    "t": 240000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1436,7 +1436,7 @@
   {
    "t": 245000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1448,7 +1448,7 @@
   {
    "t": 250000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1460,7 +1460,7 @@
   {
    "t": 255000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1472,7 +1472,7 @@
   {
    "t": 260000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1484,7 +1484,7 @@
   {
    "t": 265000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1496,7 +1496,7 @@
   {
    "t": 270000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1508,7 +1508,7 @@
   {
    "t": 275000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1520,7 +1520,7 @@
   {
    "t": 280000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1532,7 +1532,7 @@
   {
    "t": 285000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1544,7 +1544,7 @@
   {
    "t": 290000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1556,7 +1556,7 @@
   {
    "t": 295000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -1568,7 +1568,7 @@
   {
    "t": 300000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -2408,7 +2408,7 @@
   {
    "t": 305000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -2420,7 +2420,7 @@
   {
    "t": 310000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -2432,7 +2432,7 @@
   {
    "t": 315000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -2444,7 +2444,7 @@
   {
    "t": 320000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -2456,7 +2456,7 @@
   {
    "t": 325000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {
@@ -2468,7 +2468,7 @@
   {
    "t": 330000,
    "topic": "stats",
-   "payload": "{\"version\":\"v4.2.3\"}",
+   "payload": "{\"version\":\"4.2.3\"}",
    "retained": false
   },
   {

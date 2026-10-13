@@ -10,11 +10,12 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
-from fastapi.testclient import TestClient
 
 from heishamon_dashboard import config as config_mod
 from heishamon_dashboard.app import build
 from heishamon_dashboard.types import Message
+
+from ._client import LocalClient
 
 BASE = "panasonic_heat_pump"
 T0 = 1_791_000_000_000  # a multiple of 15 minutes
@@ -127,7 +128,7 @@ class Rig:
                          scheduler=NullScheduler(), static_dir=static_dir or tmp_path / "no-dist",
                          tick_interval=tick_interval, **kw)
         self.svc = self.app.state.services
-        self.client = TestClient(self.app)
+        self.client = LocalClient(self.app)
         self.data_dir = tmp_path / "data"
 
     def __enter__(self):
@@ -167,7 +168,7 @@ STATE_KEYS = {"seq", "topics", "device_online", "last_device_message", "broker_c
 TOPIC_VALUE_KEYS = {"value", "raw", "kind", "unit", "decimals", "enum_label", "catalogued", "sentinel",
                     "last_change", "last_seen", "retained_only"}
 COMMAND_KEYS = {"id", "name", "payload", "retained", "class", "status", "submitted_ts", "published_ts",
-                "confirmed_ts", "attempts", "prev_value", "detail", "keys"}
+                "confirmed_ts", "attempts", "prev_value", "detail", "keys", "eeprom_warning"}
 SYSTEM_KEYS = {"broker_connected", "device_online", "firmware", "firmware_assumed", "stats",
                "listen_only_suspected", "db_bytes", "last_flush_ts", "last_flush_ok", "last_flush_error",
                "flush_interval_s", "buffer", "dropped"}
@@ -424,6 +425,9 @@ def test_prefs_defaults_roundtrip_and_schema(rig):
         {**new, "topic_visibility": {"a": "shown"}},
         {**new, "feature_overrides": {"z2": "hide"}},
         {**new, "tiles": "main/Outside_Temp"},
+        {**new, "tiles": ["not_a_tile"]},
+        {**new, "tiles": ["outsideTemp", "main/Nope_Topic"]},
+        {**new, "tiles": [3]},
         {**new, "chart_presets": [{"name": "x"}]},
         {**new, "chart_presets": [{"name": "x", "topics": [], "extra": 1}]},
         [], "text",
@@ -434,6 +438,22 @@ def test_prefs_defaults_roundtrip_and_schema(rig):
         assert set(response.json()) == {"error", "message", "detail"}
     assert rig.client.put("/api/prefs", content=b"{", headers=JSON).status_code == 400
     assert rig.client.get("/api/prefs").json() == new  # rejected writes changed nothing
+
+
+def test_prefs_tiles_accept_builtin_ids_and_catalogued_keys(rig):
+    prefs = rig.client.get("/api/prefs").json()
+    for tiles in (["outsideTemp", "cop"], ["main/DHW_Temp"], ["dhwTemp", "main/Outside_Temp"]):
+        response = rig.client.put("/api/prefs", json={**prefs, "tiles": tiles})
+        assert response.status_code == 200 and response.json()["tiles"] == tiles
+    response = rig.client.put("/api/prefs", json={**prefs, "tiles": ["outsideTemp", "bogus"]})
+    assert response.status_code == 422 and response.json()["error"] == "bad_type"
+    assert rig.client.get("/api/prefs").json()["tiles"] == ["dhwTemp", "main/Outside_Temp"]
+
+
+def test_stored_invalid_tiles_are_dropped_on_load(rig):
+    stored = {**rig.client.get("/api/prefs").json(), "tiles": ["outsideTemp", "gone", "main/DHW_Temp", 7]}
+    rig.svc.store.prefs_put(stored)
+    assert rig.client.get("/api/prefs").json()["tiles"] == ["outsideTemp", "main/DHW_Temp"]
 
 
 def test_system_shape(rig):
@@ -561,3 +581,116 @@ def test_static_spa_serving(tmp_path):
 def test_placeholder_when_the_frontend_is_not_built(rig):
     response = rig.client.get("/")
     assert response.status_code == 404 and "not been built" in response.text
+
+
+# ------------------------------------------------------------------ B2 to B5, T03
+
+
+def test_body_too_large_413(rig):
+    rig.prime()
+    big = json.dumps({"name": "SetDHWTemp", "value": 50, "pad": "x" * 70_000})
+    for path in ("/api/command", "/api/prefs", "/api/system/flush"):
+        method = rig.client.put if path == "/api/prefs" else rig.client.post
+        response = method(path, content=big, headers=JSON)
+        assert response.status_code == 413 and response.json()["error"] == "body_too_large", path
+    # a chunked body without Content-Length is cut off as well
+    response = rig.client.post("/api/command", content=iter([b"x" * 40_000, b"x" * 40_000]), headers=JSON)
+    assert response.status_code == 413 and response.json()["error"] == "body_too_large"
+    assert rig.client.get("/api/commands").json() == {"commands": []}
+
+
+def test_long_command_name_not_echoed(rig):
+    rig.prime()
+    name = "Z" * 300
+    response = rig.post(name, 1)
+    assert response.status_code == 422 and response.json()["error"] == "unknown_command"
+    assert "ZZZ" not in response.text
+
+
+def test_topic_visibility_key_validation(rig):
+    prefs = rig.client.get("/api/prefs").json()
+    rig.feed("main/Seen_Live", "1")
+    ok = {**prefs, "topic_visibility": {"main/Outside_Temp": "hidden", "main/Seen_Live": "hidden"}}
+    assert rig.client.put("/api/prefs", json=ok).status_code == 200
+    for key in ["a" * 257, "main/+", "main/#", "/main/Outside_Temp", "main/Never_Seen", ""]:
+        response = rig.client.put("/api/prefs", json={**prefs, "topic_visibility": {key: "hidden"}})
+        assert response.status_code == 422 and response.json()["error"] == "bad_type", key
+    assert rig.client.get("/api/prefs").json() == ok
+    # invalid keys already stored (older versions) are dropped on load, with a warning
+    rig.svc.store.prefs_put({"topic_visibility": {"main/Outside_Temp": "hidden", "bad/#": "hidden"}})
+    assert rig.client.get("/api/prefs").json()["topic_visibility"] == {"main/Outside_Temp": "hidden"}
+
+
+def test_csv_formula_prefix(rig):
+    from heishamon_dashboard.api.history import history_csv
+
+    series = {"kind": "text", "points": [[1, "=1+1"], [2, "+x"], [3, "-x"], [4, "@x"], [5, "\tx"], [6, "\rx"],
+                                          [7, "plain"]]}
+    history = {"resolution": "raw", "series": {"=topic": series}}
+    text = history_csv(history, ["=topic"])
+    assert "'=topic" in text
+    values = [row[3] for row in list(csv.reader(io.StringIO(text)))[1:]]
+    assert values == ["'=1+1", "'+x", "'-x", "'@x", "'\tx", "'\rx", "plain"]
+    number = {"resolution": "raw", "series": {"t": {"kind": "number", "points": [[1, -5], [2, -1.5]]}}}
+    assert [r[3] for r in list(csv.reader(io.StringIO(history_csv(number, ["t"]))))[1:]] == ["-5", "-1.5"]
+
+
+def test_command_rate_env_reaches_the_service(tmp_path):
+    with Rig(tmp_path, env={"COMMAND_RATE_MAX": "3", "COMMAND_RATE_WINDOW_S": "120"}) as r:
+        assert r.svc.commands.rate_max == 3 and r.svc.commands.rate_window_s == 120
+
+
+# ------------------------------------------------------------------ /api/energy (F2)
+
+def _ms(year, month, day, hour=0, tz="UTC"):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    return int(datetime(year, month, day, hour, tzinfo=ZoneInfo(tz)).timestamp() * 1000)
+
+
+def test_energy_endpoint_periods(rig):
+    from zoneinfo import ZoneInfo
+    from heishamon_dashboard.api.energy import energy_range
+
+    ams = ZoneInfo("Europe/Amsterdam")
+    # a DST change (25 Oct 2026, 25-hour day) lies inside the 14 local days; ranges are local midnights
+    now = _ms(2026, 10, 27, 12, "Europe/Amsterdam")
+    assert energy_range("day", now, ams) == (_ms(2026, 10, 14, tz="Europe/Amsterdam"), now)
+    assert energy_range("month", now, ams) == (_ms(2025, 11, 1, tz="Europe/Amsterdam"), now)
+    assert energy_range("year", now, ams) == (_ms(2022, 1, 1, tz="Europe/Amsterdam"), now)
+    # year boundary: 12 months ending January, and the year range still starts four years back
+    now = _ms(2027, 1, 1, 0, "Europe/Amsterdam") + 60_000
+    assert energy_range("day", now, ams)[0] == _ms(2026, 12, 19, tz="Europe/Amsterdam")
+    assert energy_range("month", now, ams)[0] == _ms(2026, 2, 1, tz="Europe/Amsterdam")
+    assert energy_range("year", now, ams)[0] == _ms(2023, 1, 1, tz="Europe/Amsterdam")
+
+    rig.prime()
+    for minute in range(0, 180, 5):
+        rig.clock.t = T0 + minute * 60_000
+        rig.feed("LWT", "Online")
+        rig.feed("main/Heat_Power_Production", "1000")
+        rig.feed("main/Heat_Power_Consumption", "500")
+    rig.clock.t = T0 + 180 * 60_000
+    rig.feed("LWT", "Online")
+    body = rig.client.get("/api/energy?period=day").json()
+    assert set(body) >= {"tz", "from", "to", "period", "estimate", "periods"}
+    assert body["period"] == "day" and body["tz"] == "UTC" and body["to"] == rig.clock.t
+    assert body["estimate"] is True
+    assert body["from"] == _ms(2026, 9, 20)  # T0 is 2026-10-03 (UTC): 14 days ending today
+    row = body["periods"]["2026-10-03"]["heat"]
+    assert row["production_kwh"] > 0 and row["consumption_kwh"] > 0
+    month = rig.client.get("/api/energy?period=month").json()
+    assert month["from"] == _ms(2025, 11, 1) and "2026-10" in month["periods"]
+    year = rig.client.get("/api/energy?period=year").json()
+    assert year["from"] == _ms(2022, 1, 1) and "2026" in year["periods"]
+
+    for query in ("period=week", "period=", ""):
+        response = rig.client.get(f"/api/energy?{query}")
+        assert response.status_code == 422 and response.json()["error"] == "bad_param"
+
+
+def test_energy_endpoint_uses_configured_tz(tmp_path):
+    with Rig(tmp_path, env={"TZ": "Pacific/Auckland"}) as r:
+        body = r.client.get("/api/energy?period=day").json()
+        assert body["tz"] == "Pacific/Auckland"
+        assert body["from"] == _ms(2026, 9, 20, tz="Pacific/Auckland")

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import catalog from '$catalog';
-import App from '../src/App.svelte';
+import App from '../src/app/App.svelte';
 import { languages, translate } from '../src/lib/i18n/index.js';
 
 describe('scaffold', () => {

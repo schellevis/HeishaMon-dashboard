@@ -13,8 +13,9 @@ heating-curve ("stooklijn") module.
 **The design spec is the source of truth:**
 `docs/superpowers/specs/2026-10-11-heishamon-dashboard-design.md`.
 
-Status (2026-10-11): spec (revision 4.2) written, plan executed, build complete and independently
-verified (backend, frontend, simulator and capture tool; everything still uncommitted). Open item:
+Status (2026-10-13): spec (revision 4.2, amended) written, plan executed, build complete and
+independently verified (backend, frontend, simulator and capture tool), followed by a review-fixes
+refactor on branch `refactor/review-fixes` (everything still uncommitted). Open item:
 the real-capture replay fixture, which the owner records with `tools/capture.py` (decision-006); that
 test stays skipped until `backend/tests/fixtures/replay_real.json` exists. The Docker image was never
 built in development; the release check is in the README.
@@ -178,6 +179,21 @@ Note: `heishamon/HeishaMon` and `Egyras/HeishaMon` are the same repository.
   - Filter out defrost, DHW runs plus settling time, compressor off, and the first ~10 minutes after compressor start.
   - Colour by water − target (default), COP, compressor frequency, before/after the last change. Offer room − setpoint only when a room sensor is configured.
   - Add a median line per 2 °C outside band and an hours-per-band histogram.
+
+## Code layout
+
+- Backend `backend/heishamon_dashboard/`: packages `commands/` (planner, gates, lifecycle, transport,
+  service), `store/` (buffer, outages, records, rollups, queries, sqlite) and `api/` (one module per
+  feature, `api.register(app, svc, static_dir)`), plus `catalog.json` (sections `topics`, `commands`, `inputs`
+  and `models`; every command and input carries a required `ui_group`, topics and models do not) and `rules.json` (shared domain rules: curve limits and leaves, mode sets, power
+  pairs, built-in tile ids).
+- **`rules.json` is the single source for those rules.** Python reads it through `rules.py`, the
+  frontend through `lib/domain/rules.js` (`$rules` alias). Do not re-declare them in code; a grep test
+  (`test_rules.py`) fails on mode-set literals and curve-leaf patterns in the Python sources and the
+  simulator. Other rules (power pairs, tiles, curve limits) are not grep-checked.
+- Frontend `frontend/src/`: `app/` (shell and the route registry), `features/<id>/` (one folder per
+  screen, default export `{id, navKey, order, component}`), `lib/` (stores, api, domain, commands
+  controller, i18n, ui).
 
 ## Development notes
 

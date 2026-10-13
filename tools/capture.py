@@ -2,7 +2,7 @@
 
 READ-ONLY: the script subscribes to `<base>/#` and never publishes. It takes the connection
 settings from the environment (the same names as the dashboard: MQTT_HOST, MQTT_PORT, MQTT_USER,
-MQTT_PASSWORD, MQTT_TLS, MQTT_BASE_TOPIC) and does not read any `.env` file; export the variables
+MQTT_PASSWORD, MQTT_TLS, MQTT_CA_FILE, MQTT_BASE_TOPIC) and does not read any `.env` file; export the variables
 in your shell first. Run it once on your own network:
 
     python tools/capture.py --duration 900 --out backend/tests/fixtures/replay_real.json
@@ -10,10 +10,12 @@ in your shell first. Run it once on your own network:
 Sanitizing (nothing identifying leaves this script):
 
 * the `ip` topic, the `log` topic and every topic outside the known HeishaMon subtrees are dropped;
-* `stats` is reduced to its `version`;
+* `stats` is reduced to its `version` (a leading `v` is stripped; local, alpha and nightly builds and
+  sha-like values are removed), and the reduced document is checked like any other payload;
 * 1-wire addresses are replaced by stable pseudonyms (`1wire/pseudo-01`, ...) and their
   `alias` payloads (free text chosen by the owner) by the same pseudonym;
-* any payload that contains an IPv4 address, a MAC address or an e-mail address is dropped;
+* any message whose payload contains an IPv4 or IPv6 address, a MAC address, an e-mail address or a DNS
+  hostname is dropped, not rewritten;
 * the base topic and the broker address are not written; topics are relative to the base.
 
 Fixture format (`heishamon-replay/1`): `{"format", "synthetic", "duration_s", "dropped": {...},
@@ -39,6 +41,25 @@ DEFAULT_OUT = Path(__file__).resolve().parents[1] / "backend" / "tests" / "fixtu
 _IPV4 = re.compile(r"(?<![\d.])\d{1,3}(?:\.\d{1,3}){3}(?![\d.])")
 _MAC = re.compile(r"\b[0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5}\b")
 _EMAIL = re.compile(r"[^\s@]+@[^\s@]+\.[^\s@]+")
+# IPv6: at least two colons between hex groups (covers `::` forms); a lone `12:30` is not matched
+_IPV6 = re.compile(r"(?<![0-9A-Za-z:])(?:[0-9A-Fa-f]{0,4}:){2,7}[0-9A-Fa-f]{0,4}(?![0-9A-Za-z:])")
+# DNS hostname: two or more labels ending in an alphabetic TLD
+_HOSTNAME = re.compile(r"(?<![\w.-])(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}(?![\w-])")
+_VERSION = re.compile(r"^v?(\d+\.\d+(?:\.\d+)?(?:-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)?)$")
+_SHA_RUN = re.compile(r"[0-9A-Fa-f]{7,}")
+
+
+def _identifying(text: str) -> bool:
+    return bool(_IPV4.search(text) or _MAC.search(text) or _EMAIL.search(text)
+                or _IPV6.search(text) or _HOSTNAME.search(text))
+
+
+def _clean_version(value: str) -> str | None:
+    """`v4.2.3` -> `4.2.3`; `3.2.4-beta-2` is kept; local/alpha/nightly builds and sha-like runs are dropped."""
+    match = _VERSION.match(value.strip())
+    if not match or _SHA_RUN.search(value):
+        return None
+    return match.group(1)
 
 
 class Sanitizer:
@@ -70,8 +91,11 @@ class Sanitizer:
                 data = json.loads(payload)
             except ValueError:
                 return self._drop("stats_unparseable")
-            version = data.get("version") if isinstance(data, dict) else None
-            return topic, json.dumps({"version": version} if isinstance(version, str) else {}, separators=(",", ":"))
+            version = _clean_version(data["version"]) if isinstance(data, dict) and isinstance(data.get("version"), str) else None
+            payload = json.dumps({"version": version} if version else {}, separators=(",", ":"))
+            if _identifying(payload):
+                return self._drop("identifying_payload")
+            return topic, payload
         if topic.startswith("1wire/"):
             parts = topic.split("/")
             name = self.pseudonym(parts[1])
@@ -80,7 +104,7 @@ class Sanitizer:
             if len(parts) > 2:
                 return self._drop("other")
             topic = f"1wire/{name}"
-        if _IPV4.search(payload) or _MAC.search(payload) or _EMAIL.search(payload):
+        if _identifying(payload):
             return self._drop("identifying_payload")
         return topic, payload
 
@@ -128,7 +152,7 @@ def _client(config):
     if config.mqtt_password is not None:
         kwargs["password"] = config.mqtt_password
     if config.mqtt_tls:
-        kwargs["tls_params"] = aiomqtt.TLSParameters()
+        kwargs["tls_params"] = aiomqtt.TLSParameters(ca_certs=config.mqtt_ca_file)
     return aiomqtt.Client(config.mqtt_host, port=config.mqtt_port, **kwargs)
 
 
