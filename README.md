@@ -51,7 +51,7 @@ Confirm the history and preferences from before `stop` are still there. `stop` m
 
 ## Reverse proxy
 
-Spec §13. The proxy terminates TLS and authenticates. This process is reached over plain HTTP behind it. It **does not trust** `X-Forwarded-*` headers. When `PUBLIC_ORIGINS` is set, the `Host` header must match one of those origins (`host` and optional port); otherwise the request is `403 bad_host`. An empty `PUBLIC_ORIGINS` skips that check and logs a warning at startup — set it.
+Spec §13. The proxy terminates TLS and authenticates. This process is reached over plain HTTP behind it. It **does not trust** `X-Forwarded-*` headers. When `PUBLIC_ORIGINS` is set, the `Host` header must match one of those origins (`host` and optional port); otherwise the request is `403 bad_host`. An empty `PUBLIC_ORIGINS` skips the `Host` match and logs a warning at startup — set it. Without it, writes (`POST`/`PUT`) and WebSocket connections are accepted only when the `Host` is `localhost` or an IP literal (`127.0.0.1:8000`, `[::1]:8000`, `192.168.1.10:8000`). A DNS name gets `403 bad_host` until you set `PUBLIC_ORIGINS`; reads are unaffected. Request bodies above 64 KiB are refused with `413`, and the CSV export prefixes text cells that start with `=`, `+`, `-`, `@`, TAB or CR with `'` so spreadsheets do not run them as formulas.
 
 Set:
 
@@ -123,12 +123,15 @@ Spec §12. A missing required variable, or a value outside its range, stops star
 | `MQTT_USER` | string | empty | no |
 | `MQTT_PASSWORD` | string | empty | no |
 | `MQTT_TLS` | `1`, `true`, `yes` (any case) turn TLS on; anything else leaves it off | off | no |
+| `MQTT_CA_FILE` | path to a PEM CA bundle used to verify the broker when `MQTT_TLS` is on; the file must exist | empty (system CAs) | no |
 | `MQTT_BASE_TOPIC` | 1–128 bytes UTF-8; `/`-separated non-empty segments; no leading or trailing `/`; no `+`, `#` or NUL; must not start with `$` | `panasonic_heat_pump` | no |
 | `DATA_DIR` | writable directory | `/data` | no |
 | `FLUSH_INTERVAL_SECONDS` | integer 10–86400 | `900` | no |
 | `BUFFER_MAX_ENTRIES` | integer ≥ 1000 | `200000` | no |
 | `BUFFER_MAX_BYTES` | integer ≥ 16777216 (16 MiB) | `268435456` (256 MiB) | no |
 | `AUDIT_BUFFER_MAX` | integer 100–100000 | `10000` | no |
+| `COMMAND_RATE_MAX` | integer ≥ 1; publish attempts per command name per window (retries count) | `6` | no |
+| `COMMAND_RATE_WINDOW_S` | integer ≥ 1; sliding window in seconds | `3600` | no |
 | `RAW_RETENTION_DAYS` | integer ≥ 1, or empty to keep raw samples | empty | no |
 | `HTTP_PORT` | integer 1–65535 | `8000` | no |
 | `TZ` | IANA name, for example `Europe/Amsterdam`. An unknown name is a startup error | `UTC` | no |
@@ -210,7 +213,7 @@ From a checkout (no Docker needed):
 npm --prefix frontend run test
 ```
 
-`npm --prefix frontend run test` runs Vitest. The Playwright end-to-end suite lives under `frontend/e2e`; run it from `frontend/`. The one skipped backend test is the real-capture replay, which stays skipped until `backend/tests/fixtures/replay_real.json` exists (see below).
+`npm --prefix frontend run test` runs Vitest. The Playwright end-to-end suite lives under `frontend/e2e`; run it from `frontend/`. Four backend tests are skipped: the real-capture replay and two catalog tests (`test_model_from_real_capture`, `test_real_capture_sentinels_and_enums`) that read the same fixture all stay skipped until `backend/tests/fixtures/replay_real.json` exists (see below), and one exemption case (`rules.py` itself) in the `rules.json` grep test.
 
 ## Privacy and a real MQTT capture
 
@@ -220,7 +223,7 @@ This is a public repository.
 - The HeishaMon `ip` topic identifies the device. It must not appear in committed fixtures.
 - Connection settings stay in the environment or in an uncommitted `.env`.
 
-A real session for the replay test is captured **by the owner, on their own network**. `tools/capture.py` only subscribes. It does not publish. It does not read a `.env` file. Export the MQTT variables in the shell first (`MQTT_HOST` is required; `MQTT_PORT`, `MQTT_USER`, `MQTT_PASSWORD`, `MQTT_TLS` and `MQTT_BASE_TOPIC` are the same names as the dashboard).
+A real session for the replay test is captured **by the owner, on their own network**. `tools/capture.py` only subscribes. It does not publish. It does not read a `.env` file. Export the MQTT variables in the shell first (`MQTT_HOST` is required; `MQTT_PORT`, `MQTT_USER`, `MQTT_PASSWORD`, `MQTT_TLS`, `MQTT_CA_FILE` and `MQTT_BASE_TOPIC` are the same names as the dashboard).
 
 ```sh
 MQTT_HOST=mqtt.example.invalid MQTT_PORT=1883 \
@@ -232,7 +235,7 @@ MQTT_HOST=mqtt.example.invalid MQTT_PORT=1883 \
 
 What it writes is sanitized: the `ip` topic, the `log` topic and anything outside the known HeishaMon subtrees are dropped; `stats` is reduced to the `version` field; 1-wire addresses become stable pseudonyms (`1wire/pseudo-01`, …) and alias text is replaced with that pseudonym; a payload that still contains an IPv4 address, a MAC address or an email address is dropped. The broker address and the base topic are not stored. Topics in the file are relative to the base.
 
-Until `backend/tests/fixtures/replay_real.json` exists, the real-replay test is skipped. A synthetic replay from the simulator covers the meantime. Read the file before committing it and confirm it has no broker address, account, or `ip` topic.
+Until `backend/tests/fixtures/replay_real.json` exists, the real-replay test and the two catalog tests that read the same file are skipped. A synthetic replay from the simulator covers the meantime. Read the file before committing it and confirm it has no broker address, account, or `ip` topic.
 
 ## Run from a checkout
 

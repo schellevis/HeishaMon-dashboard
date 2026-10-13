@@ -55,6 +55,7 @@ export function createApi({ fetch: fetchImpl = globalThis.fetch, base = '' } = {
     putPrefs: (prefs) => request('PUT', '/api/prefs', prefs),
     system: () => request('GET', '/api/system'),
     overlay: (params) => request('GET', `/api/overlay${query(params)}`),
+    energy: (params) => request('GET', `/api/energy${query(params)}`),
     flush: () => request('POST', '/api/system/flush', {}),
   };
 }

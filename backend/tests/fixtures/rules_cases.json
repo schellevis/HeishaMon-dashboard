@@ -1,0 +1,36 @@
+{
+  "curve_validity": [
+    {"mode": "heat", "group": "outside", "value": -20, "valid": true},
+    {"mode": "heat", "group": "outside", "value": -21, "valid": false},
+    {"mode": "heat", "group": "outside", "value": 30, "valid": true},
+    {"mode": "heat", "group": "outside", "value": 31, "valid": false},
+    {"mode": "heat", "group": "target", "value": 15, "valid": true},
+    {"mode": "heat", "group": "target", "value": 14, "valid": false},
+    {"mode": "heat", "group": "target", "value": 75, "valid": true},
+    {"mode": "heat", "group": "target", "value": 76, "valid": false},
+    {"mode": "cool", "group": "outside", "value": 15, "valid": true},
+    {"mode": "cool", "group": "outside", "value": 14, "valid": false},
+    {"mode": "cool", "group": "outside", "value": 30, "valid": true},
+    {"mode": "cool", "group": "outside", "value": 31, "valid": false},
+    {"mode": "cool", "group": "target", "value": 5, "valid": true},
+    {"mode": "cool", "group": "target", "value": 4, "valid": false},
+    {"mode": "cool", "group": "target", "value": 20, "valid": true},
+    {"mode": "cool", "group": "target", "value": 21, "valid": false}
+  ],
+  "leaf_names": [
+    {"zone": 1, "mode": "heat", "end": "cold", "group": "target", "topic": "main/Z1_Heat_Curve_Target_High_Temp"},
+    {"zone": 1, "mode": "heat", "end": "cold", "group": "outside", "topic": "main/Z1_Heat_Curve_Outside_Low_Temp"},
+    {"zone": 1, "mode": "heat", "end": "warm", "group": "target", "topic": "main/Z1_Heat_Curve_Target_Low_Temp"},
+    {"zone": 1, "mode": "heat", "end": "warm", "group": "outside", "topic": "main/Z1_Heat_Curve_Outside_High_Temp"},
+    {"zone": 2, "mode": "cool", "end": "cold", "group": "target", "topic": "main/Z2_Cool_Curve_Target_High_Temp"},
+    {"zone": 2, "mode": "cool", "end": "warm", "group": "outside", "topic": "main/Z2_Cool_Curve_Outside_High_Temp"}
+  ],
+  "power_selection": [
+    {"has_extra": false, "mode": "heat", "topics": ["main/Heat_Power_Production", "main/Heat_Power_Consumption"]},
+    {"has_extra": false, "mode": "cool", "topics": ["main/Cool_Power_Production", "main/Cool_Power_Consumption"]},
+    {"has_extra": false, "mode": "dhw", "topics": ["main/DHW_Power_Production", "main/DHW_Power_Consumption"]},
+    {"has_extra": true, "mode": "heat", "topics": ["extra/Heat_Power_Production_Extra", "extra/Heat_Power_Consumption_Extra"]},
+    {"has_extra": true, "mode": "cool", "topics": ["extra/Cool_Power_Production_Extra", "extra/Cool_Power_Consumption_Extra"]},
+    {"has_extra": true, "mode": "dhw", "topics": ["extra/DHW_Power_Production_Extra", "extra/DHW_Power_Consumption_Extra"]}
+  ]
+}

@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
-import Curve from '../src/screens/Curve.svelte';
-import CurveChart from '../src/components/curve/CurveChart.svelte';
+import Curve from '../src/features/curve/CurveScreen.svelte';
+import CurveChart from '../src/features/curve/CurveChart.svelte';
 import { api } from '../src/lib/api.js';
 import {
   answerConfirm,
@@ -389,7 +389,7 @@ describe('Curve screen', () => {
     await fireEvent.click(screen.getByTestId('apply-curve'));
     await confirmNext(true);
     await waitFor(() => expect(command).toHaveBeenCalledWith({
-      name: 'SetCurves', value: { zone1: { heat: { target: { high: 20 } } } }, confirm: false,
+      name: 'SetCurves', value: { zone1: { heat: { target: { high: 20 } } } }, confirm: true,
     }));
   });
 
@@ -440,7 +440,7 @@ describe('Curve screen', () => {
     expect(command).toHaveBeenCalledWith({
       name: 'SetCurves',
       value: { zone1: { heat: { target: { high: 47 } } } },
-      confirm: false,
+      confirm: true,
     });
     await waitFor(() => expect(screen.getByTestId('key-status').textContent).toContain('Z1_Heat_Curve_Target_High_Temp'));
   });
@@ -497,7 +497,7 @@ describe('Curve screen', () => {
     await fireEvent.click(screen.getByTestId('apply-heaterOn'));
     await confirmNext(true);
     await waitFor(() => expect(command).toHaveBeenCalledTimes(1));
-    expect(command).toHaveBeenCalledWith({ name: 'SetHeaterOnOutdoorTemp', value: -1, confirm: false });
+    expect(command).toHaveBeenCalledWith({ name: 'SetHeaterOnOutdoorTemp', value: -1, confirm: true });
   });
 
   it('threshold markers stop at their catalog ranges', async () => {
@@ -514,7 +514,7 @@ describe('Curve screen', () => {
     expect(screen.getByTestId('shift-value').textContent).toBe('1');
     await fireEvent.click(screen.getByTestId('apply-shift'));
     await confirmNext(true);
-    await waitFor(() => expect(command).toHaveBeenCalledWith({ name: 'SetZ1HeatRequestTemperature', value: 1, confirm: false }));
+    await waitFor(() => expect(command).toHaveBeenCalledWith({ name: 'SetZ1HeatRequestTemperature', value: 1, confirm: true }));
   });
 
   it('shows a rejection code from the backend', async () => {
@@ -544,11 +544,11 @@ describe('Curve screen', () => {
     expect(screen.getByTestId('draft-group-curve')).toBeTruthy();
   });
 
-  it('warns about 3 or more changes in the last 60 minutes', () => {
+  it('shows the wear warning when the server flags eeprom_warning', () => {
     const now = Date.now();
     commands.set(
       Object.fromEntries(
-        [1, 2, 3].map((i) => [`x${i}`, { id: `x${i}`, name: 'SetCurves', payload: '{}', status: 'confirmed', submitted_ts: now - i * 1000, keys: null }]),
+        [1, 2, 3].map((i) => [`x${i}`, { id: `x${i}`, name: 'SetCurves', payload: '{}', status: 'confirmed', submitted_ts: now - i * 1000, keys: null, eeprom_warning: i === 1 }]),
       ),
     );
     mount();

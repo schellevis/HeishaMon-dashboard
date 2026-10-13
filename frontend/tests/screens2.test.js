@@ -13,7 +13,7 @@ import {
   isAction,
   isRisky,
   jsonDiff,
-} from '../src/components/settings/grouping.js';
+} from '../src/features/settings/grouping.js';
 import {
   commands,
   confirmRequest,
@@ -24,10 +24,10 @@ import {
   state,
   system,
 } from '../src/lib/stores.js';
-import Log from '../src/screens/Log.svelte';
-import Settings from '../src/screens/Settings.svelte';
-import System from '../src/screens/System.svelte';
-import Topics from '../src/screens/Topics.svelte';
+import Log from '../src/features/log/LogScreen.svelte';
+import Settings from '../src/features/settings/SettingsScreen.svelte';
+import System from '../src/features/system/SystemScreen.svelte';
+import Topics from '../src/features/topics/TopicsScreen.svelte';
 
 function field(value, unknown = false, stale = false) {
   return { value, unknown, stale };

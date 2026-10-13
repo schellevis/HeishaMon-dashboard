@@ -2,27 +2,27 @@
 // A curve is { cold: { outside, target }, warm: { outside, target } }.
 // Cold end = Outside_Low + Target_High; warm end = Outside_High + Target_Low (crosswise naming, §3).
 
-export const LIMITS = {
-  heat: { outside: [-20, 30], target: [15, 75] },
-  cool: { outside: [15, 30], target: [5, 20] },
-};
-export const MODE_SETS = { heat: [0, 2, 4, 6], cool: [1, 5, 7, 8] };
-export const ROOM_SENSOR_VALUES = [1, 2, 3];
+import { curveEnds, curveLeaf, curveLimits, curveShift, modeSets, roomSensorValues } from './domain/rules.js';
+
+export const LIMITS = curveLimits;
+export const MODE_SETS = { heat: modeSets.heating, cool: modeSets.cooling };
+export const ROOM_SENSOR_VALUES = roomSensorValues;
 /** Profile sensor values (profile.zone.zN.sensor) that are a room sensor (thermostat/thermistor). */
 export const ROOM_SENSORS = ['ext_thermostat', 'int_thermostat', 'thermistor'];
-export const SHIFT_RANGE = { min: -5, max: 5 };
+export const SHIFT_RANGE = { min: curveShift[0], max: curveShift[1] };
 export const MODEL_TOLERANCE = 1;
 export const THRESHOLDS = {
   heaterOn: { key: 'main/Heater_On_Outdoor_Temp', command: 'SetHeaterOnOutdoorTemp', min: -15, max: 20 },
   heatingOff: { key: 'main/Heating_Off_Outdoor_Temp', command: 'SetHeatingOffOutdoorTemp', min: 5, max: 35 },
 };
 
-// [end, field] -> [key part, SetCurves json path]
+// [end, field]; the SetCurves json path is field -> curveEnds[end][field] lowercased (crosswise naming, rules.json)
+const hl = (end, field) => curveEnds[end][field].toLowerCase();
 const LEAVES = [
-  ['cold', 'target', 'Target_High', ['target', 'high']],
-  ['warm', 'target', 'Target_Low', ['target', 'low']],
-  ['warm', 'outside', 'Outside_High', ['outside', 'high']],
-  ['cold', 'outside', 'Outside_Low', ['outside', 'low']],
+  ['cold', 'target'],
+  ['warm', 'target'],
+  ['warm', 'outside'],
+  ['cold', 'outside'],
 ];
 
 export function zoneNum(zone) {
@@ -37,12 +37,9 @@ function modeOf(mode) {
   return m;
 }
 
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
 /** Catalog-style leaf name, e.g. Z1_Heat_Curve_Target_High_Temp. */
 export function leafKey(zone, mode, end, field) {
-  const part = LEAVES.find((l) => l[0] === end && l[1] === field)[2];
-  return `Z${zoneNum(zone)}_${cap(modeOf(mode))}_Curve_${part}_Temp`;
+  return curveLeaf(zoneNum(zone), modeOf(mode), field, end).replace(/^[^/]*\//, '');
 }
 
 /** Cold/warm end from published values (a map key -> number, `main/` prefix optional); null if any is missing. */
@@ -156,13 +153,13 @@ export function setcurvesDiff(current, draft, zone = 'z1', mode = 'heat') {
   const m = modeOf(mode);
   const json = {};
   const keys = {};
-  for (const [end, field, , [grp, hl]] of LEAVES) {
+  for (const [end, field] of LEAVES) {
     const value = draft[end][field];
     if (value === current[end][field]) continue;
     json[`zone${n}`] ??= {};
     json[`zone${n}`][m] ??= {};
-    json[`zone${n}`][m][grp] ??= {};
-    json[`zone${n}`][m][grp][hl] = value;
+    json[`zone${n}`][m][field] ??= {};
+    json[`zone${n}`][m][field][hl(end, field)] = value;
     keys[leafKey(n, m, end, field)] = value;
   }
   return { json, keys };
@@ -176,8 +173,8 @@ export function leavesOfJson(json) {
     if (!n) continue;
     for (const [mode, mv] of Object.entries(zv ?? {})) {
       if (!(mode in LIMITS)) continue;
-      for (const [end, field, , [grp, hl]] of LEAVES) {
-        const v = mv?.[grp]?.[hl];
+      for (const [end, field] of LEAVES) {
+        const v = mv?.[field]?.[hl(end, field)];
         if (typeof v === 'number') out[leafKey(n, mode, end, field)] = v;
       }
     }

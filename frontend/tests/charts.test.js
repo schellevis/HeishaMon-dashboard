@@ -13,11 +13,11 @@ vi.stubGlobal('matchMedia', vi.fn(() => ({
 import { translate } from '../src/lib/i18n/index.js';
 import { api } from '../src/lib/api.js';
 import { catalog, topicByKey } from '../src/lib/catalog.js';
-import Charts from '../src/screens/Charts.svelte';
-import ChartContainer from '../src/components/charts/ChartContainer.svelte';
-import TimeRangeSelector from '../src/components/charts/TimeRangeSelector.svelte';
-import TopicSelector from '../src/components/charts/TopicSelector.svelte';
-import PresetSelector from '../src/components/charts/PresetSelector.svelte';
+import Charts from '../src/features/charts/ChartsScreen.svelte';
+import ChartContainer from '../src/features/charts/ChartContainer.svelte';
+import TimeRangeSelector from '../src/features/charts/TimeRangeSelector.svelte';
+import TopicSelector from '../src/features/charts/TopicSelector.svelte';
+import PresetSelector from '../src/features/charts/PresetSelector.svelte';
 import {
   createChart,
   historyToUplot,
@@ -761,5 +761,66 @@ describe('chart labels and local time axis (§7.2)', () => {
     expect(x.values(null, [sec], 0, 70, 3600)).toEqual(['09:43']);
     const [xEn] = timeAxes('en', 'Europe/Amsterdam');
     expect(xEn.values(null, [sec], 0, 70, 3600)[0]).not.toMatch(/am|pm/i);
+  });
+});
+
+describe('T06: LOCF alignment, preset contract, overrides', () => {
+  const hist = (extra = {}) => ({
+    resolution: 'raw',
+    series: {
+      'main/A': { kind: 'number', points: [[1000, 1], [4000, 2]], breaks: [], ...extra.a },
+      'main/B': { kind: 'number', points: [[2000, 10], [3000, 20], [5000, 30]], breaks: [], ...extra.b },
+    },
+  });
+
+  it('carries the last value forward on the shared axis', () => {
+    const u = historyToUplot(hist());
+    expect(u.data[0]).toEqual([1, 2, 3, 4, 5]);
+    expect(u.data[1]).toEqual([1, 1, 1, 2, 2]);
+    expect(u.data[2]).toEqual([null, 10, 20, 20, 30]);
+  });
+
+  it('keeps null for zero-coverage points and does not carry across them', () => {
+    const u = historyToUplot(hist({ a: { points: [[1000, 1, 5], [2500, 9, 0], [4000, 2, 5]] } }));
+    expect(u.data[1]).toEqual([1, 1, null, null, 2, 2]);
+  });
+
+  it('keeps null inside and across a series break', () => {
+    const u = historyToUplot(hist({ b: { breaks: [[2500, 4500]] } }));
+    // B: 2000=10, 3000=20 is inside the break only as a point; 4000 lies in the break
+    expect(u.data[0]).toEqual([1, 2, 2.5, 3, 4, 5]);
+    expect(u.data[2][4]).toBeNull();
+  });
+
+  it('every built-in preset key is a catalog key', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const real = JSON.parse(readFileSync(resolve(process.cwd(), '../backend/heishamon_dashboard/catalog.json'), 'utf8'));
+    const { BUILTIN_PRESETS, presetTopics } = await import('../src/features/charts/PresetSelector.svelte');
+    const keys = new Set(real.topics.map((t) => t.key));
+    for (const profileVariant of [null, { has_extra: { value: true } }, { has_extra: { value: false } }]) {
+      for (const preset of Object.values(BUILTIN_PRESETS)) {
+        for (const key of presetTopics(preset, profileVariant)) expect(keys.has(key), key).toBe(true);
+      }
+    }
+  });
+
+  it('reads feature overrides from the prefs store', async () => {
+    const probe = { key: 'main/Feature_Probe', kind: 'number', unit: '', decimals: 0, feature: 'dhw', category: 'x', label: { en: 'Feature probe' } };
+    catalog.topics.push(probe);
+    try {
+      profile.set({});
+      prefs.set({});
+      const shown = render(TopicSelector, { selected: [], onSelect: vi.fn() });
+      await tick();
+      expect(shown.container.textContent).toContain('Feature probe');
+      shown.unmount();
+      prefs.set({ feature_overrides: { dhw: 'hide' } });
+      const hidden = render(TopicSelector, { selected: [], onSelect: vi.fn() });
+      await tick();
+      expect(hidden.container.textContent).not.toContain('Feature probe');
+    } finally {
+      catalog.topics.splice(catalog.topics.indexOf(probe), 1);
+    }
   });
 });

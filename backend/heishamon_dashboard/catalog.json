@@ -182,7 +182,7 @@
       "feature": null,
       "label": {
         "en": "Water inlet temperature",
-        "nl": "Aanvoertemperatuur"
+        "nl": "Retourtemperatuur (inlaat)"
       }
     },
     {
@@ -199,7 +199,7 @@
       "feature": null,
       "label": {
         "en": "Water outlet temperature",
-        "nl": "Retourtemperatuur"
+        "nl": "Aanvoertemperatuur (uitlaat)"
       }
     },
     {
@@ -1384,7 +1384,7 @@
       "key": "main/Low_Pressure",
       "id": "TOP66",
       "kind": "number",
-      "unit": null,
+      "unit": "kgf/cm²",
       "decimals": 0,
       "sentinels": [
         -50
@@ -3497,7 +3497,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetPump",
@@ -3517,7 +3518,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "pump"
     },
     {
       "name": "SetMaxPumpDuty",
@@ -3540,7 +3542,8 @@
         "min": 64,
         "max": 254,
         "step": 1
-      }
+      },
+      "ui_group": "pump"
     },
     {
       "name": "SetQuietMode",
@@ -3563,7 +3566,8 @@
         "min": 0,
         "max": 3,
         "step": 1
-      }
+      },
+      "ui_group": "quiet"
     },
     {
       "name": "SetZ1HeatRequestTemperature",
@@ -3632,7 +3636,8 @@
           "max": 30,
           "step": 1
         }
-      ]
+      ],
+      "ui_group": "zones"
     },
     {
       "name": "SetZ1CoolRequestTemperature",
@@ -3701,7 +3706,8 @@
           "max": 30,
           "step": 1
         }
-      ]
+      ],
+      "ui_group": "zones"
     },
     {
       "name": "SetZ2HeatRequestTemperature",
@@ -3776,7 +3782,8 @@
           "max": 30,
           "step": 1
         }
-      ]
+      ],
+      "ui_group": "zones"
     },
     {
       "name": "SetZ2CoolRequestTemperature",
@@ -3851,7 +3858,8 @@
           "max": 30,
           "step": 1
         }
-      ]
+      ],
+      "ui_group": "zones"
     },
     {
       "name": "SetForceDHW",
@@ -3879,7 +3887,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "dhw"
     },
     {
       "name": "SetForceDefrost",
@@ -3898,7 +3907,8 @@
       },
       "allowed": [
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetForceSterilization",
@@ -3923,7 +3933,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "sterilization"
     },
     {
       "name": "SetSterilizationTemp",
@@ -3952,7 +3963,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "sterilization"
     },
     {
       "name": "SetSterilizationMaxTime",
@@ -3981,7 +3993,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "sterilization"
     },
     {
       "name": "SetForceHeater",
@@ -4003,7 +4016,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "heaters"
     },
     {
       "name": "SetHolidayMode",
@@ -4025,7 +4039,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetPowerfulMode",
@@ -4048,7 +4063,8 @@
         "min": 0,
         "max": 3,
         "step": 1
-      }
+      },
+      "ui_group": "operation"
     },
     {
       "name": "SetOperationMode",
@@ -4071,7 +4087,8 @@
         "min": 0,
         "max": 6,
         "step": 1
-      }
+      },
+      "ui_group": "operation"
     },
     {
       "name": "SetDHWTemp",
@@ -4100,7 +4117,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "dhw"
     },
     {
       "name": "SetCurves",
@@ -4133,7 +4151,8 @@
       "label": {
         "en": "Heating/cooling curves",
         "nl": "Stooklijnen verwarmen/koelen"
-      }
+      },
+      "ui_group": "operation"
     },
     {
       "name": "SetZones",
@@ -4156,7 +4175,8 @@
         "min": 0,
         "max": 2,
         "step": 1
-      }
+      },
+      "ui_group": "zones"
     },
     {
       "name": "SetFloorHeatDelta",
@@ -4179,7 +4199,8 @@
         "min": 1,
         "max": 15,
         "step": 1
-      }
+      },
+      "ui_group": "zones"
     },
     {
       "name": "SetFloorCoolDelta",
@@ -4202,7 +4223,8 @@
         "min": 1,
         "max": 15,
         "step": 1
-      }
+      },
+      "ui_group": "zones"
     },
     {
       "name": "SetDHWHeatDelta",
@@ -4231,7 +4253,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "dhw"
     },
     {
       "name": "SetReset",
@@ -4250,7 +4273,8 @@
       },
       "allowed": [
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetHeaterDelayTime",
@@ -4273,7 +4297,13 @@
         "min": 0,
         "max": 30,
         "step": 1
-      }
+      },
+      "applicability": {
+        "series": [
+          "J"
+        ]
+      },
+      "ui_group": "heaters"
     },
     {
       "name": "SetHeaterStartDelta",
@@ -4296,7 +4326,13 @@
         "min": -15,
         "max": 15,
         "step": 1
-      }
+      },
+      "applicability": {
+        "series": [
+          "J"
+        ]
+      },
+      "ui_group": "heaters"
     },
     {
       "name": "SetHeaterStopDelta",
@@ -4319,7 +4355,13 @@
         "min": -15,
         "max": 15,
         "step": 1
-      }
+      },
+      "applicability": {
+        "series": [
+          "J"
+        ]
+      },
+      "ui_group": "heaters"
     },
     {
       "name": "SetMainSchedule",
@@ -4341,7 +4383,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "quiet"
     },
     {
       "name": "SetAltExternalSensor",
@@ -4363,7 +4406,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetExternalPadHeater",
@@ -4386,7 +4430,8 @@
         "min": 0,
         "max": 2,
         "step": 1
-      }
+      },
+      "ui_group": "heaters"
     },
     {
       "name": "SetBufferDelta",
@@ -4415,7 +4460,8 @@
           "profile.buffer_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "operation"
     },
     {
       "name": "SetBuffer",
@@ -4437,7 +4483,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetHeatingOffOutdoorTemp",
@@ -4460,7 +4507,8 @@
         "min": 5,
         "max": 35,
         "step": 1
-      }
+      },
+      "ui_group": "operation"
     },
     {
       "name": "SetExternalControl",
@@ -4482,7 +4530,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetExternalError",
@@ -4504,7 +4553,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetExternalCompressorControl",
@@ -4526,7 +4576,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetExternalHeatCoolControl",
@@ -4548,7 +4599,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetBivalentControl",
@@ -4570,7 +4622,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "bivalent"
     },
     {
       "name": "SetBivalentMode",
@@ -4599,7 +4652,8 @@
           "profile.bivalent"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "bivalent"
     },
     {
       "name": "SetBivalentStartTemp",
@@ -4628,7 +4682,8 @@
           "profile.bivalent"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "bivalent"
     },
     {
       "name": "SetBivalentAPStartTemp",
@@ -4657,7 +4712,8 @@
           "profile.bivalent"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "bivalent"
     },
     {
       "name": "SetBivalentAPStopTemp",
@@ -4686,7 +4742,8 @@
           "profile.bivalent"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "bivalent"
     },
     {
       "name": "SetHeatingControl",
@@ -4708,7 +4765,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "operation"
     },
     {
       "name": "SetSmartDHW",
@@ -4736,7 +4794,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "dhw"
     },
     {
       "name": "SetQuietModePriority",
@@ -4758,7 +4817,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "quiet"
     },
     {
       "name": "SetPumpFlowrateMode",
@@ -4780,7 +4840,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "pump"
     },
     {
       "name": "SetDHWSensorSelection",
@@ -4808,7 +4869,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "dhw"
     },
     {
       "name": "SetDHWHeaterState",
@@ -4836,7 +4898,8 @@
           "profile.dhw_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "dhw"
     },
     {
       "name": "SetRoomHeaterState",
@@ -4858,7 +4921,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "heaters"
     },
     {
       "name": "SetHeaterOnOutdoorTemp",
@@ -4881,7 +4945,8 @@
         "min": -15,
         "max": 20,
         "step": 1
-      }
+      },
+      "ui_group": "heaters"
     },
     {
       "name": "SetHeatCoolMode",
@@ -4901,7 +4966,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "pcb"
     },
     {
       "name": "SetCompressorState",
@@ -4921,7 +4987,8 @@
       "allowed": [
         0,
         1
-      ]
+      ],
+      "ui_group": "pcb"
     },
     {
       "name": "SetSmartGridMode",
@@ -4942,7 +5009,8 @@
         "min": 0,
         "max": 3,
         "step": 1
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetExternalThermostat1State",
@@ -4963,7 +5031,8 @@
         "min": 0,
         "max": 3,
         "step": 1
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetExternalThermostat2State",
@@ -4984,7 +5053,8 @@
         "min": 0,
         "max": 3,
         "step": 1
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetDemandControl",
@@ -4992,7 +5062,7 @@
       "class": "unverifiable",
       "risky": false,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "heishamon_fact",
       "readback": [],
       "compare": "equal",
       "min_firmware": "3.2.3",
@@ -5002,10 +5072,11 @@
         "nl": "Vraagsturing (optionele PCB)"
       },
       "range": {
-        "min": 0,
-        "max": 255,
+        "min": 43,
+        "max": 234,
         "step": 1
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetPoolTemp",
@@ -5026,7 +5097,8 @@
         "min": -30.0,
         "max": 90.0,
         "step": 0.5
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetBufferTemp",
@@ -5053,7 +5125,8 @@
           "profile.buffer_installed"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "pcb"
     },
     {
       "name": "SetZ1RoomTemp",
@@ -5074,7 +5147,8 @@
         "min": -30.0,
         "max": 90.0,
         "step": 0.5
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetZ1WaterTemp",
@@ -5095,7 +5169,8 @@
         "min": -30.0,
         "max": 90.0,
         "step": 0.5
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetZ2RoomTemp",
@@ -5122,7 +5197,8 @@
           "profile.zone.z2.active"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "pcb"
     },
     {
       "name": "SetZ2WaterTemp",
@@ -5149,7 +5225,8 @@
           "profile.zone.z2.active"
         ]
       },
-      "safe_under_unknown": false
+      "safe_under_unknown": false,
+      "ui_group": "pcb"
     },
     {
       "name": "SetSolarTemp",
@@ -5170,7 +5247,8 @@
         "min": -30.0,
         "max": 90.0,
         "step": 0.5
-      }
+      },
+      "ui_group": "pcb"
     },
     {
       "name": "SetOptPCBByte9",
@@ -5178,7 +5256,7 @@
       "class": "unverifiable",
       "risky": true,
       "type": "int",
-      "range_source": "panasonic_manual",
+      "range_source": "encoding_domain",
       "readback": [],
       "compare": "equal",
       "min_firmware": "3.2.3",
@@ -5191,7 +5269,8 @@
         "min": 0,
         "max": 255,
         "step": 1
-      }
+      },
+      "ui_group": "pcb"
     }
   ],
   "inputs": [
@@ -5210,7 +5289,8 @@
       "label": {
         "en": "OpenTherm water pressure",
         "nl": "OpenTherm waterdruk"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/chSetLowBound",
@@ -5219,7 +5299,7 @@
       "type": "int",
       "range": {
         "min": 0,
-        "max": 255,
+        "max": 127,
         "step": 1
       },
       "range_source": "heishamon_fact",
@@ -5227,7 +5307,8 @@
       "label": {
         "en": "OpenTherm heating setpoint lower bound",
         "nl": "OpenTherm ondergrens instelwaarde verwarming"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/chSetUppBound",
@@ -5236,7 +5317,7 @@
       "type": "int",
       "range": {
         "min": 0,
-        "max": 255,
+        "max": 127,
         "step": 1
       },
       "range_source": "heishamon_fact",
@@ -5244,7 +5325,8 @@
       "label": {
         "en": "OpenTherm heating setpoint upper bound",
         "nl": "OpenTherm bovengrens instelwaarde verwarming"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/chState",
@@ -5261,7 +5343,8 @@
       "label": {
         "en": "OpenTherm heating active",
         "nl": "OpenTherm verwarming actief"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/coolingState",
@@ -5278,7 +5361,8 @@
       "label": {
         "en": "OpenTherm cooling active",
         "nl": "OpenTherm koelen actief"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/dhwSetLowBound",
@@ -5287,7 +5371,7 @@
       "type": "int",
       "range": {
         "min": 0,
-        "max": 255,
+        "max": 127,
         "step": 1
       },
       "range_source": "heishamon_fact",
@@ -5295,7 +5379,8 @@
       "label": {
         "en": "OpenTherm dHW setpoint lower bound",
         "nl": "OpenTherm ondergrens instelwaarde tapwater"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/dhwSetUppBound",
@@ -5304,7 +5389,7 @@
       "type": "int",
       "range": {
         "min": 0,
-        "max": 255,
+        "max": 127,
         "step": 1
       },
       "range_source": "heishamon_fact",
@@ -5312,7 +5397,8 @@
       "label": {
         "en": "OpenTherm dHW setpoint upper bound",
         "nl": "OpenTherm bovengrens instelwaarde tapwater"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/dhwSetpoint",
@@ -5329,7 +5415,8 @@
       "label": {
         "en": "OpenTherm dHW setpoint",
         "nl": "OpenTherm instelwaarde tapwater"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/dhwState",
@@ -5346,7 +5433,8 @@
       "label": {
         "en": "OpenTherm dHW active",
         "nl": "OpenTherm tapwater actief"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/dhwTemp",
@@ -5363,7 +5451,8 @@
       "label": {
         "en": "OpenTherm dHW temperature",
         "nl": "OpenTherm tapwatertemperatuur"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/flameState",
@@ -5380,7 +5469,8 @@
       "label": {
         "en": "OpenTherm burner flame",
         "nl": "OpenTherm brandervlam"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/inletTemp",
@@ -5396,8 +5486,9 @@
       "min_firmware": "3.5",
       "label": {
         "en": "OpenTherm inlet temperature",
-        "nl": "OpenTherm aanvoertemperatuur"
-      }
+        "nl": "OpenTherm retourtemperatuur"
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/maxTSet",
@@ -5414,7 +5505,8 @@
       "label": {
         "en": "OpenTherm maximum flow setpoint",
         "nl": "OpenTherm maximale aanvoerinstelling"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/outletTemp",
@@ -5430,8 +5522,9 @@
       "min_firmware": "3.5",
       "label": {
         "en": "OpenTherm outlet temperature",
-        "nl": "OpenTherm retourtemperatuur"
-      }
+        "nl": "OpenTherm aanvoertemperatuur"
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/outsideTemp",
@@ -5448,7 +5541,8 @@
       "label": {
         "en": "OpenTherm outside temperature",
         "nl": "OpenTherm buitentemperatuur"
-      }
+      },
+      "ui_group": "opentherm"
     },
     {
       "path": "opentherm/read/relativeModulation",
@@ -5465,24 +5559,8 @@
       "label": {
         "en": "OpenTherm relative modulation",
         "nl": "OpenTherm relatieve modulatie"
-      }
-    },
-    {
-      "path": "opentherm/read/roomSetOverride",
-      "class": "input",
-      "retain": false,
-      "type": "dec1",
-      "range": {
-        "min": -30.0,
-        "max": 90.0,
-        "step": 0.5
       },
-      "range_source": "heishamon_fact",
-      "min_firmware": "3.5",
-      "label": {
-        "en": "OpenTherm room setpoint override",
-        "nl": "OpenTherm overschrijving kamerinstelling"
-      }
+      "ui_group": "opentherm"
     },
     {
       "path": "s0/WatthourTotal/1",
@@ -5497,7 +5575,8 @@
       "label": {
         "en": "S0 meter 1 total energy",
         "nl": "S0-meter 1 totale energie"
-      }
+      },
+      "ui_group": "s0"
     },
     {
       "path": "s0/WatthourTotal/2",
@@ -5512,7 +5591,8 @@
       "label": {
         "en": "S0 meter 2 total energy",
         "nl": "S0-meter 2 totale energie"
-      }
+      },
+      "ui_group": "s0"
     }
   ],
   "models": [

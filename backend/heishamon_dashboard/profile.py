@@ -3,15 +3,15 @@ import json
 from typing import Mapping
 
 from .catalog import Catalog
+from . import rules
 from .firmware import parse_firmware
 from .types import TopicValue
 
 STALE_MS = 660_000
 PCB_LIVE_MS = 360_000
 
-_HEATING = {0, 2, 4, 6}
-_COOLING = {1, 5, 7, 8}
-_DHW = {3, 4, 5, 6, 8}
+_MODES = rules.load().operating_modes
+_HEATING, _COOLING, _DHW = _MODES["heating"], _MODES["cooling"], _MODES["dhw"]
 _ZONES = {0: "z1", 1: "z2", 2: "both"}
 _CONTROL = {0: "curve", 1: "direct"}
 _SENSOR = {0: "water", 1: "ext_thermostat", 2: "int_thermostat", 3: "thermistor"}

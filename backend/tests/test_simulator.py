@@ -303,7 +303,7 @@ def test_fault_echo_drop_and_drop_first():
     n = len(log)
     sim.command("SetDHWTemp", "50")
     echoed = _after(log, n)
-    assert echoed == [("main/DHW_Target_Temp", "50", False, clock.now_ms())]
+    assert echoed == [("main/DHW_Target_Temp", "50", True, clock.now_ms())]
 
     n = len(log)
     sim.command("SetOperationMode", "4")
@@ -315,9 +315,9 @@ def test_fault_echo_drop_and_drop_first():
     sim.command("SetZones", "2")
     assert not any(t == "main/Zones_State" and p == "2" for t, p, *_ in _after(log, n))
     sim.command("SetZones", "2")
-    assert ("main/Zones_State", "2", False, clock.now_ms()) in _after(log, n)
+    assert ("main/Zones_State", "2", True, clock.now_ms()) in _after(log, n)
     sim.command("SetZones", "1")
-    assert ("main/Zones_State", "1", False, clock.now_ms()) in log
+    assert ("main/Zones_State", "1", True, clock.now_ms()) in log
 
 
 def test_fault_delay_partial_and_listen_only():
@@ -329,7 +329,7 @@ def test_fault_delay_partial_and_listen_only():
     assert not any(t == "main/DHW_Target_Temp" and p == "48" for t, p, *_ in _after(log, n))
     clock.now = NOW + 10_000
     sim.tick()
-    assert ("main/DHW_Target_Temp", "48", False, clock.now_ms()) in _after(log, n)
+    assert ("main/DHW_Target_Temp", "48", True, clock.now_ms()) in _after(log, n)
 
     body = {
         "zone1": {"heat": {"target": {"high": 55, "low": 35}, "outside": {"high": 15, "low": -10}}}
@@ -343,7 +343,7 @@ def test_fault_delay_partial_and_listen_only():
     n = len(log)
     sim.command("SetCurves", json.dumps(body))
     got = {t: p for t, p, retained, _ts in _after(log, n) if t in leaves}
-    assert all(retained is False for t, _p, retained, _ts in _after(log, n) if t in leaves)
+    assert all(retained is True for t, _p, retained, _ts in _after(log, n) if t in leaves)
     assert got == {k: v for k, v in leaves.items() if k != "main/Z1_Heat_Curve_Outside_Low_Temp"}
     assert "main/Z1_Heat_Curve_Outside_Low_Temp" not in got
 
@@ -364,7 +364,7 @@ def test_per_command_listen_only_drops_that_command_only():
     sim.command("SetDHWTemp", "50")
     sim.command("SetOperationMode", "4")
     assert not any(t == "main/DHW_Target_Temp" for t, *_ in _after(log, n))
-    assert ("main/Operating_Mode_State", "4", False, NOW) in _after(log, n)
+    assert ("main/Operating_Mode_State", "4", True, NOW) in _after(log, n)
 
 
 def test_library_does_not_open_sockets(monkeypatch):
@@ -396,3 +396,14 @@ def test_unknown_command_is_ignored():
     n = len(log)
     sim.command("NotACommand", "1")
     assert log[n:] == []
+
+
+def test_simulator_readback_retained():
+    """Value read-backs are retained like HeishaMon's; the LWT stays non-retained."""
+    sim, _clock, log = run("heat_dhw")
+    n = len(log)
+    sim.command("SetDHWTemp", "50")
+    after = _after(log, n)
+    assert after and all(retained is True for _t, _p, retained, _ts in after)
+    assert ("main/DHW_Target_Temp", "50", True, NOW) in after
+    assert _latest(log)["main/DHW_Target_Temp"][:2] == ("50", True)

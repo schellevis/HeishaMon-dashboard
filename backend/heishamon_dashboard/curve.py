@@ -8,31 +8,29 @@ import re
 from statistics import median
 from typing import Any
 
+from . import derived, rules
 from .types import Liveness
 
-LIMITS = {
-    "heat": {"outside": (-20, 30), "target": (15, 75)},
-    "cool": {"outside": (15, 30), "target": (5, 20)},
-}
+_RULES = rules.load()
+LIMITS = _RULES.curve_limits
 # Operating_Mode_State values per tab (Appendix A.4 "overlay mode sets").
-MODE_SETS = {"heat": {0, 2, 4, 6}, "cool": {1, 5, 7, 8}}
+MODE_SETS = {"heat": _RULES.operating_modes["heating"], "cool": _RULES.operating_modes["cooling"]}
 # Z1/Z2_Sensor_Settings values meaning a room sensor is configured (thermostat or thermistor).
-ROOM_SENSOR_VALUES = {1, 2, 3}
+ROOM_SENSOR_VALUES = _RULES.room_sensor_values
 
 MINUTE_MS = 60_000
 WINDOW_MIN = 15
 WINDOW_MS = WINDOW_MIN * MINUTE_MS
 LOOKBACK_MIN = 10
+CHUNK_MS = 7 * 86_400_000  # a multiple of WINDOW_MS, so chunks split on window boundaries
 MIN_ELIGIBLE = 12
 MIN_MEDIAN_WINDOWS = 3
 VALVE_ROOM, VALVE_DHW = 0, 1
 
-# (curve end, field) -> (key part, SetCurves json path)
+# (curve end, field) -> SetCurves json path, e.g. ("target", "high"); from the crosswise naming in rules
 _LEAVES = {
-    ("cold", "target"): ("Target_High", ("target", "high")),
-    ("warm", "target"): ("Target_Low", ("target", "low")),
-    ("warm", "outside"): ("Outside_High", ("outside", "high")),
-    ("cold", "outside"): ("Outside_Low", ("outside", "low")),
+    (end, field): (field, _RULES.curve_ends[end][field].lower())
+    for field in ("target", "outside") for end in ("cold", "warm")
 }
 
 
@@ -51,9 +49,8 @@ def _mode(mode: str) -> str:
 
 
 def leaf_key(zone: Any, mode: str, end: str, field: str) -> str:
-    """Catalog-style leaf name, e.g. Z1_Heat_Curve_Target_High_Temp."""
-    part = _LEAVES[(end, field)][0]
-    return f"Z{_zone_num(zone)}_{_mode(mode).capitalize()}_Curve_{part}_Temp"
+    """Catalog-style leaf name without the `main/` prefix (per rules.json `curve_leaf`)."""
+    return _RULES.leaf_for_end(_zone_num(zone), _mode(mode), end, field).removeprefix("main/")
 
 
 def curve_points(values: dict, zone: Any, mode: str) -> dict | None:
@@ -124,7 +121,7 @@ def setcurves_diff(current: dict, draft: dict, zone: Any = "z1", mode: str = "he
     n, m = _zone_num(zone), _mode(mode)
     body: dict = {}
     keys: dict[str, int] = {}
-    for (end, field), (_, (grp, hl)) in _LEAVES.items():
+    for (end, field), (grp, hl) in _LEAVES.items():
         new = draft[end][field]
         if new == current[end][field]:
             continue
@@ -135,9 +132,9 @@ def setcurves_diff(current: dict, draft: dict, zone: Any = "z1", mode: str = "he
 
 # ------------------------------------------------------------------ overlay
 
-def _topics(zone: Any, mode: str, own_water_sensor: bool, extra_power: bool) -> dict[str, str]:
+def _topics(zone: Any, mode: str, own_water_sensor: bool, has_extra: bool) -> dict[str, str]:
     n, m = _zone_num(zone), _mode(mode).capitalize()
-    suffix = "_Extra" if extra_power else ""
+    prod, cons = derived.power_topics(has_extra)[0][_mode(mode)]
     return {
         "outside": "main/Outside_Temp",
         "water": f"main/Z{n}_Water_Temp" if own_water_sensor else "main/Main_Outlet_Temp",
@@ -146,8 +143,8 @@ def _topics(zone: Any, mode: str, own_water_sensor: bool, extra_power: bool) -> 
         "valve": "main/ThreeWay_Valve_State",
         "defrost": "main/Defrosting_State",
         "freq": "main/Compressor_Freq",
-        "prod": f"{'extra' if extra_power else 'main'}/{m}_Power_Production{suffix}",
-        "cons": f"{'extra' if extra_power else 'main'}/{m}_Power_Consumption{suffix}",
+        "prod": prod,
+        "cons": cons,
         "sensor": f"main/Z{n}_Sensor_Settings",
         "room": "main/Room_Thermostat_Temp" if n == 1 else "main/Second_Room_Thermostat_Temp",
         "setpoint": f"main/Z{n}_{m}_Request_Temp",
@@ -160,23 +157,34 @@ def _full(row) -> bool:
 
 def overlay(store, zone: Any, mode: str, from_ts: int, to_ts: int, now: int,
             liveness: Liveness | None = None, *, own_water_sensor: bool = False,
-            extra_power: bool | None = None) -> dict:
+            has_extra: bool = False) -> dict:
     """Spec §4.4 `Overlay`, evaluated per minute from `rollups_1m` (§8). Times are ms.
 
-    `own_water_sensor` selects Z1/Z2_Water_Temp instead of Main_Outlet_Temp. `extra_power=None`
-    uses the `extra/` power pair when it has any data in range, else the coarse `main/` pair.
+    `own_water_sensor` selects Z1/Z2_Water_Temp instead of Main_Outlet_Temp. `has_extra` (from
+    the installation profile) selects the `extra/` power pair, else the coarse `main/` pair; the
+    source is never inferred from rollup data.
     """
     z, md = f"z{_zone_num(zone)}", _mode(mode)
-    lo = (from_ts // MINUTE_MS) - LOOKBACK_MIN
-    t0 = lo * MINUTE_MS
-    if extra_power is None:
-        probe = _topics(z, md, own_water_sensor, True)
-        got = store.rollups_1m([probe["prod"], probe["cons"]], t0, to_ts, now, liveness)
-        extra_power = any(r[3] > 0 for rows in got.values() for r in rows)
-    tp = _topics(z, md, own_water_sensor, extra_power)
+    tp = _topics(z, md, own_water_sensor, has_extra)
+    boundary = store.last_confirmed_setcurves(z, md)
+    windows: list[dict] = []
+    # At most CHUNK_MS of minute rows (plus LOOKBACK_MIN) are in memory at once; only the 15-minute
+    # aggregates survive a chunk. Each chunk re-reads LOOKBACK_MIN minutes before it, so the
+    # startup/DHW exclusions match an unchunked run exactly.
+    start = -(-from_ts // WINDOW_MS) * WINDOW_MS
+    while start < to_ts:
+        end = min(start + CHUNK_MS, to_ts)
+        windows += _overlay_chunk(store, tp, md, boundary, start, end, now, liveness)
+        start = end
+    return _summary(z, md, boundary, windows)
+
+
+def _overlay_chunk(store, tp: dict[str, str], md: str, boundary: int | None, from_ts: int,
+                   to_ts: int, now: int, liveness: Liveness | None) -> list[dict]:
+    """Windows starting in [from_ts, to_ts); `from_ts` is a window boundary."""
+    t0 = ((from_ts // MINUTE_MS) - LOOKBACK_MIN) * MINUTE_MS
     data = store.rollups_1m(list(tp.values()), t0, to_ts, now, liveness)
     rows = {name: {r[0]: r for r in data.get(key, [])} for name, key in tp.items()}
-    boundary = store.last_confirmed_setcurves(z, md)
     modes = MODE_SETS[md]
     required = ("outside", "water", "target", "opmode", "valve", "defrost", "freq", "prod", "cons")
 
@@ -237,6 +245,10 @@ def overlay(store, zone: Any, mode: str, from_ts: int, to_ts: int, now: int,
             "eligible_minutes": len(mins),
         })
 
+    return windows
+
+
+def _summary(z: str, md: str, boundary: int | None, windows: list[dict]) -> dict:
     bands: dict[int, list[dict]] = {}
     for win in windows:
         bands.setdefault(int(win["outside"] // 2) * 2, []).append(win)

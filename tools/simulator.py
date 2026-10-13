@@ -3,9 +3,11 @@
 `Simulator` never opens a socket. The CLI (`python tools/simulator.py`) is the
 only entry point that connects to a broker.
 
-Command read-backs are published with retained=False. Spec §6 step 6 confirms a
-setting only from a non-retained read-back that arrives after publish. Value
-snapshots and the 300 s full re-publish stay retained, matching HeishaMon.
+All value telemetry is published retained, as HeishaMon does: the initial snapshot, the
+300 s full re-publish and the read-back after a command (a new subscriber therefore sees the
+new value). The broker still delivers a live read-back to current subscribers with the retain
+flag cleared, which is what spec §6 step 6 relies on. Commands stay non-retained; the LWT
+`Online` heartbeat is not retained either.
 `listen_only` drops command read-backs and keeps the telemetry stream, so the
 device stays online while settings fail.
 """
@@ -25,10 +27,13 @@ from presets import PROFILE_KEYS, resolve_preset  # noqa: E402
 
 from heishamon_dashboard.catalog import load as load_catalog
 from heishamon_dashboard.firmware import parse_firmware
+from heishamon_dashboard.rules import load as load_rules
 
 _MODES = {"echo", "drop", "drop_first", "partial", "listen_only"}
 _ZONE = {"zone1": "Z1", "zone2": "Z2"}
-_CURVE_MODE = {"heat": "Heat", "cool": "Cool"}
+_CURVE_MODES = ("heat", "cool")
+_CURVE_GROUPS = ("target", "outside")
+_CURVE_ENDS = ("high", "low")
 def _catalog_path():
     import heishamon_dashboard.catalog as catalog_mod
     return Path(catalog_mod.__file__).parent / "catalog.json"
@@ -66,26 +71,27 @@ def curve_leaves(payload: str) -> list[tuple[str, str]]:
         return []
     if not isinstance(data, dict):
         return []
+    rules = load_rules()
     leaves = []
     for zone_name, zone_label in _ZONE.items():
         zone = data.get(zone_name)
         if not isinstance(zone, dict):
             continue
-        for mode_name, mode_label in _CURVE_MODE.items():
+        for mode_name in _CURVE_MODES:
             mode = zone.get(mode_name)
             if not isinstance(mode, dict):
                 continue
-            for group, group_label in (("target", "Target"), ("outside", "Outside")):
+            for group in _CURVE_GROUPS:
                 body = mode.get(group)
                 if not isinstance(body, dict):
                     continue
-                for end, end_label in (("high", "High"), ("low", "Low")):
+                for end in _CURVE_ENDS:
                     if end not in body:
                         continue
                     value = body[end]
                     if isinstance(value, bool) or not isinstance(value, (int, float)):
                         continue
-                    key = f"main/{zone_label}_{mode_label}_Curve_{group_label}_{end_label}_Temp"
+                    key = rules.leaf_topic(int(zone_label[1:]), mode_name, group, end.capitalize())
                     leaves.append((key, str(int(value))))
     return leaves
 
@@ -147,7 +153,7 @@ class Simulator:
             due = self.clock.now_ms() + int(float(delay_s) * 1000)
             self._delayed.append((due, leaves))
             return
-        self._emit(leaves, retained=False)
+        self._emit(leaves, retained=True)
 
     def _initial_values(self) -> dict[str, str]:
         values: dict[str, str] = {}
@@ -222,7 +228,7 @@ class Simulator:
         ready = [item for item in self._delayed if item[0] <= now]
         self._delayed = [item for item in self._delayed if item[0] > now]
         for _due, leaves in ready:
-            self._emit(leaves, retained=False)
+            self._emit(leaves, retained=True)
 
     def _publish_lwt(self) -> None:
         self.publish("LWT", "Online", False)

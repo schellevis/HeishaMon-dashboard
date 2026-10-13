@@ -67,11 +67,12 @@ def risky(entry):
     if entry.get("name") == "SetHeatpump":
         return False
     return bool(entry.get("pcb") or entry["class"] in ("trigger", "retained_exception")
-                or entry.get("risky"))
+                or entry.get("risky")
+                or (entry.get("applicability") or {}).get("series"))  # K4: the series is unknown in this rig
 
 
 def test_inventory_covers_the_whole_catalog():
-    assert len(COMMANDS) == 64 and len(INPUTS) == 19
+    assert len(COMMANDS) == 64 and len(INPUTS) == 18
     assert set(COMMANDS) | set(INPUTS) == {e["name"] for e in CATALOG.commands} | {e["path"] for e in CATALOG.inputs}
 
 

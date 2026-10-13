@@ -15,11 +15,11 @@
      "range": {"min": 40, "max": 75, "step": 1}, "allowed": null,
      "range_source": "panasonic_manual", "readback": ["main/DHW_Target_Temp"], "compare": "equal",
      "applicability": {"requires": ["profile.dhw_installed"]}, "safe_under_unknown": false,
-     "min_firmware": "3.2.3", "category": "dhw",
+     "min_firmware": "3.2.3", "category": "dhw", "ui_group": "dhw",
      "label": {"en": "DHW target temperature", "nl": "Doeltemperatuur warm water"}},
     {"name": "SetHolidayMode", "pcb": false, "class": "setting", "risky": false, "type": "bool",
      "allowed": [0, 1], "range_source": "encoding_domain", "readback": ["main/Holiday_Mode_State"],
-     "compare": "holiday", "min_firmware": "3.2.3", "category": "operation",
+     "compare": "holiday", "min_firmware": "3.2.3", "category": "operation", "ui_group": "operation",
      "label": {"en": "Holiday mode", "nl": "Vakantiemodus"}}
   ],
   "inputs": [],

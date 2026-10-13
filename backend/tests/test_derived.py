@@ -1,9 +1,9 @@
-"""T07: live COP, energy over spec §5.4 timelines T2/T3, event detection."""
+"""T07: energy over spec §5.4 timelines T2/T3, event detection."""
 from datetime import datetime, timezone
 
 import pytest
 
-from heishamon_dashboard.derived import EventDetector, energy, energy_joules, live_cop
+from heishamon_dashboard.derived import EventDetector, energy, energy_joules
 from heishamon_dashboard.store import Store
 from heishamon_dashboard.types import Liveness, Receipt, TopicValue
 
@@ -33,30 +33,6 @@ def live(ts):
 
 EXTRA = {"has_extra": {"value": True, "unknown": False}}
 NO_EXTRA = {"has_extra": {"value": False, "unknown": False}}
-
-
-# --- COP ---------------------------------------------------------------------
-
-def test_cop_zero_consumption_is_none():
-    vals = {PROD: tv(PROD, 1000), CONS: tv(CONS, 0)}
-    assert live_cop(vals, NO_EXTRA)["heat"] is None
-
-
-def test_cop_value_and_missing_or_invalid():
-    vals = {PROD: tv(PROD, 3000), CONS: tv(CONS, 1000)}
-    assert live_cop(vals, NO_EXTRA)["heat"] == pytest.approx(3.0)
-    assert live_cop(vals, NO_EXTRA)["cool"] is None
-    vals[CONS] = tv(CONS, -1, valid=False)
-    assert live_cop(vals, NO_EXTRA)["heat"] is None
-
-
-def test_cop_extra_preferred_and_estimate_flag():
-    vals = {PROD: tv(PROD, 3000), CONS: tv(CONS, 1000), XPROD: tv(XPROD, 2500), XCONS: tv(XCONS, 1000)}
-    r = live_cop(vals, EXTRA)
-    assert r["heat"] == pytest.approx(2.5) and r["estimate"] is False
-    r = live_cop(vals, NO_EXTRA)
-    assert r["heat"] == pytest.approx(3.0) and r["estimate"] is True
-    assert live_cop({XPROD: tv(XPROD, 1), XCONS: tv(XCONS, 1)}, NO_EXTRA)["heat"] is None
 
 
 # --- energy ------------------------------------------------------------------

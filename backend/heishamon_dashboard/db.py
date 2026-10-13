@@ -49,6 +49,14 @@ def connect(path: str) -> sqlite3.Connection:
     return conn
 
 
+def connect_reader(path: str) -> sqlite3.Connection:
+    """A second connection for reads: `query_only` refuses every write. It is not a `mode=ro` URI,
+    which fails when the `-shm` file cannot be created. Open it after `connect` has made the file."""
+    conn = sqlite3.connect(path, isolation_level=None, check_same_thread=False)
+    conn.execute("PRAGMA query_only=ON")
+    return conn
+
+
 def ensure_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(_SCHEMA)
     row = conn.execute("SELECT version FROM schema_version").fetchone()

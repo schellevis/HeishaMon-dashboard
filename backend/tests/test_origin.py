@@ -68,10 +68,10 @@ def test_absent_origin_is_allowed(rig, method, path, body):
 
 
 def test_derived_same_origin_matches_with_the_scheme_ignored(rig):
-    for origin in ("http://testserver", "https://testserver", "HTTP://TESTSERVER"):
+    for origin in ("http://localhost", "https://localhost", "HTTP://LOCALHOST"):
         assert send(rig, "put", "/api/prefs", PREFS, origin=origin).status_code == 200, origin
     # the host[:port] must match exactly
-    for origin in ("http://testserver:8000", "http://other", "https://testserver.evil.test"):
+    for origin in ("http://localhost:8000", "http://other", "https://localhost.evil.test"):
         assert send(rig, "put", "/api/prefs", PREFS, origin=origin).status_code == 403, origin
     response = send(rig, "put", "/api/prefs", PREFS, origin="http://localhost:8000", host="localhost:8000")
     assert response.status_code == 200
@@ -94,7 +94,7 @@ def test_allowed_origins_are_trusted_and_get_cors_headers(rig):
 def test_cors_headers_only_for_allowed_origins(rig):
     ok = rig.client.get("/api/state", headers={"origin": "https://embed.example.test"})
     assert ok.headers["access-control-allow-origin"] == "https://embed.example.test"
-    for origin in ("https://evil.example.test", "http://testserver", "null"):
+    for origin in ("https://evil.example.test", "http://localhost", "null"):
         other = rig.client.get("/api/state", headers={"origin": origin})
         assert other.status_code == 200  # reads are not blocked server-side, just not CORS-enabled
         assert not any(h.lower().startswith("access-control-") for h in other.headers), origin
@@ -108,7 +108,7 @@ def test_preflight_headers_only_for_allowed_origins(rig):
     assert ok.headers["access-control-allow-origin"] == "https://embed.example.test"
     assert "PUT" in ok.headers["access-control-allow-methods"]
     assert ok.headers["access-control-allow-headers"].lower() == "content-type"
-    for origin in ("https://evil.example.test", "http://testserver"):
+    for origin in ("https://evil.example.test", "http://localhost"):
         denied = rig.client.options("/api/prefs", headers={"origin": origin, **request})
         assert not any(h.lower().startswith("access-control-") for h in denied.headers), origin
 
@@ -138,8 +138,8 @@ def test_json_content_type_with_charset_is_fine(rig):
 
 def test_websocket_handshake_follows_the_same_origin_rules(rig):
     assert not ws_rejected(rig)  # absent Origin
-    assert not ws_rejected(rig, origin="http://testserver")  # derived same origin
-    assert not ws_rejected(rig, origin="https://testserver")  # scheme ignored
+    assert not ws_rejected(rig, origin="http://localhost")  # derived same origin
+    assert not ws_rejected(rig, origin="https://localhost")  # scheme ignored
     assert not ws_rejected(rig, origin="https://embed.example.test")  # ALLOWED_ORIGINS
     assert ws_rejected(rig, origin="https://evil.example.test")
     assert ws_rejected(rig, origin="null")
@@ -173,7 +173,7 @@ def public_rig(tmp_path):
 @pytest.mark.parametrize("headers", [{}, {"host": "evil.example.test"}, {"host": "heat.example.test:8000"}])
 def test_bad_host_is_403_bad_host_with_public_origins(public_rig, headers):
     if not headers:
-        headers = {"host": "testserver"}
+        headers = {"host": "localhost"}
     response = public_rig.client.get("/api/state", headers=headers)
     assert response.status_code == 403 and response.json()["error"] == "bad_host"
     response = public_rig.client.put("/api/prefs", json=PREFS, headers={**headers, "origin": "https://heat.example.test"})
@@ -193,10 +193,39 @@ def test_proxy_case_rest_and_websocket_pass(public_rig):
 
 def test_with_public_origins_the_trusted_set_is_exact(public_rig):
     host = {"host": "heat.example.test"}
-    for origin in ("http://heat.example.test", "https://testserver", "https://evil.example.test"):
+    for origin in ("http://heat.example.test", "https://localhost", "https://evil.example.test"):
         response = public_rig.client.put("/api/prefs", json=PREFS, headers={**host, "origin": origin})
         assert response.status_code == 403 and response.json()["error"] == "bad_origin", origin
         assert ws_rejected(public_rig, **host, origin=origin)
     allowed = public_rig.client.put("/api/prefs", json=PREFS, headers={**host, "origin": "https://embed.example.test"})
     assert allowed.status_code == 200
     assert allowed.headers["access-control-allow-origin"] == "https://embed.example.test"
+
+
+# ---------------------------------------------------- Host policy without PUBLIC_ORIGINS (B6)
+
+
+@pytest.mark.parametrize("host", ["127.0.0.1:8000", "127.0.0.1", "[::1]:8000", "localhost:8000", "localhost",
+                                  "192.168.1.10:8000", "[fe80::1]:8000", "LOCALHOST:8000"])
+def test_host_policy_without_public_origins_allows(rig, host):
+    assert send(rig, "put", "/api/prefs", PREFS, host=host).status_code == 200
+    assert rig.client.get("/api/state", headers={"host": host}).status_code == 200
+    assert not ws_rejected(rig, host=host)
+
+
+@pytest.mark.parametrize("host", ["dash.example:8000", "localhost.example", "localhost.example:8000", "evil", ""])
+def test_host_policy_without_public_origins_rejects_dns_names(rig, host):
+    for method, path, body in MUTATIONS:
+        response = send(rig, method, path, body, host=host)
+        assert response.status_code == 403 and response.json()["error"] == "bad_host", (method, path)
+        assert "PUBLIC_ORIGINS" in response.json()["message"]
+    assert ws_rejected(rig, host=host)
+    if host:  # reads are unaffected
+        assert rig.client.get("/api/state", headers={"host": host}).status_code == 200
+
+
+def test_origin_helper_host_classification():
+    from heishamon_dashboard.origin import literal_or_localhost
+
+    assert literal_or_localhost("::1") and literal_or_localhost("[::1]:80") and literal_or_localhost("10.0.0.5:80")
+    assert not literal_or_localhost("dash.example") and not literal_or_localhost(None)

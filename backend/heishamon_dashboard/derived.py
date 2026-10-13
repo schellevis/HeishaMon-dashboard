@@ -1,25 +1,17 @@
-"""Derived values (spec §4.1 `derived`): live COP, energy from rollups, and event detection."""
+"""Derived values (spec §4.1 `derived`): energy from rollups, and event detection."""
 from __future__ import annotations
 
 from datetime import datetime, timezone, tzinfo
 from typing import Callable, Mapping
 
+from . import rules
 from .store import MINUTE_MAX_SPAN_MS, Store
-from .types import Liveness, Receipt, TopicValue
+from .types import Liveness, Receipt
 
 MODES = ("heat", "cool", "dhw")
 PERIODS = ("day", "month", "year")
 
-_MAIN = {
-    "heat": ("main/Heat_Power_Production", "main/Heat_Power_Consumption"),
-    "cool": ("main/Cool_Power_Production", "main/Cool_Power_Consumption"),
-    "dhw": ("main/DHW_Power_Production", "main/DHW_Power_Consumption"),
-}
-_EXTRA = {
-    "heat": ("extra/Heat_Power_Production_Extra", "extra/Heat_Power_Consumption_Extra"),
-    "cool": ("extra/Cool_Power_Production_Extra", "extra/Cool_Power_Consumption_Extra"),
-    "dhw": ("extra/DHW_Power_Production_Extra", "extra/DHW_Power_Consumption_Extra"),
-}
+_RULES = rules.load()
 
 
 def has_extra(profile) -> bool:
@@ -36,26 +28,8 @@ def power_topics(profile) -> tuple[dict[str, tuple[str, str]], bool]:
     """(mode -> (production topic, consumption topic), estimate flag).
     extra/ is preferred; main/ is coarse (~200 W steps), so results are flagged as estimates."""
     if has_extra(profile):
-        return _EXTRA, False
-    return _MAIN, True
-
-
-def _watts(values: Mapping[str, TopicValue], key: str) -> float | None:
-    tv = values.get(key)
-    if tv is None or not tv.valid or isinstance(tv.value, bool) or not isinstance(tv.value, (int, float)):
-        return None
-    return float(tv.value)
-
-
-def live_cop(values: Mapping[str, TopicValue], profile) -> dict:
-    """Per-mode COP = production / consumption, None unless both are valid and consumption > 0."""
-    topics, estimate = power_topics(profile)
-    out: dict = {}
-    for mode, (prod_key, cons_key) in topics.items():
-        prod, cons = _watts(values, prod_key), _watts(values, cons_key)
-        out[mode] = prod / cons if prod is not None and cons is not None and cons > 0 else None
-    out["estimate"] = estimate
-    return out
+        return _RULES.power_topics(True), False
+    return _RULES.power_topics(False), True
 
 
 def _period_label(ts_ms: int, period: str, tz: tzinfo) -> str:
@@ -75,10 +49,8 @@ def energy_joules(store: Store, from_ts: int, to_ts: int, period: str, now: int,
     topics, _ = power_topics(profile)
     keys = [k for pair in topics.values() for k in pair]
     if to_ts - from_ts > MINUTE_MAX_SPAN_MS:  # long ranges: 1-hour rollups
-        hist = store.history(keys, from_ts, to_ts, 10**9, now, liveness)
-        if hist["resolution"] == "raw":  # cannot happen for such spans; guard anyway
-            raise RuntimeError("expected rollup resolution")
-        buckets = {k: [(p[0], p[1], p[2]) for p in hist["series"][k]["points"]] for k in keys}
+        rows = store.rollups_1h(keys, from_ts, to_ts, now, liveness)  # every bucket, never thinned
+        buckets = {k: [(r[0] * 3_600_000, r[4], r[3]) for r in rows[k]] for k in keys}
     else:  # shorter ranges: the same sum over 1-minute rows
         rows = store.rollups_1m(keys, from_ts, to_ts, now, liveness)
         buckets = {k: [(r[0] * 60_000, r[4], r[3]) for r in rows[k]] for k in keys}

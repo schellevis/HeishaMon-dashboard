@@ -95,7 +95,7 @@ def test_ip_log_and_foreign_topics_are_dropped():
 def test_stats_is_reduced_to_the_version():
     _, document = run()
     stats = [m for m in document["messages"] if m["topic"] == "stats"]
-    assert [json.loads(m["payload"]) for m in stats] == [{"version": "v4.2.3"}]
+    assert [json.loads(m["payload"]) for m in stats] == [{"version": "4.2.3"}]
 
 
 def test_one_wire_addresses_become_stable_pseudonyms():
@@ -141,3 +141,66 @@ def test_main_reports_a_missing_host_without_connecting(capsys, tmp_path):
     assert capture.main(["--out", str(tmp_path / "o.json")], env={}) == 2
     assert "MQTT_HOST" in capsys.readouterr().err
     assert not (tmp_path / "o.json").exists()
+
+
+def test_client_uses_the_ca_file(monkeypatch):
+    import aiomqtt
+
+    seen = {}
+    monkeypatch.setattr(aiomqtt, "TLSParameters", lambda **kw: seen.update(kw) or "tls")
+    monkeypatch.setattr(aiomqtt, "Client", lambda host, **kw: seen.update(client=kw))
+    config = SimpleNamespace(mqtt_user=None, mqtt_password=None, mqtt_tls=True, mqtt_ca_file="/etc/ca.pem",
+                             mqtt_host="h", mqtt_port=8883)
+    capture._client(config)
+    assert seen["ca_certs"] == "/etc/ca.pem" and seen["client"]["tls_params"] == "tls"
+
+
+def _clean(topic, payload):
+    return capture.Sanitizer().clean(topic, payload)
+
+
+def _stats(**fields):
+    return json.dumps(fields)
+
+
+@pytest.mark.parametrize("raw,kept", [
+    ("v4.2.3", "4.2.3"), ("4.2.3", "4.2.3"), ("3.5", "3.5"), ("3.2.4-beta-2", "3.2.4-beta-2"),
+    ("v3.2.4-beta-2", "3.2.4-beta-2"),
+])
+def test_version_forms(raw, kept):
+    topic, payload = _clean("stats", _stats(version=raw, uptime=5))
+    assert json.loads(payload) == {"version": kept}
+
+
+@pytest.mark.parametrize("raw", ["Local build", "Alpha-1a2b3c4d", "Nightly-abcdef0", "v4.2.3-deadbeef01"])
+def test_version_dropped_forms(raw):
+    topic, payload = _clean("stats", _stats(version=raw))
+    assert json.loads(payload) == {}
+
+
+def test_ipv6_message_dropped():
+    sanitizer = capture.Sanitizer()
+    assert sanitizer.clean("main/Note", "via 2001:db8::1 ok") is None
+    assert sanitizer.clean("main/Note", "fe80::1ff:fe23:4567:890a") is None
+    assert sanitizer.dropped == {"identifying_payload": 2}
+
+
+def test_hostname_message_dropped():
+    assert _clean("main/Note", "connected to broker.example.org") is None
+    assert _clean("main/Note", "host my-pump.local.nl") is None
+    assert _clean("main/Note", "plain text") == ("main/Note", "plain text")
+
+
+def test_numeric_not_matched():
+    for value in ("21.5", "-3.25", "1.2.3", "0", "123456"):
+        assert _clean("main/Outside_Temp", value) == ("main/Outside_Temp", value)
+
+
+def test_stats_checked_after_reduction():
+    sanitizer = capture.Sanitizer()
+    # identifying data outside the version never leaves; the reduced document is checked as well
+    assert sanitizer.clean("stats", _stats(version="v4.2.3", ip="192.0.2.5", host="a.example.org")) == (
+        "stats", '{"version":"4.2.3"}')
+    # a non-version string is removed from the reduced document, never passed through
+    assert sanitizer.clean("stats", _stats(version="host.example.org")) == ("stats", "{}")
+    assert sanitizer.dropped == {}

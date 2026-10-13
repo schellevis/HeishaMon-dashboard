@@ -130,11 +130,54 @@ def test_broker_reconnect_stays_unknown_until_qualifying():
     assert st.liveness().offline_since is None
     st.ingest(msg("main/Outside_Temp", "5", True, 2_100))
     st.ingest(msg("commands/SetDHWTemp", "45", False, 2_200))
-    st.tick(2_000 + 3600_000)
+    st.tick(2_000 + st.liveness_timeout_ms - 1)
     assert st.device_online == "unknown"
     st.ingest(msg("LWT", "Online", False, 2_000 + 3600_000))
     assert st.device_online == "online"
     assert ons == [1_000, 2_000 + 3600_000]
+
+
+def test_reconnect_retained_offline_stays_unknown():
+    st = State(CATALOG)
+    offs = []
+    st.on_offline(offs.append)
+    st.ingest(msg("main/Outside_Temp", "5", False, 1_000))
+    st.broker_reconnect(2_000)
+    st.ingest(msg("LWT", "Offline", True, 2_100))  # the broker's retained will
+    assert st.device_online == "unknown"
+    assert st.liveness().offline_since is None
+    assert offs == []
+
+
+def test_reconnect_timeout_offline_backdated():
+    st = State(CATALOG)
+    offs = []
+    st.on_offline(offs.append)
+    t0 = 1_000
+    st.ingest(msg("main/Outside_Temp", "5", False, t0))
+    st.broker_reconnect(2_000)
+    st.ingest(msg("LWT", "Offline", True, 2_100))
+    st.tick(2_000 + st.liveness_timeout_ms - 1)
+    assert st.device_online == "unknown" and offs == []
+    st.tick(2_000 + st.liveness_timeout_ms)
+    assert st.device_online == "offline"
+    assert offs == [t0]
+    assert st.liveness().offline_since == t0
+
+
+def test_unknown_topic_cap():
+    from heishamon_dashboard.state import UNKNOWN_TOPIC_MAX
+
+    st = State(CATALOG)
+    for i in range(UNKNOWN_TOPIC_MAX):
+        assert st.ingest(msg(f"main/Mystery_{i}", "1", False, 1_000)) is not None
+    assert st.ingest(msg("main/One_Too_Many", "1", False, 1_000)) is None
+    assert st.ingest_dropped == 1 and "main/One_Too_Many" not in st.values
+    # known uncatalogued topics keep updating; always-accepted and catalogued topics pass
+    assert st.ingest(msg("main/Mystery_0", "2", False, 2_000)) is not None
+    for topic in ("main/Outside_Temp", "stats", "LWT", "1wire/28-abc", "s0/Watt/1", "opentherm/write/x"):
+        assert st.ingest(msg(topic, "1", False, 2_000)) is not None, topic
+    assert st.ingest_dropped == 1
 
 
 def test_change_detection_sentinel_and_retained_then_live():

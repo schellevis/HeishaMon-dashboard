@@ -9,7 +9,7 @@ from heishamon_dashboard.commands import CommandService, values_match
 from heishamon_dashboard.firmware import parse_firmware
 from heishamon_dashboard.mqtt import PublishError
 from heishamon_dashboard.state import State
-from heishamon_dashboard.store import Store
+from heishamon_dashboard.store import StorageUnavailable, Store
 from heishamon_dashboard.types import Message
 
 T0 = 1_791_000_000_000
@@ -626,6 +626,7 @@ async def test_setcurves_removes_matching_keys_and_noops(rig):
 
 
 async def test_setcurves_supersede_stops_all_keys_of_the_old_record(rig):
+    rig.feed(leaf("Target_Low"), "28")
     st, old = await rig.go("SetCurves", HEAT)
     st, new = await rig.go("SetCurves", {"zone1": {"heat": {"target": {"high": 40}}}})
     assert st == 201
@@ -638,6 +639,7 @@ async def test_setcurves_supersede_stops_all_keys_of_the_old_record(rig):
 
 
 async def test_setcurves_other_zone_does_not_supersede(rig):
+    rig.feed(leaf("Target_Low", zone="Z2"), "28")
     _, a = await rig.go("SetCurves", HEAT)
     _, b = await rig.go("SetCurves", {"zone2": {"heat": {"target": {"high": 40}}}})
     assert rig.rec(a)["status"] == "pending" and rig.rec(b)["status"] == "pending"
@@ -815,7 +817,7 @@ async def test_old_or_unknown_firmware_blocks_exactly_the_newer_entries(tmp_path
         if st == 422 and body["error"] == "firmware_too_old":
             old_inputs.add(i["path"])
     assert old_inputs == {i["path"] for i in CAT.inputs if i["path"].startswith("opentherm/")}
-    assert len(old_inputs) == 17
+    assert len(old_inputs) == 16
     rig.store.close()
 
 
@@ -833,6 +835,7 @@ async def test_supported_firmware_opens_the_gate(tmp_path):
 
 
 async def fail_one(rig, value, change_other=True, change_readback=False, gap=20):
+    rig.svc.rate_max = 1000  # these tests are about the listen-only streak, not the rate limit
     st, body = await rig.go("SetDHWTemp", value)
     assert st == 201, body
     await rig.sched.advance(2)
@@ -934,7 +937,7 @@ async def test_status_callback_errors_do_not_break_commands(tmp_path):
     rig.store.close()
 
 
-async def test_eeprom_change_counts(rig):
+async def test_eeprom_warning_counts_publish_attempts_in_the_last_hour(rig):
     assert rig.svc.recent_change_count("SetDHWTemp") == 0
     for v in (50, 51, 52):
         st, body = await rig.go("SetDHWTemp", v)
@@ -944,14 +947,170 @@ async def test_eeprom_change_counts(rig):
     assert rig.svc.recent_change_count("SetDHWTemp") == 3
     assert rig.svc.eeprom_warning("SetDHWTemp") is True
     assert rig.svc.eeprom_warning("SetQuietMode") is False
+    assert rig.svc.to_api(rig.rec(body))["eeprom_warning"] is True
     await rig.sched.advance(60 * 60)
     assert rig.svc.recent_change_count("SetDHWTemp") == 0
-    assert rig.svc.eeprom_warning("SetDHWTemp") is False
+    assert rig.svc.to_api(rig.rec(body))["eeprom_warning"] is False
 
 
-async def test_eeprom_counts_failed_but_not_noop_or_superseded(rig):
-    await fail_one(rig, 50)  # failed counts
-    await rig.go("SetDHWTemp", 45)  # noop: does not count
-    await rig.go("SetDHWTemp", 60)
-    await rig.go("SetDHWTemp", 61)  # supersedes: the 60 record does not count
-    assert rig.svc.recent_change_count("SetDHWTemp") == 1
+async def test_eeprom_warning_counts_superseded(rig):
+    bodies = [(await rig.go("SetDHWTemp", v))[1] for v in (50, 51, 52)]  # two are superseded
+    assert [rig.rec(b)["status"] for b in bodies] == ["superseded", "superseded", "pending"]
+    assert bodies[0]["eeprom_warning"] is False and bodies[2]["eeprom_warning"] is True
+    await rig.go("SetDHWTemp", 45)  # equals the read-back but publishes while 52 is in flight
+    assert rig.svc.recent_change_count("SetDHWTemp") == 4
+    st, other = await rig.go("SetQuietMode", 1)
+    assert other["eeprom_warning"] is False
+
+
+async def test_noop_does_not_count_as_publish_attempt(rig):
+    await rig.go("SetDHWTemp", 45)  # noop
+    assert rig.svc.recent_change_count("SetDHWTemp") == 0
+
+
+# ------------------------------------------------------------------ review fixes (C1–C6)
+
+
+async def test_revert_before_readback_publishes_and_kills_retry(rig):
+    _, a = await rig.go("SetDHWTemp", 55)
+    await rig.sched.advance(1)
+    st, b = await rig.go("SetDHWTemp", 45)  # equals the live read-back, but 55 may still land
+    assert st == 201 and b["status"] == "pending"
+    assert [p[2] for p in rig.mqtt.published] == ["55", "45"]
+    assert rig.rec(a)["status"] == "superseded"
+    await rig.sched.advance(10)  # the 55 retry would be here; only the 45 retry may publish
+    assert [p[2] for p in rig.mqtt.published] == ["55", "45", "45"]
+    assert rig.rec(a)["status"] == "superseded"
+
+
+async def test_revert_after_retry_publishes(rig):
+    _, a = await rig.go("SetDHWTemp", 55)
+    await rig.sched.advance(10)  # the retry publishes 55; the live read-back stays 45
+    assert [p[2] for p in rig.mqtt.published] == ["55", "55"]
+    await rig.sched.advance(1)
+    st, b = await rig.go("SetDHWTemp", 45)
+    assert st == 201 and b["status"] == "pending"
+    assert [p[2] for p in rig.mqtt.published][-1] == "45"
+    assert rig.rec(a)["status"] == "superseded"
+    assert rig.svc._flights[b["id"]].last_publish_ts == rig.clock.now_ms()
+
+
+async def test_setcurves_partial_ordering_against_readback(rig):
+    rig.feed(leaf("Outside_Low"), "-15")
+    st, body = await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"high": -20}}}})
+    assert (st, body["error"], body["detail"]["rule"]) == (422, "out_of_range", "ordering")
+
+
+async def test_setcurves_missing_counterpart_profile_unknown(rig):
+    st, body = await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"high": -20}}}})
+    assert (st, body["error"], body["detail"]) == (422, "profile_unknown", {"field": leaf("Outside_Low")})
+    rig.feed(leaf("Outside_Low"), "-15")
+    rig.clock.t += 700_000  # a stale read-back counts as missing
+    st, body = await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"high": 10}}}})
+    assert (st, body["error"]) == (422, "profile_unknown")
+
+
+async def test_setcurves_retained_snapshot_counts_as_known(rig):
+    rig.feed(leaf("Outside_Low"), "-15", retained=True)  # fresh dashboard: only the retained snapshot
+    st, body = await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"high": -20}}}})
+    assert (st, body["error"], body["detail"]["rule"]) == (422, "out_of_range", "ordering")
+
+
+async def test_setcurves_two_partials_conflict(rig):
+    rig.feed(leaf("Outside_Low"), "-15")
+    rig.feed(leaf("Outside_High"), "15")
+    st, a = await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"low": -10}}}})
+    assert st == 201
+    st, body = await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"high": -12}}}})
+    assert (st, body["error"], body["detail"]["rule"]) == (422, "out_of_range", "ordering")
+    assert rig.rec(a)["status"] == "pending"
+    # a disjoint leaf of the same zone/mode stays in flight
+    st, c = await rig.go("SetCurves", {"zone1": {"heat": {"outside": {"high": 12}}}})
+    assert st == 201 and rig.rec(a)["status"] == "pending"
+
+
+async def test_setcurves_retry_meaning_changed(rig):
+    st, body = await rig.go("SetCurves", HEAT)
+    assert st == 201
+    rig.profile = coupled_profile(sensor="ext_thermostat", heat="direct")
+    await rig.sched.advance(10)
+    r = rig.rec(body)
+    assert r["status"] == "failed" and r["detail"] == "meaning_changed"
+    assert len(rig.mqtt.published) == 1
+
+
+async def test_identical_inflight_returns_record(rig):
+    st, a = await rig.go("SetDHWTemp", 50)
+    st, b = await rig.go("SetDHWTemp", 50)
+    assert st == 200 and b["id"] == a["id"] and b["status"] == "pending"
+    assert len(rig.mqtt.published) == 1
+    st, c = await rig.go("SetCurves", HEAT)
+    st, d = await rig.go("SetCurves", {"zone1": {"heat": {"target": {"high": 38}}}})
+    assert st == 200 and d["id"] == c["id"]
+    assert len(rig.mqtt.published) == 2
+
+
+async def test_rate_limit_429(rig):
+    rig.svc.rate_max = 3
+    for v in (50, 51, 52):
+        assert (await rig.go("SetDHWTemp", v))[0] == 201
+    await rig.sched.advance(100)
+    st, body = await rig.go("SetDHWTemp", 53)
+    assert (st, body["error"]) == (429, "rate_limited")
+    assert body["detail"] == {"retry_after_s": 3600 - 100}
+    assert len(rig.mqtt.published) == 3
+    assert (await rig.go("SetQuietMode", 1))[0] == 201  # per command name
+    await rig.sched.advance(3500)
+    assert (await rig.go("SetDHWTemp", 53))[0] == 201
+
+
+async def test_retry_over_cap_fails_rate_limited(rig):
+    rig.svc.rate_max = 1
+    st, body = await rig.go("SetDHWTemp", 50)
+    await rig.sched.advance(10)
+    r = rig.rec(body)
+    assert r["status"] == "failed" and r["detail"] == "rate_limited"
+    assert len(rig.mqtt.published) == 1
+
+
+async def test_storage_unavailable_keeps_old_flight(rig):
+    st, old = await rig.go("SetDHWTemp", 50)
+
+    def boom(rec):
+        raise StorageUnavailable("full")
+
+    rig.store.append_command = boom
+    st, body = await rig.go("SetDHWTemp", 55)
+    assert (st, body["error"]) == (503, "storage_unavailable")
+    assert rig.rec(old)["status"] == "pending"
+    await rig.sched.advance(10)
+    assert rig.rec(old)["status"] == "retried"
+    assert [p[2] for p in rig.mqtt.published] == ["50", "50"]
+
+
+# ------------------------------------------------------------------ K1, K4
+async def test_opentherm_bound_128_is_out_of_range(rig):
+    st, body = await rig.go("opentherm/read/chSetUppBound", 128, True)
+    assert (st, body["error"]) == (422, "out_of_range")
+    assert (await rig.go("opentherm/read/chSetUppBound", 127, True))[0] == 201
+
+
+async def test_heater_j_only_known_series(rig):
+    rig.profile["series"] = F("K")
+    st, body = await rig.go("SetHeaterDelayTime", 10, True)
+    assert (st, body["error"], body["detail"]) == (422, "not_applicable", {"series": "K"})
+    rig.profile["series"] = F("K", stale=True)  # stale but known: its value still decides
+    assert (await rig.go("SetHeaterDelayTime", 10, True))[1]["error"] == "not_applicable"
+    rig.profile["series"] = F("J", stale=True)
+    assert (await rig.go("SetHeaterDelayTime", 10))[0] == 201
+
+
+async def test_heater_unknown_series_needs_confirm(rig):
+    for series in (F(None, unknown=True), F(None), None):
+        if series is None:
+            rig.profile.pop("series", None)
+        else:
+            rig.profile["series"] = series
+        st, body = await rig.go("SetHeaterStartDelta", 5)
+        assert (st, body["error"]) == (422, "confirm_required")
+    assert (await rig.go("SetHeaterStartDelta", 5, True))[0] == 201

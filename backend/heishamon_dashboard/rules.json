@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "curve_limits": {
+    "heat": {"outside": [-20, 30], "target": [15, 75]},
+    "cool": {"outside": [15, 30], "target": [5, 20]}
+  },
+  "curve_shift": [-5, 5],
+  "curve_leaf": "main/Z{zone}_{Mode}_Curve_{Group}_{End}_Temp",
+  "curve_ends": {
+    "cold": {"outside": "Low", "target": "High"},
+    "warm": {"outside": "High", "target": "Low"}
+  },
+  "operating_modes": {
+    "heating": [0, 2, 4, 6],
+    "cooling": [1, 5, 7, 8],
+    "dhw": [3, 4, 5, 6, 8],
+    "read_only": [7, 8]
+  },
+  "room_sensor_values": [1, 2, 3],
+  "power_pairs": {
+    "main": {
+      "heat": ["main/Heat_Power_Production", "main/Heat_Power_Consumption"],
+      "cool": ["main/Cool_Power_Production", "main/Cool_Power_Consumption"],
+      "dhw": ["main/DHW_Power_Production", "main/DHW_Power_Consumption"]
+    },
+    "extra": {
+      "heat": ["extra/Heat_Power_Production_Extra", "extra/Heat_Power_Consumption_Extra"],
+      "cool": ["extra/Cool_Power_Production_Extra", "extra/Cool_Power_Consumption_Extra"],
+      "dhw": ["extra/DHW_Power_Production_Extra", "extra/DHW_Power_Consumption_Extra"]
+    }
+  },
+  "s0_meters": ["s0/WatthourTotal/1", "s0/WatthourTotal/2"],
+  "tiles": [
+    "outsideTemp", "mainOutletTemp", "mainInletTemp", "deltaTemp", "compressorFreq",
+    "heatPowerConsumption", "heatPowerProduction", "cop", "threeWayValve", "defrostingState",
+    "dhwTemp", "bufferTemp", "solarTemp", "coolPowerProduction"
+  ]
+}

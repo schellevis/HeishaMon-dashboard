@@ -120,7 +120,12 @@ class Mqtt:
     async def _publish(self, relative: str, payload: str, *, retain: bool) -> None:
         if not self.connected or self._client is None:
             raise PublishError("broker disconnected")
-        await self._client.publish(f"{self._base}/{relative}", payload, qos=0, retain=retain)
+        import aiomqtt
+
+        try:
+            await self._client.publish(f"{self._base}/{relative}", payload, qos=0, retain=retain)
+        except aiomqtt.MqttError as e:
+            raise PublishError(f"publish failed: {e}") from e
 
     def _dispatch(self, raw) -> None:
         topic = str(raw.topic)
@@ -151,7 +156,7 @@ class Mqtt:
         if self._config.mqtt_password is not None:
             kwargs["password"] = self._config.mqtt_password
         if self._config.mqtt_tls:
-            kwargs["tls_params"] = aiomqtt.TLSParameters()
+            kwargs["tls_params"] = aiomqtt.TLSParameters(ca_certs=self._config.mqtt_ca_file)
         return aiomqtt.Client(self._config.mqtt_host, port=self._config.mqtt_port, **kwargs)
 
 

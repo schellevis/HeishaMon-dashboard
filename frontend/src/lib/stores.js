@@ -1,9 +1,12 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
+import { fullPrefs } from '../features/settings/prefs.js';
 import { api } from './api.js';
 import { LANGUAGE_KEY, initialLanguage } from './i18n/index.js';
+import { normalizeTopicValue } from './domain/normalize.js';
 import { createWsClient, wsUrl } from './ws.js';
 
-export const ROUTES = ['overview', 'charts', 'energy', 'curve', 'settings', 'topics', 'log', 'system'];
+import { ROUTES } from '../app/registry.js';
+export { ROUTES };
 
 export const state = writable(null);
 export const profile = writable(null);
@@ -47,7 +50,16 @@ export function resetClientState() {
 }
 
 export function applyHello(msg) {
-  state.set(msg.state);
+  const snapshot = msg.state;
+  if (snapshot?.topics) {
+    const topics = {};
+    for (const [key, entry] of Object.entries(snapshot.topics)) {
+      topics[key] = { ...entry, ...normalizeTopicValue(key, entry.raw, entry.value, entry) };
+    }
+    state.set({ ...snapshot, topics });
+  } else {
+    state.set(snapshot);
+  }
   profile.set(msg.profile);
 }
 
@@ -57,13 +69,8 @@ function applyValue(msg) {
     const prev = current.topics?.[msg.topic];
     const changed = !prev || prev.raw !== msg.raw;
     const next = {
-      kind: 'text',
-      unit: null,
-      decimals: null,
-      enum_label: null,
-      catalogued: false,
-      sentinel: false,
       ...prev,
+      ...normalizeTopicValue(msg.topic, msg.raw, msg.value, prev),
       value: msg.value,
       raw: msg.raw,
       last_seen: msg.ts,
@@ -146,6 +153,26 @@ export function applyServerMessage(msg) {
     default:
       break;
   }
+}
+
+let prefsQueue = Promise.resolve();
+
+/**
+ * Serialised prefs write. `patch` is an object or `(current) => object`; it is merged over the latest
+ * prefs when its turn comes, so edits from different components never overwrite each other. The server
+ * response is written back into the `prefs` store.
+ */
+export function updatePrefs(patch) {
+  const run = async () => {
+    const current = fullPrefs(get(prefs));
+    const delta = typeof patch === 'function' ? patch(current) : patch;
+    const saved = await api.putPrefs({ ...current, ...delta });
+    if (saved) prefs.set(saved);
+    return saved;
+  };
+  const result = prefsQueue.then(run, run);
+  prefsQueue = result.catch(() => {});
+  return result;
 }
 
 export function askConfirm(detail) {

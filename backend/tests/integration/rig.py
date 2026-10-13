@@ -21,6 +21,8 @@ from amqtt.broker import Broker
 from heishamon_dashboard import config as config_mod
 from heishamon_dashboard.app import build
 
+from .._client import LocalClient
+
 BASE = "panasonic_heat_pump"
 ROOT = Path(__file__).resolve().parents[3]
 TOOLS = ROOT / "tools"
@@ -191,7 +193,6 @@ class AppRig:
     """
 
     def __init__(self, tmp_path, broker: EmbeddedBroker, *, clock=None, scheduler=None, **env):
-        from fastapi.testclient import TestClient
 
         self.broker = broker
         self.clock = clock or FakeClock()
@@ -202,7 +203,7 @@ class AppRig:
         self.svc = self.app.state.services
         self.seen: dict[str, int] = {}
         self.svc.mqtt.on_message(self._count)
-        self.client = TestClient(self.app)
+        self.client = LocalClient(self.app)
 
     def _count(self, message):
         if not message.retained:

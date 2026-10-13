@@ -44,3 +44,4 @@ export function commandRange(name) {
   const entry = catalog.commands.find((c) => c.name === name);
   return entry?.range ?? { min: 0, max: 100 };
 }
+export { expectPresetActive } from './stack.js';

@@ -208,3 +208,15 @@ def test_unknown_topic_and_empty_range(tmp_path):
     h = s.history(["main/Nope"], T0, T0 + 1000, 100, T0 + 1000, None)
     assert h["series"]["main/Nope"]["points"] == [] and h["series"]["main/Nope"]["breaks"] == []
     assert s.rollups_1m(["main/Nope"], T0, T0 + 1000, T0 + 1000, None) == {"main/Nope": []}
+
+
+def test_event_detail_truncated_before_buffer(tmp_path):
+    from heishamon_dashboard.store import DETAIL_MAX_BYTES
+
+    s = Store(str(tmp_path / "s.db"))
+    s.append_event(T0, "big", {"text": "x" * 100_000})
+    s.append_event(T0 + 1, "small", {"n": 1})
+    big, small = s._events[-2], s._events[-1]
+    assert len(json.dumps(big["detail"]).encode()) <= DETAIL_MAX_BYTES + 64
+    assert big["detail"].get("truncated") is True
+    assert small["detail"] == {"n": 1}

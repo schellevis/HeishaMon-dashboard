@@ -53,7 +53,7 @@ def test_synthetic_replay_end_to_end(broker, make_app):
         sent = {m["topic"] for m in document["messages"]}
         assert sent <= set(topics)  # everything published is visible
         assert system["device_online"] == "online" and system["last_flush_ok"] is True
-        assert system["firmware"] == "v4.2.3"
+        assert system["firmware"] == "4.2.3"
         assert profile["operating_mode"]["value"] == 4  # the heat_dhw preset
         # only real changes are stored: constant topics have one row despite the 300 s full re-publish
         assert rows == expected_rows(document)

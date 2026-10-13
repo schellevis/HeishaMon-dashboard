@@ -636,7 +636,7 @@ A2_TABLE = {
         "readback": [],
         "compare": "equal",
         "min_firmware": "3.2.3",
-        "range": {"min": 0, "max": 255, "step": 1},
+        "range": {"min": 43, "max": 234, "step": 1},
         "risky": False,
     },
     "SetPoolTemp": {
@@ -766,7 +766,6 @@ INPUT_PATHS = {
     "opentherm/read/inletTemp",
     "opentherm/read/outletTemp",
     "opentherm/read/dhwTemp",
-    "opentherm/read/roomSetOverride",
     "opentherm/read/chPressure",
     "opentherm/read/relativeModulation",
     # bool inputs
@@ -1016,7 +1015,7 @@ def test_topic_ids_upstream_index(cat):
 
 def test_dutch_labels_are_translated(cat):
     entries = list(cat.topics) + list(cat.commands) + list(cat.inputs)
-    assert len(entries) == 157 + 64 + 19
+    assert len(entries) == 157 + 64 + 18
     same = [e for e in entries if e["label"]["nl"] == e["label"]["en"]]
     assert len(same) <= 0.10 * len(entries), [e.get("key") or e.get("name") or e.get("path") for e in same]
     assert all(e["label"]["nl"].strip() for e in entries)
@@ -1065,6 +1064,12 @@ ROOM_SENSORS = ("ext_thermostat", "int_thermostat", "thermistor")
 def _cmd(name):
     data = json.loads(CATALOG_PATH.read_text())
     return next(c for c in data["commands"] if c["name"] == name)
+
+
+@pytest.mark.parametrize("zone", ["1", "2"])
+@pytest.mark.parametrize("kind", ["Heat", "Cool"])
+def test_request_temperature_has_conditional_ranges(zone, kind):
+    assert _cmd(f"SetZ{zone}{kind}RequestTemperature").get("conditional_ranges")
 
 
 @pytest.mark.parametrize("zone", ["1", "2"])
@@ -1206,3 +1211,56 @@ def test_real_capture_sentinels_and_enums(cat):
     for key in ("main/Buffer_Temp", "main/Pool_Temp", "main/Solar_Temp", "main/Z1_Water_Temp",
                 "main/Z2_Water_Temp", "main/DHW_Holiday_Shift_Temp", "main/Water_Pressure"):
         assert float(last[key]) in cat.topic(key)["sentinels"], key
+
+
+# ---------------------------------------------------------------------------
+# K1-K5 catalog conformity
+# ---------------------------------------------------------------------------
+
+def test_opentherm_bounds_0_127(cat):
+    for name in ("chSetUppBound", "chSetLowBound", "dhwSetUppBound", "dhwSetLowBound"):
+        i = cat.input(f"opentherm/read/{name}")
+        assert i["range"] == {"min": 0, "max": 127, "step": 1}
+        assert i["range_source"] == "heishamon_fact"
+
+
+def test_no_room_set_override(cat):
+    assert not any("roomSetOverride" in i["path"] for i in cat.inputs)
+    assert len(cat.inputs) == 18
+
+
+def test_demand_control_range(cat):
+    c = cat.command("SetDemandControl")
+    assert c["range"] == {"min": 43, "max": 234, "step": 1}
+    assert c["range_source"] == "heishamon_fact"
+
+
+def test_pcb_byte9_encoding_domain(cat):
+    c = cat.command("SetOptPCBByte9")
+    assert c["range_source"] == "encoding_domain"
+    assert c["range"] == {"min": 0, "max": 255, "step": 1}
+
+
+@pytest.mark.parametrize("name", ["SetHeaterDelayTime", "SetHeaterStartDelta", "SetHeaterStopDelta"])
+def test_heater_series_applicability(name, cat):
+    assert cat.command(name)["applicability"] == {"series": ["J"]}
+
+
+def test_nl_inlet_outlet_labels(cat):
+    topics = {t["key"]: t for t in cat.topics}
+    assert topics["main/Main_Inlet_Temp"]["label"]["nl"] == "Retourtemperatuur (inlaat)"
+    assert topics["main/Main_Outlet_Temp"]["label"]["nl"] == "Aanvoertemperatuur (uitlaat)"
+    assert cat.input("opentherm/read/inletTemp")["label"]["nl"] == "OpenTherm retourtemperatuur"
+    assert cat.input("opentherm/read/outletTemp")["label"]["nl"] == "OpenTherm aanvoertemperatuur"
+
+
+def test_low_pressure_unit(cat):
+    t = next(t for t in cat.topics if t["key"] == "main/Low_Pressure")
+    assert t["unit"] == "kgf/cm²"
+
+
+def test_every_entry_has_a_known_ui_group(cat):
+    """R2: settings grouping reads `ui_group`; `category` stays as it is."""
+    for entry in list(cat.commands) + list(cat.inputs):
+        assert entry["ui_group"] in catalog.UI_GROUPS, entry.get("name") or entry["path"]
+    assert all(c["ui_group"] == "pcb" for c in cat.commands if c["pcb"])
