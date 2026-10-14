@@ -20,6 +20,8 @@ import TopicSelector from '../src/features/charts/TopicSelector.svelte';
 import PresetSelector from '../src/features/charts/PresetSelector.svelte';
 import {
   createChart,
+  buildSeries,
+  themedAxes,
   historyToUplot,
   getBreakChecker,
   insertBreaks,
@@ -822,5 +824,26 @@ describe('T06: LOCF alignment, preset contract, overrides', () => {
     } finally {
       catalog.topics.splice(catalog.topics.indexOf(probe), 1);
     }
+  });
+});
+
+describe('buildSeries', () => {
+  const Fake = { paths: { stepped: () => 'STEPPED' } };
+  it('prepends the x series and steps enum and stepped series', () => {
+    const out = buildSeries([{ label: 'a' }, { label: 'b', enumBand: true }, { label: 'c', stepped: true }], Fake);
+    expect(out[0]).toEqual({});
+    expect(out[1].paths).toBeUndefined();
+    expect(out[2].paths).toBe('STEPPED');
+    expect(out[3].paths).toBe('STEPPED');
+    expect('stepped' in out[3]).toBe(false);
+  });
+});
+
+describe('themedAxes', () => {
+  it('keeps explicit axis colours and fills the rest', () => {
+    const [a, b] = themedAxes([{ stroke: 'red' }, {}]);
+    expect(a.stroke).toBe('red');
+    expect(b).toHaveProperty('grid');
+    expect(b).toHaveProperty('ticks');
   });
 });

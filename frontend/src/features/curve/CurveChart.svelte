@@ -18,6 +18,7 @@
     shift = 0,
     showShift = false,
     directSetpoint = null,
+    inactive = false, // draw the curve inactive even without a direct setpoint
     editable = true,
     outside = null,
     reportedTarget = null,
@@ -172,13 +173,14 @@
     {#if changed}
       <polyline data-testid="ghost-line" class="ghost" points={points(curveLine(current, 0, xd))} />
     {/if}
-    {#if directSetpoint === null}
+    {#if directSetpoint === null && !inactive}
       <polyline data-testid="curve-line" class="curve" points={points(curveLine(shown, 0, xd))} />
       {#if showShift && shift}
         <polyline data-testid="shift-line" class="shift" points={points(curveLine(shown, shift, xd))} />
       {/if}
     {:else}
       <polyline data-testid="curve-line" class="curve inactive-line" points={points(curveLine(shown, 0, xd))} />
+      {#if directSetpoint !== null}
       <line
         data-testid="direct-line"
         class="direct"
@@ -187,6 +189,7 @@
         y1={sy(directSetpoint)}
         y2={sy(directSetpoint)}
       />
+      {/if}
     {/if}
     {#each ['cold', 'warm'] as end (end)}
       <circle

@@ -4,28 +4,8 @@
   import { api } from '../../lib/api.js';
   import { translate } from '../../lib/i18n/index.js';
   import { language } from '../../lib/stores.js';
-  import { commandByName } from '../../lib/catalog.js';
+  import { commandLabel, detailText, kindLabel } from '../../lib/eventtext.js';
   import { formatDateTime } from '../../lib/time.js';
-
-  function kindLabel(kind, lang) {
-    const key = `log.kind_${kind}`;
-    const text = translate(lang, key);
-    return text === key ? kind : text;
-  }
-
-  function commandLabel(name, lang) {
-    const entry = commandByName(name);
-    return entry?.label?.[lang] || entry?.label?.en || name;
-  }
-
-  function detailText(detail) {
-    if (detail == null) return '';
-    if (typeof detail !== 'object') return String(detail);
-    return Object.entries(detail)
-      .filter(([, value]) => value !== null && value !== undefined)
-      .map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`)
-      .join(', ');
-  }
 
   let commandRows = $state([]);
   let eventRows = $state([]);

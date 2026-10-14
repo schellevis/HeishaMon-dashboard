@@ -6,6 +6,29 @@
  */
 
 import { axisFormatter } from './time.js';
+import { cssVar } from './theme.js';
+
+/** uPlot series: series[0] describes the x axis; enum bands and `stepped` series draw as steps. */
+export function buildSeries(series = [], Uplot = null) {
+  return [{}, ...series.map((s) => {
+    const { enumBand, stepped, ...rest } = s;
+    if ((enumBand || stepped) && Uplot?.paths?.stepped) rest.paths = Uplot.paths.stepped({ align: 1 });
+    return rest;
+  })];
+}
+
+/** Axes coloured from the current theme; explicit settings win. */
+export function themedAxes(axes = []) {
+  const ink = cssVar('--ink-3') || undefined;
+  const line = cssVar('--line') || undefined;
+  return axes.map((axis) => ({
+    stroke: ink,
+    grid: { stroke: line, width: 1 },
+    ticks: { stroke: line, width: 1 },
+    font: '10px "Martian Mono Variable", monospace',
+    ...axis,
+  }));
+}
 
 // Dynamic import of uplot to avoid module-level side effects
 let uplotPromise = null;
@@ -85,14 +108,7 @@ export async function createChart(element, options = {}) {
     ...options,
   };
 
-  // uPlot expects series[0] to describe the x axis; historyToUplot only emits value series.
-  const series = [{}, ...(mergedOptions.series || []).map((s) => {
-    const { enumBand, ...rest } = s;
-    if (enumBand && Uplot.paths && Uplot.paths.stepped) {
-      rest.paths = Uplot.paths.stepped({ align: 1 });
-    }
-    return rest;
-  })];
+  const series = buildSeries(mergedOptions.series || [], Uplot);
   const chart = new Uplot({ ...mergedOptions, series }, mergedOptions.data || [], element);
 
   return {
