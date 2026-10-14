@@ -268,6 +268,32 @@ describe('Overview screen (§7.1)', () => {
     });
   });
 
+  it('lays out schematic, now panel, controls, timeline, curve, events and tiles', async () => {
+    vi.spyOn(api, 'energy').mockResolvedValue({ periods: {} });
+    vi.spyOn(api, 'events').mockResolvedValue({ events: [] });
+    vi.spyOn(api, 'commands').mockResolvedValue({ commands: [] });
+    state.set(makeState());
+    profile.set(profileFixtures.heatPlusDhw);
+    prefs.set(makePrefs());
+    render(Overview);
+    for (const id of ['plant', 'quick-controls', 'timeline', 'recent-events', 'tiles']) {
+      expect(screen.getByTestId(id)).toBeTruthy();
+    }
+    expect(screen.getByTestId('now-cop')).toBeTruthy();
+  });
+
+  it('shows a temperature dot on degree tiles, none for a sentinel', () => {
+    const t = (value, sentinel = false) => ({
+      value, raw: String(value), kind: 'number', unit: '°C', decimals: 1, enum_label: null,
+      catalogued: true, sentinel, last_change: 1, last_seen: 1, retained_only: false,
+    });
+    const { unmount } = render(Tile, { key: 'outsideTemp', topic: t(6), sparkline: [] });
+    expect(screen.getByTestId('tile-outsideTemp').querySelector('.temp-dot')).toBeTruthy();
+    unmount();
+    render(Tile, { key: 'outsideTemp', topic: t(-128, true), sparkline: [] });
+    expect(screen.getByTestId('tile-outsideTemp').querySelector('.temp-dot')).toBeNull();
+  });
+
   describe('tile keys exist in production catalog', () => {
     it('every tile topic key exists in the production catalog', () => {
       // All topic keys used in tiles must exist in catalog.topics

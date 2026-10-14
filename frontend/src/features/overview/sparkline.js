@@ -4,55 +4,52 @@
 
 import { api } from '../../lib/api.js';
 
-const SPARKLINE_POINTS = 96; // ~15 min intervals for 24h
+const SLOTS = 96; // 15 min slots for 24 h
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_POINTS = 1500; // a full day of 1-minute buckets
 
 /**
- * Fetch 24h of history for a topic and extract sparkline values.
- * §4.4 History: at raw resolution points are [ts, value]; at 1m/1h resolution [ts, avg|null, covered_seconds].
- * Render null/zero-coverage points as gaps (null).
+ * Reduce a history series to `n` equal slots: coverage-weighted mean per slot (raw points weigh 1),
+ * null for an empty slot or a slot whose start lies inside a break.
+ * §4.4 History: raw points are [ts, value]; 1m/1h points are [ts, avg|null, covered_seconds].
+ * @returns {Array<number | null>}
+ */
+export function reduceToSlots(series, resolution, from, to, n = SLOTS) {
+  const slot = (to - from) / n;
+  const sums = new Array(n).fill(0);
+  const weights = new Array(n).fill(0);
+  for (const point of series?.points ?? []) {
+    if (!point || point.length === 0) continue;
+    const [ts, value, covered] = point;
+    if (typeof value !== 'number' || Number.isNaN(value)) continue;
+    const weight = resolution === 'raw' ? 1 : covered;
+    if (!(weight > 0)) continue;
+    const index = Math.floor((ts - from) / slot);
+    if (index < 0 || index >= n) continue;
+    sums[index] += value * weight;
+    weights[index] += weight;
+  }
+  const breaks = series?.breaks ?? [];
+  return sums.map((sum, i) => {
+    const start = from + i * slot;
+    if (breaks.some(([a, b]) => start >= a && start < b)) return null;
+    return weights[i] > 0 ? sum / weights[i] : null;
+  });
+}
+
+/**
+ * Fetch 24h of history for a topic and reduce it to sparkline values.
  * @param {string} topicKey
  * @param {number} now
  * @returns {Promise<Array<number | null>>}
  */
 export async function fetchSparklineValues(topicKey, now = Date.now()) {
-  const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
-  
+  const from = now - DAY_MS;
   try {
-    const history = await api.history({
-      topics: [topicKey],
-      from: twentyFourHoursAgo,
-      to: now,
-      max_points: SPARKLINE_POINTS,
-    });
-
+    const history = await api.history({ topics: [topicKey], from, to: now, max_points: MAX_POINTS });
     const series = history?.series?.[topicKey];
     if (!series) return [];
-
-    const points = series.points ?? [];
-    const resolution = history.resolution;
-
-    // Map points to values, rendering null/zero coverage as gaps
-    return points.map((point) => {
-      if (!point || point.length === 0) return null;
-      
-      if (resolution === 'raw') {
-        // [ts, value]
-        const value = point[1];
-        if (value === null || value === undefined || typeof value !== 'number' || isNaN(value)) {
-          return null;
-        }
-        return value;
-      } else {
-        // 1m or 1h: [ts, avg|null, covered_seconds]
-        const avg = point[1];
-        const coveredSeconds = point[2];
-        
-        if (avg === null || coveredSeconds === 0 || coveredSeconds === null || coveredSeconds === undefined) {
-          return null;
-        }
-        return typeof avg === 'number' && !isNaN(avg) ? avg : null;
-      }
-    });
+    return reduceToSlots(series, history.resolution, from, now, SLOTS);
   } catch (error) {
     console.warn(`Sparkline fetch failed for ${topicKey}:`, error);
     return [];

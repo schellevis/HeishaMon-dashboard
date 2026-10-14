@@ -79,7 +79,7 @@
   }
 </script>
 
-<article class="command compact" data-testid={`control-coupled-${zone}-${mode}`} data-gate={gate ?? undefined} data-leaf={leaf}>
+<article class="command compact" class:draft={toSend !== null} data-testid={`control-coupled-${zone}-${mode}`} data-gate={gate ?? undefined} data-leaf={leaf}>
   <div class="head">
     <label class="name" for={`coupled-${zone}-${mode}`}>{labelText}</label>
     <span class="current">
@@ -146,7 +146,8 @@
     font-weight: 600;
   }
   .current {
-    color: var(--text-secondary);
+    font-family: var(--font-data);
+    color: var(--ink-2);
     font-size: 0.8125rem;
   }
   .edit {
@@ -172,17 +173,24 @@
   .warn {
     margin: 0;
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   .warn {
-    color: var(--danger);
+    color: var(--fail-ink);
   }
   .link {
     background: none;
     border: none;
-    color: var(--primary);
+    color: var(--warm-ink);
     padding: 0;
     cursor: pointer;
     font-size: 0.8125rem;
+  }
+  .draft input:not([type='range']) {
+    border-color: var(--pending);
+    color: var(--pending-ink);
+  }
+  .draft input[type='range'] {
+    accent-color: var(--pending);
   }
 </style>

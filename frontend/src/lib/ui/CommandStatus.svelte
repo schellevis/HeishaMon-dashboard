@@ -31,22 +31,22 @@
     padding: 0.1rem 0.5rem;
     border-radius: 999px;
     font-size: 0.75rem;
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
+    background: var(--panel-2);
+    color: var(--ink-2);
     white-space: nowrap;
   }
   span[data-status='confirmed'] {
-    background: #dcfce7;
-    color: #166534;
+    background: color-mix(in srgb, var(--ok) 16%, transparent);
+    color: var(--ok-ink);
   }
   span[data-status='failed'] {
-    background: #fee2e2;
-    color: #991b1b;
+    background: color-mix(in srgb, var(--fail) 16%, transparent);
+    color: var(--fail-ink);
   }
   span[data-status='pending'],
   span[data-status='retried'] {
-    background: #fef3c7;
-    color: #92400e;
+    background: color-mix(in srgb, var(--pending) 16%, transparent);
+    color: var(--pending-ink);
   }
   .detail {
     opacity: 0.8;

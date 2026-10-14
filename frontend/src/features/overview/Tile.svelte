@@ -4,6 +4,7 @@
   import { tileIds } from '../../lib/domain/rules.js';
   import { topicByKey } from '../../lib/catalog.js';
   import Sparkline from './Sparkline.svelte';
+  import TempDot from '../../lib/ui/TempDot.svelte';
 
   let {
     key = '',
@@ -41,7 +42,7 @@
     </button>
   </header>
   <div class="value" class:text={topic?.kind !== 'number'} class:value-stale={presented.className}>
-    {presented.text}
+    {#if shown?.unit === '°C' && topic && !topic.sentinel}<TempDot value={topic.value} />{/if}{presented.text}
   </div>
   {#if sparkline}
     <Sparkline data={sparkline} />
@@ -50,11 +51,10 @@
 
 <style>
   .tile {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    padding: 0.625rem 0.75rem;
-    font-size: 0.875rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 12px 14px;
     position: relative;
     min-width: 0;
     display: flex;
@@ -66,19 +66,21 @@
     align-items: flex-start;
     gap: 0.25rem;
     margin-bottom: 0.25rem;
-    color: var(--text-secondary);
-    font-size: 0.8125rem;
   }
   .label {
     min-width: 0;
     line-height: 1.25;
     overflow-wrap: break-word;
     hyphens: auto;
+    font: 500 10.5px/1.25 var(--font-data);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
   }
   .pin {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--ink-3);
     cursor: pointer;
     font-size: 0.875rem;
     padding: 0 0.125rem;
@@ -86,12 +88,11 @@
     flex: none;
   }
   .pin:hover {
-    color: #b45309;
+    color: var(--warm-ink);
   }
   .value {
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.2;
+    font: 500 22px/1.2 var(--font-data);
+    font-stretch: 87.5%;
     margin-bottom: 0.25rem;
     min-width: 0;
     overflow-wrap: break-word;
@@ -102,14 +103,11 @@
     font-size: 0.9375rem;
   }
   .value-stale {
-    color: #6b7280;
+    color: var(--ink-3);
   }
   @media (max-width: 480px) {
     .tile {
-      padding: 0.5rem 0.625rem;
-    }
-    header {
-      font-size: 0.75rem;
+      padding: 10px 12px;
     }
     .value {
       font-size: 1.25rem;
@@ -120,6 +118,6 @@
   }
   .tile :global(svg) {
     margin-top: auto;
-    color: var(--primary);
+    color: var(--ink-3);
   }
 </style>
