@@ -1,10 +1,6 @@
 import { translate } from './i18n/index.js';
 
-import { modeSets } from './domain/rules.js';
-
-const HEATING_MODES = new Set(modeSets.heating);
-const COOLING_MODES = new Set(modeSets.cooling);
-const DHW_MODES = new Set(modeSets.dhw);
+import { activityFrom } from './domain/activity.js';
 
 /** Age of a timestamp, for the status bar and for stale values (§9). */
 export function formatAge(ms, lang = 'en') {
@@ -34,15 +30,13 @@ function topicNumber(state, key) {
  * Mode sets follow Appendix A.4.
  */
 export function activityOf(state, profile) {
-  if (topicNumber(state, 'main/Defrosting_State') === 1) return 'defrost';
-  if (topicNumber(state, 'main/ThreeWay_Valve_State') === 1) return 'dhw';
-  if (topicNumber(state, 'main/Heatpump_State') === 0) return 'idle';
   const field = profile?.operating_mode;
-  const mode = field && !field.unknown ? field.value : topicNumber(state, 'main/Operating_Mode_State');
-  if (HEATING_MODES.has(mode)) return 'heating';
-  if (COOLING_MODES.has(mode)) return 'cooling';
-  if (DHW_MODES.has(mode)) return 'dhw';
-  return 'idle';
+  return activityFrom({
+    defrost: topicNumber(state, 'main/Defrosting_State'),
+    valve: topicNumber(state, 'main/ThreeWay_Valve_State'),
+    heatpump: topicNumber(state, 'main/Heatpump_State'),
+    mode: field && !field.unknown ? field.value : topicNumber(state, 'main/Operating_Mode_State'),
+  });
 }
 
 export function activityLabel(activity, lang = 'en') {
