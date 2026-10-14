@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="nl" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeishaMon dashboard — ontwerpvoorstel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap" rel="stylesheet">
+<style>
+/* ── Tokens ─────────────────────────────────────────────── */
+:root {
+  --cold: #4fa3e0;
+  --cool: #8fb8c9;
+  --warm: #f0a04b;
+  --hot: #e5533d;
+  --ok: #6cc59a;
+  --pending: #e8c25a;
+  --fail: #e5533d;
+  --font-ui: "Instrument Sans", system-ui, sans-serif;
+  --font-data: "Martian Mono", ui-monospace, monospace;
+  --r: 10px;
+}
+[data-theme="night"] {
+  --ground: #12181c;
+  --panel: #182026;
+  --panel-2: #1e2830;
+  --line: #2a3640;
+  --line-2: #364552;
+  --ink: #dce3e8;
+  --ink-2: #93a3b0;
+  --ink-3: #64737f;
+  --pipe-idle: #33414c;
+  --unit: #222c34;
+}
+[data-theme="day"] {
+  --ground: #e9edf0;
+  --panel: #ffffff;
+  --panel-2: #f3f6f8;
+  --line: #d5dde3;
+  --line-2: #bcc8d1;
+  --ink: #18212a;
+  --ink-2: #4f5f6c;
+  --ink-3: #7d8c98;
+  --pipe-idle: #c9d3da;
+  --unit: #f6f8f9;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 14px/1.45 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; border-radius: 4px; }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-stretch: 87.5%; }
+.tag {
+  font: 500 10.5px/1 var(--font-data); font-stretch: 87.5%;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+
+/* ── Shell ──────────────────────────────────────────────── */
+.shell { display: grid; grid-template-columns: 76px 1fr; grid-template-rows: auto 1fr; min-height: 100%; }
+.rail {
+  grid-row: 1 / 3; background: var(--panel); border-right: 1px solid var(--line);
+  display: flex; flex-direction: column; align-items: center; padding: 14px 0; gap: 4px;
+  position: sticky; top: 0; height: 100vh;
+}
+.mark { width: 36px; height: 36px; margin-bottom: 14px; }
+.rail a {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; width: 64px; padding: 8px 0;
+  color: var(--ink-3); text-decoration: none; font-size: 11px; border-radius: 8px;
+}
+.rail a svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.rail a:hover { color: var(--ink); background: var(--panel-2); }
+.rail a[aria-current="page"] { color: var(--ink); background: var(--panel-2); box-shadow: inset 2px 0 0 var(--warm); }
+.rail .spacer { flex: 1; }
+
+.status {
+  display: flex; align-items: center; gap: 18px; padding: 10px 24px; border-bottom: 1px solid var(--line);
+  background: var(--ground); position: sticky; top: 0; z-index: 5; flex-wrap: wrap;
+}
+.status .item { display: flex; align-items: baseline; gap: 7px; white-space: nowrap; }
+.status .val { font: 500 12.5px var(--font-data); font-stretch: 87.5%; }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); align-self: center; box-shadow: 0 0 0 0 var(--ok); }
+.pulse.beat { animation: beat .9s ease-out; }
+@keyframes beat { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 70%, transparent); } to { box-shadow: 0 0 0 8px transparent; } }
+.status .grow { flex: 1; }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 999px;
+  border: 1px solid var(--line-2); background: var(--panel); cursor: pointer; font-size: 12.5px;
+}
+.chip svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.chip.locked { border-color: color-mix(in srgb, var(--ok) 50%, var(--line-2)); }
+.chip.unlocked { border-color: var(--pending); color: var(--pending); }
+
+main { padding: 22px 24px 120px; min-width: 0; }
+.screen { display: none; }
+.screen.on { display: block; }
+.screen-head { display: flex; align-items: baseline; gap: 16px; margin: 0 0 16px; flex-wrap: wrap; }
+.screen-head h1 { font: 600 22px/1.1 var(--font-ui); letter-spacing: -.01em; margin: 0; }
+.screen-head p { margin: 0; color: var(--ink-2); }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panel-head h2 { margin: 0; font: 600 13.5px var(--font-ui); }
+.panel-body { padding: 16px; }
+
+/* ── Overview ───────────────────────────────────────────── */
+.ov { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; }
+.ov > * { min-width: 0; }
+.ov .plant { grid-column: 1; }
+.ov .side { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; gap: 16px; }
+.ov .timeline { grid-column: 1; }
+.ov .lower { grid-column: 1 / 3; display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+
+.plant-head { display: flex; align-items: center; gap: 14px; padding: 14px 18px 0; flex-wrap: wrap; }
+.activity { font: 600 26px/1 var(--font-ui); letter-spacing: -.015em; display: flex; align-items: center; gap: 10px; }
+.activity .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--warm); }
+.activity small { font: 400 14px var(--font-ui); color: var(--ink-2); letter-spacing: 0; }
+.plant-head .grow { flex: 1; }
+.legend { display: flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 11.5px; }
+.legend .ramp { width: 110px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--cold), var(--cool) 35%, var(--warm) 65%, var(--hot)); }
+
+#schematic { display: block; width: 100%; height: auto; }
+.schem-scroll { overflow-x: auto; }
+#schematic text { font-family: var(--font-data); font-stretch: 87.5%; }
+.pipe-base { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; transition: stroke .8s; }
+.pipe-flow { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 2 11; stroke: rgba(255,255,255,.7); animation: flow var(--flow-speed, 1.2s) linear infinite; }
+[data-theme="day"] .pipe-flow { stroke: rgba(255,255,255,.95); }
+.pipe-flow.off { opacity: 0; }
+@keyframes flow { to { stroke-dashoffset: -13; } }
+.refrig { fill: none; stroke: var(--line-2); stroke-width: 2; stroke-dasharray: 5 4; }
+.unit-box { fill: var(--unit); stroke: var(--line-2); stroke-width: 1.2; }
+.unit-label { fill: var(--ink-3); font-size: 10px; letter-spacing: .1em; }
+.bubble circle { fill: var(--panel); stroke: var(--ink-2); stroke-width: 1.2; }
+.bubble .bt { fill: var(--ink-2); font-size: 9.5px; font-weight: 600; text-anchor: middle; letter-spacing: .04em; }
+.bubble .bl { stroke: var(--ink-2); stroke-width: 1; }
+.reading { fill: var(--ink); font-size: 15px; font-weight: 500; }
+.reading-sub { fill: var(--ink-3); font-size: 9.5px; letter-spacing: .06em; }
+#fan { transform-origin: 125px 175px; transform-box: view-box; }
+#fan.spin { animation: spin var(--fan-speed, 1.6s) linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.branch-off { opacity: .35; }
+
+.side .now { padding: 18px; }
+.cop { display: flex; align-items: baseline; gap: 10px; }
+.cop .big { font: 400 64px/0.9 var(--font-data); font-stretch: 75%; letter-spacing: -.03em; }
+.cop .lbl { display: flex; flex-direction: column; gap: 3px; color: var(--ink-2); font-size: 12.5px; }
+.cop .lbl .num { font-size: 11px; white-space: nowrap; color: var(--ink-3); }
+.kv { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border-top: 1px solid var(--line); }
+.kv > div { background: var(--panel); padding: 11px 16px; }
+.kv .v { font: 500 18px/1.2 var(--font-data); font-stretch: 87.5%; margin-top: 3px; }
+.kv .v small { font-size: 11px; color: var(--ink-3); margin-left: 3px; font-weight: 400; }
+.power-bar { height: 6px; border-radius: 3px; background: var(--panel-2); display: flex; overflow: hidden; margin: 14px 0 6px; }
+.power-bar i { display: block; height: 100%; }
+.power-note { display: flex; justify-content: space-between; color: var(--ink-3); font-size: 11.5px; }
+
+.ctl { padding: 4px 16px 16px; }
+.ctl-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.ctl-row:last-child { border-bottom: 0; }
+.ctl-row .l { display: flex; flex-direction: column; }
+.ctl-row .l span:last-child { color: var(--ink-3); font-size: 11.5px; }
+.seg { display: flex; flex-wrap: wrap; background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 2px; gap: 2px; }
+.seg button { border: 0; background: none; padding: 5px 9px; border-radius: 6px; cursor: pointer; font-size: 12.5px; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 0 0 1px var(--line-2); }
+.seg button.draft { box-shadow: 0 0 0 1.5px var(--pending); color: var(--ink); }
+.stepper { display: flex; align-items: center; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.stepper button { width: 30px; height: 30px; border: 0; background: var(--panel-2); cursor: pointer; font-size: 16px; }
+.stepper button:hover { background: var(--line); }
+.stepper output { min-width: 64px; text-align: center; font: 500 14px var(--font-data); font-stretch: 87.5%; }
+.stepper.draft { border-color: var(--pending); }
+.stepper.draft output { color: var(--pending); }
+.toggle { width: 40px; height: 22px; border-radius: 11px; border: 1px solid var(--line-2); background: var(--panel-2); position: relative; cursor: pointer; padding: 0; }
+.toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink-3); transition: transform .15s, background .15s; }
+.toggle[aria-checked="true"] { background: color-mix(in srgb, var(--ok) 25%, var(--panel-2)); border-color: var(--ok); }
+.toggle[aria-checked="true"]::after { transform: translateX(18px); background: var(--ok); }
+
+.tray {
+  margin: 0 16px 16px; padding: 12px; border-radius: 8px; border: 1px dashed var(--pending);
+  background: color-mix(in srgb, var(--pending) 7%, transparent); display: none;
+}
+.tray.show { display: block; }
+.tray ul { list-style: none; margin: 0 0 10px; padding: 0; font-size: 12.5px; }
+.tray li { display: flex; flex-direction: column; gap: 2px; padding: 4px 0; }
+.tray li code { font: 11px var(--font-data); color: var(--ink-3); }
+.tray .acts { display: flex; gap: 8px; }
+.btn { border: 1px solid var(--line-2); background: var(--panel-2); border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 13px; }
+.btn:hover { background: var(--line); }
+.btn.primary { background: var(--ink); color: var(--ground); border-color: var(--ink); font-weight: 600; }
+.btn.primary:hover { opacity: .9; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.lockhint { font-size: 11.5px; color: var(--ink-3); margin-top: 8px; }
+
+.tl-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.tl-read { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+.tl-read b { font: 500 12px var(--font-data); font-stretch: 87.5%; color: var(--ink); }
+.tl-read i { display: inline-block; width: 10px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+#timeline { display: block; width: 100%; height: auto; touch-action: pan-y; }
+#timeline text { font: 10px var(--font-data); font-stretch: 87.5%; fill: var(--ink-3); }
+
+.events { list-style: none; margin: 0; padding: 0; }
+.events li { display: grid; grid-template-columns: 54px 16px 1fr; gap: 8px; padding: 9px 16px; border-bottom: 1px solid var(--line); align-items: start; font-size: 13px; }
+.events li:last-child { border-bottom: 0; }
+.events time { font: 12px var(--font-data); font-stretch: 87.5%; color: var(--ink-3); padding-top: 1px; }
+.events .k { width: 8px; height: 8px; border-radius: 2px; margin-top: 6px; }
+.events small { display: block; color: var(--ink-3); font-size: 11.5px; }
+.events code { font: 11px var(--font-data); color: var(--ink-2); }
+
+#minicurve { display: block; width: 100%; height: auto; }
+#minicurve text, #curvechart text, #histo text { font: 10px var(--font-data); font-stretch: 87.5%; fill: var(--ink-3); }
+
+/* ── Curve screen ───────────────────────────────────────── */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
+.tabs button { border: 0; background: none; padding: 9px 14px; cursor: pointer; color: var(--ink-3); border-bottom: 2px solid transparent; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--warm); }
+.tabs button .badge { font: 10px var(--font-data); padding: 2px 6px; border-radius: 4px; background: var(--panel-2); margin-left: 6px; color: var(--ink-2); }
+.cv { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; }
+.cv .main-col { display: flex; flex-direction: column; gap: 16px; }
+.cv .side-col { display: flex; flex-direction: column; gap: 16px; }
+#curvechart { display: block; width: 100%; height: auto; touch-action: none; user-select: none; }
+.handle { cursor: grab; }
+.handle:active { cursor: grabbing; }
+.handle circle.hit { fill: transparent; }
+.handle circle.ring { fill: var(--panel); stroke-width: 2.5; }
+.handle:focus-visible { outline: none; }
+.handle:focus-visible circle.ring { stroke-width: 4; }
+.pts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pt { border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.pt h3 { margin: 0 0 8px; font: 600 12.5px var(--font-ui); display: flex; align-items: center; gap: 7px; }
+.pt h3 i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.pt label { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--ink-2); padding: 3px 0; }
+.pt input { width: 66px; padding: 5px 7px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--panel-2); font: 13px var(--font-data); text-align: right; }
+.diff { font: 12.5px var(--font-data); font-stretch: 87.5%; }
+.diff div { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+.diff .was { color: var(--ink-3); text-decoration: line-through; margin-right: 6px; }
+.diff .is { color: var(--pending); }
+.diff .empty { color: var(--ink-3); font-family: var(--font-ui); border: 0; }
+.payload { margin-top: 10px; font: 11px/1.5 var(--font-data); color: var(--ink-2); background: var(--panel-2); border-radius: 6px; padding: 8px 10px; word-break: break-all; }
+.note { font-size: 12px; color: var(--ink-2); display: flex; gap: 8px; }
+.note svg { flex: none; width: 15px; height: 15px; stroke: var(--pending); fill: none; stroke-width: 1.8; margin-top: 1px; }
+.colorby { display: flex; gap: 6px; flex-wrap: wrap; }
+.changelog { list-style: none; margin: 0; padding: 0; font-size: 12.5px; }
+.changelog li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.changelog li:last-child { border: 0; }
+.changelog .when { color: var(--ink-3); font: 11.5px var(--font-data); }
+
+/* ── Topics screen ──────────────────────────────────────── */
+.tp-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.tp-tools input[type="search"] { flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--panel-2); font: 13px var(--font-data); }
+table.topics { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.topics th { text-align: left; font-weight: 500; padding: 8px 16px; position: sticky; top: 49px; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 1; }
+table.topics td { padding: 7px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+table.topics tr:hover td { background: var(--panel-2); }
+table.topics .key { font: 12px var(--font-data); font-stretch: 87.5%; }
+table.topics .key span { color: var(--ink-3); }
+table.topics .val { font: 500 13px var(--font-data); font-stretch: 87.5%; text-align: right; white-space: nowrap; }
+table.topics .val small { color: var(--ink-3); font-weight: 400; }
+table.topics .ago { font: 11.5px var(--font-data); color: var(--ink-3); white-space: nowrap; }
+table.topics tr.flash td.val { animation: flash 1.2s; }
+@keyframes flash { from { background: color-mix(in srgb, var(--warm) 25%, transparent); } }
+tr.sentinel td { color: var(--ink-3); }
+.sent { font: 10.5px var(--font-data); border: 1px solid var(--line-2); border-radius: 4px; padding: 1px 5px; color: var(--ink-2); white-space: nowrap; }
+.vis { padding: 4px 6px; border: 1px solid var(--line-2); border-radius: 6px; background: var(--panel-2); font-size: 12px; }
+
+.stub { padding: 48px 24px; text-align: center; color: var(--ink-2); }
+
+/* ── Proposal dialog ────────────────────────────────────── */
+.about-btn { position: fixed; right: 20px; bottom: 20px; z-index: 20; border-radius: 999px; padding: 10px 16px; border: 1px solid var(--line-2); background: var(--panel); box-shadow: 0 6px 24px rgba(0,0,0,.25); cursor: pointer; font-weight: 600; }
+dialog { max-width: 760px; width: calc(100% - 32px); border: 1px solid var(--line-2); border-radius: 14px; background: var(--panel); color: var(--ink); padding: 0; }
+dialog::backdrop { background: rgba(8,12,15,.6); backdrop-filter: blur(3px); }
+.dlg-body { padding: 24px 28px; max-height: 78vh; overflow: auto; }
+.dlg-body h2 { font: 600 20px var(--font-ui); margin: 0 0 6px; }
+.dlg-body h3 { font: 600 14px var(--font-ui); margin: 22px 0 6px; }
+.dlg-body p, .dlg-body li { color: var(--ink-2); }
+.dlg-body ul { padding-left: 18px; margin: 6px 0; }
+.dlg-body li { margin: 4px 0; }
+.dlg-body b { color: var(--ink); font-weight: 600; }
+.demo { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.swatches { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.swatches span { display: flex; align-items: center; gap: 6px; font: 11px var(--font-data); color: var(--ink-2); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px 4px 4px; }
+.swatches span i { width: 16px; height: 16px; border-radius: 4px; }
+.dlg-foot { display: flex; justify-content: flex-end; padding: 12px 20px; border-top: 1px solid var(--line); }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .ov { grid-template-columns: minmax(0, 1fr); }
+  .ov .side { grid-column: 1; grid-row: auto; display: grid; grid-template-columns: 1fr 1fr; }
+  .ov .lower { grid-column: 1; }
+  .cv { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .shell { grid-template-columns: 1fr; }
+  .rail {
+    position: fixed; bottom: 0; top: auto; left: 0; right: 0; height: auto; flex-direction: row; justify-content: space-around;
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); border-right: 0; border-top: 1px solid var(--line); z-index: 10; grid-row: auto;
+  }
+  .rail .mark, .rail .spacer, .rail .desk { display: none; }
+  .rail a { width: auto; flex: 1; font-size: 10.5px; }
+  .status { padding: 8px 14px; gap: 10px 14px; }
+  .status .hide-m { display: none; }
+  main { padding: 16px 12px 110px; }
+  .ov .side { grid-template-columns: 1fr; }
+  .ov .lower { grid-template-columns: 1fr; }
+  .activity { font-size: 21px; }
+  #schematic { min-width: 720px; }
+  .pts { grid-template-columns: 1fr; }
+  table.topics .hide-m { display: none; }
+  .about-btn { bottom: 76px; right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pipe-flow, #fan.spin, .pulse.beat, table.topics tr.flash td.val { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" aria-label="Hoofdmenu">
+    <svg class="mark" viewBox="0 0 36 36" aria-hidden="true">
+      <rect x="1" y="1" width="34" height="34" rx="9" fill="none" stroke="var(--line-2)"/>
+      <path d="M8 22 C 12 12, 16 12, 18 18 S 24 24, 28 14" fill="none" stroke="var(--warm)" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="28" cy="14" r="2.6" fill="var(--warm)"/>
+    </svg>
+    <a href="#overview" data-nav="overview" aria-current="page"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>Nu</a>
+    <a href="#charts" data-nav="charts"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l4-5 3 3 5-6"/></svg>Grafieken</a>
+    <a href="#energy" data-nav="energy"><svg viewBox="0 0 24 24"><path d="M13 3 5 13h6l-1 8 8-10h-6z"/></svg>Energie</a>
+    <a href="#curve" data-nav="curve"><svg viewBox="0 0 24 24"><path d="M4 7h4l8 10h4"/><circle cx="8" cy="7" r="1.8"/><circle cx="16" cy="17" r="1.8"/></svg>Stooklijn</a>
+    <a href="#settings" data-nav="settings"><svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Instellen</a>
+    <a href="#topics" data-nav="topics"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h9"/></svg>Topics</a>
+    <span class="spacer"></span>
+    <a class="desk" href="#log" data-nav="log"><svg viewBox="0 0 24 24"><path d="M6 4h9l3 3v13H6z M9 11h6M9 15h6"/></svg>Logboek</a>
+    <a class="desk" href="#system" data-nav="system"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="10" rx="2"/><path d="M9 19h6M12 15v4"/></svg>Systeem</a>
+  </nav>
+
+  <header class="status" aria-label="Status">
+    <div class="item"><span class="pulse" id="pulse"></span><span class="val">Online</span><span class="tag" id="lastmsg">0 s geleden</span></div>
+    <div class="item"><span class="tag">Modus</span><span class="val" id="st-mode">Verwarmen + SWW</span></div>
+    <div class="item hide-m"><span class="tag">Fout</span><span class="val">geen</span></div>
+    <div class="item hide-m"><span class="tag">HeishaMon</span><span class="val">v4.2.3</span></div>
+    <span class="grow"></span>
+    <button class="chip locked" id="lock" aria-pressed="true">
+      <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Schrijfslot aan</span>
+    </button>
+    <button class="chip hide-m" id="theme" title="Wissel thema">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg><span>Dag</span>
+    </button>
+    <button class="chip" title="Taal">NL</button>
+  </header>
+
+  <main>
+    <!-- ═══ OVERVIEW ═══ -->
+    <section class="screen on" id="screen-overview" aria-label="Nu">
+      <div class="ov">
+        <div class="panel plant">
+          <div class="plant-head">
+            <div class="activity"><span class="dot" id="act-dot"></span><span id="act">Verwarmen</span><small id="act-sub">zone 1 · stooklijn</small></div>
+            <span class="grow"></span>
+            <div class="legend"><span class="num">15°</span><span class="ramp"></span><span class="num">55°</span></div>
+          </div>
+          <div class="schem-scroll"><svg id="schematic" viewBox="0 40 960 345" role="img" aria-label="Live schema van de installatie">
+            <!-- outdoor unit -->
+            <g>
+              <rect class="unit-box" x="30" y="70" width="190" height="220" rx="12"/>
+              <text class="unit-label" x="44" y="92">BUITENUNIT</text>
+              <circle cx="125" cy="175" r="58" fill="none" stroke="var(--line-2)" stroke-width="1.2"/>
+              <circle cx="125" cy="175" r="50" fill="none" stroke="var(--line)" stroke-width="1"/>
+              <g id="fan">
+                <path d="M125 175 C 120 150, 128 130, 140 128 C 142 150, 133 165, 125 175Z" fill="var(--ink-3)"/>
+                <path d="M125 175 C 120 150, 128 130, 140 128 C 142 150, 133 165, 125 175Z" fill="var(--ink-3)" transform="rotate(120 125 175)"/>
+                <path d="M125 175 C 120 150, 128 130, 140 128 C 142 150, 133 165, 125 175Z" fill="var(--ink-3)" transform="rotate(240 125 175)"/>
+                <circle cx="125" cy="175" r="6" fill="var(--panel)" stroke="var(--ink-3)"/>
+              </g>
+              <g class="bubble" transform="translate(64,262)"><circle r="15"/><line class="bl" x1="-15" x2="15" y1="0" y2="0"/><text class="bt" y="-3">TT</text><text class="bt" y="10">OUT</text></g>
+              <text class="reading" x="86" y="262" id="r-out">6.3°</text>
+              <text class="reading-sub" x="86" y="275">BUITEN</text>
+              <g class="bubble" transform="translate(160,262)"><circle r="15"/><line class="bl" x1="-15" x2="15" y1="0" y2="0"/><text class="bt" y="-3">SC</text><text class="bt" y="10">CMP</text></g>
+              <text class="reading" x="182" y="262" id="r-hz" text-anchor="start">34</text>
+              <text class="reading-sub" x="182" y="275">HZ</text>
+            </g>
+            <!-- refrigerant -->
+            <path class="refrig" d="M220 140 H330"/>
+            <path class="refrig" d="M220 220 H330"/>
+            <text class="reading-sub" x="244" y="132">KOUDEMIDDEL</text>
+            <!-- hydro module -->
+            <g>
+              <rect class="unit-box" x="330" y="60" width="170" height="310" rx="12"/>
+              <text class="unit-label" x="344" y="82">BINNENUNIT</text>
+              <path d="M380 110 l30 14 -30 14 30 14 -30 14 30 14 -30 14 30 14" fill="none" stroke="var(--ink-3)" stroke-width="1.4"/>
+              <text class="reading-sub" x="376" y="250">WARMTEWISSELAAR</text>
+            </g>
+            <!-- flow main: hydro → valve -->
+            <path class="pipe-base" id="p-flow" d="M500 110 H600" stroke="var(--warm)"/>
+            <path class="pipe-flow" id="pf-flow" d="M500 110 H600"/>
+            <!-- zone branch -->
+            <g id="br-zone">
+              <path class="pipe-base" id="p-zf" d="M600 110 H860 V130" stroke="var(--warm)"/>
+              <path class="pipe-flow" id="pf-zf" d="M600 110 H860 V130"/>
+              <path class="pipe-base" id="p-zr" d="M900 210 V230 H500" stroke="var(--cool)"/>
+              <path class="pipe-flow" id="pf-zr" d="M900 210 V230 H500"/>
+              <!-- emitter: underfloor loop -->
+              <rect x="840" y="130" width="80" height="80" rx="8" fill="var(--unit)" stroke="var(--line-2)"/>
+              <path d="M852 145 H908 V160 H852 V175 H908 V190 H852 V200" fill="none" stroke="var(--ink-3)" stroke-width="1.4"/>
+              <text class="unit-label" x="872" y="122">ZONE 1</text>
+              <g class="bubble" transform="translate(700,82)"><circle r="15"/><line class="bl" x1="-15" x2="15" y1="0" y2="0"/><text class="bt" y="-3">TT</text><text class="bt" y="10">FLW</text></g>
+              <text class="reading" x="722" y="80" id="r-flow">35.2°</text>
+              <text class="reading-sub" x="722" y="93" id="r-flow-sub">AANVOER · DOEL 35</text>
+              <g class="bubble" transform="translate(700,262)"><circle r="15"/><line class="bl" x1="-15" x2="15" y1="0" y2="0"/><text class="bt" y="-3">TT</text><text class="bt" y="10">RET</text></g>
+              <text class="reading" x="722" y="260" id="r-ret">30.4°</text>
+              <text class="reading-sub" x="722" y="273" id="r-dt">RETOUR · ΔT 4.8 K</text>
+            </g>
+            <!-- pump on return -->
+            <g transform="translate(540,230)">
+              <circle r="14" fill="var(--panel)" stroke="var(--ink-2)" stroke-width="1.4"/>
+              <path d="M6 -6 L-8 0 L6 6" fill="none" stroke="var(--ink-2)" stroke-width="1.4" stroke-linejoin="round"/>
+            </g>
+            <text class="reading" x="520" y="206" id="r-pump" font-size="13">14.8</text>
+            <text class="reading-sub" x="566" y="206">L/MIN</text>
+            <!-- DHW branch -->
+            <g id="br-dhw">
+              <path class="pipe-base" id="p-df" d="M600 110 V290 H780" stroke="var(--pipe-idle)"/>
+              <path class="pipe-flow off" id="pf-df" d="M600 110 V290 H780"/>
+              <path class="pipe-base" id="p-dr" d="M780 350 H500" stroke="var(--pipe-idle)"/>
+              <path class="pipe-flow off" id="pf-dr" d="M780 350 H500"/>
+              <defs>
+                <linearGradient id="tankfill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" id="tank-top" stop-color="var(--hot)"/>
+                  <stop offset="1" id="tank-bot" stop-color="var(--warm)"/>
+                </linearGradient>
+                <clipPath id="tankclip"><rect x="782" y="262" width="52" height="110" rx="24"/></clipPath>
+              </defs>
+              <rect x="782" y="262" width="52" height="110" rx="24" fill="url(#tankfill)" opacity=".28" clip-path="url(#tankclip)"/>
+              <rect x="782" y="262" width="52" height="110" rx="24" fill="none" stroke="var(--line-2)" stroke-width="1.4"/>
+              <path d="M780 290 C 815 296, 795 306, 815 314 S 795 328, 815 336 S 800 346, 780 350" fill="none" stroke="var(--ink-3)" stroke-width="1.4"/>
+              <text class="unit-label" x="848" y="290">SWW-BOILER</text>
+              <text class="reading" x="848" y="314" id="r-dhw">48.6°</text>
+              <text class="reading-sub" x="848" y="327" id="r-dhw-sub">DOEL 52</text>
+            </g>
+            <!-- 3-way valve -->
+            <g transform="translate(600,110)">
+              <path d="M-11 -9 L0 0 L-11 9 Z M11 -9 L0 0 L11 9 Z" fill="var(--panel)" stroke="var(--ink-2)" stroke-width="1.4"/>
+              <path d="M-8 11 L0 0 L8 11 Z" fill="var(--panel)" stroke="var(--ink-2)" stroke-width="1.4"/>
+            </g>
+            <text class="reading-sub" x="584" y="92">3-WEG</text>
+          </svg></div>
+        </div>
+
+        <aside class="side">
+          <div class="panel">
+            <div class="now">
+              <div class="tag">Rendement nu</div>
+              <div class="cop">
+                <span class="big num" id="cop">4.4</span>
+                <span class="lbl"><span>COP</span><span class="num" id="cop-sub">2.71 kW uit / 0.62 kW in</span></span>
+              </div>
+              <div class="power-bar" aria-hidden="true"><i id="pb-in" style="background:var(--ink-2)"></i><i id="pb-amb" style="background:var(--cold)"></i></div>
+              <div class="power-note"><span>stroom</span><span>uit buitenlucht</span></div>
+            </div>
+            <div class="kv">
+              <div><div class="tag">Compressor</div><div class="v" id="kv-hz">34<small>Hz</small></div></div>
+              <div><div class="tag">Pomp</div><div class="v" id="kv-pump">14.8<small>l/min</small></div></div>
+              <div><div class="tag">Vandaag</div><div class="v">7.9<small>kWh in</small></div></div>
+              <div><div class="tag">Vandaag COP</div><div class="v">4.1</div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h2>Bediening</h2><span class="tag" id="ctl-state">alleen lezen</span></div>
+            <div class="ctl">
+              <div class="ctl-row">
+                <div class="l"><span>Warmtepomp</span><span>aan sinds 06:12</span></div>
+                <button class="toggle" role="switch" aria-checked="true" aria-label="Warmtepomp aan of uit" data-cmd="power"></button>
+              </div>
+              <div class="ctl-row" style="flex-direction:column;align-items:stretch">
+                <div class="l"><span>Bedrijfsmodus</span></div>
+                <div class="seg" id="modeseg" role="group" aria-label="Bedrijfsmodus">
+                  <button data-mode="Verwarmen">Verw.</button>
+                  <button data-mode="Verwarmen + SWW" aria-pressed="true">Verw.+SWW</button>
+                  <button data-mode="SWW">SWW</button>
+                  <button data-mode="Koelen">Koel</button>
+                  <button data-mode="Auto">Auto</button>
+                </div>
+              </div>
+              <div class="ctl-row">
+                <div class="l"><span>Zone 1 · verschuiving</span><span>stooklijnmodus, −5…+5</span></div>
+                <div class="stepper" id="shift" data-val="1" data-min="-5" data-max="5" data-fmt="shift">
+                  <button aria-label="Lager">−</button><output>+1 K</output><button aria-label="Hoger">+</button>
+                </div>
+              </div>
+              <div class="ctl-row">
+                <div class="l"><span>Warm water</span><span>doeltemperatuur</span></div>
+                <div class="stepper" id="dhwset" data-val="52" data-min="40" data-max="65" data-fmt="temp">
+                  <button aria-label="Lager">−</button><output>52 °C</output><button aria-label="Hoger">+</button>
+                </div>
+              </div>
+              <div class="ctl-row">
+                <div class="l"><span>Stille modus</span></div>
+                <div class="seg" id="quietseg" role="group" aria-label="Stille modus">
+                  <button aria-pressed="true">Uit</button><button>1</button><button>2</button><button>3</button>
+                </div>
+              </div>
+            </div>
+            <div class="tray" id="tray" aria-live="polite">
+              <ul id="tray-list"></ul>
+              <div class="acts"><button class="btn primary" id="apply">Toepassen</button><button class="btn" id="discard">Verwerpen</button></div>
+              <div class="lockhint" id="lockhint">Zet het schrijfslot uit om te kunnen toepassen.</div>
+            </div>
+          </div>
+        </aside>
+
+        <div class="panel timeline">
+          <div class="panel-head tl-head">
+            <h2>Afgelopen 24 uur</h2>
+            <div class="tl-read" id="tl-read"></div>
+          </div>
+          <div class="panel-body" style="padding:8px 8px 4px">
+            <svg id="timeline" viewBox="0 0 1000 250" role="img" aria-label="Tijdlijn van de afgelopen 24 uur"></svg>
+          </div>
+        </div>
+
+        <div class="lower">
+          <div class="panel">
+            <div class="panel-head"><h2>Stooklijn zone 1</h2><a href="#curve" class="tag" style="text-decoration:none">openen →</a></div>
+            <div class="panel-body" style="padding:8px 12px"><svg id="minicurve" viewBox="0 0 680 250"></svg></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Gebeurtenissen</h2><a href="#log" class="tag" style="text-decoration:none">logboek →</a></div>
+            <ul class="events">
+              <li><time>14:02</time><span class="k" style="background:var(--cold)"></span><div>Ontdooien, 4 min<small>aanvoer zakte naar 22 °C, herstel in 9 min</small></div></li>
+              <li><time>11:15</time><span class="k" style="background:var(--ok)"></span><div>Verschuiving zone 1 → +1 K bevestigd<small><code>SetZ1HeatRequestTemperature = 1</code> · terug­gelezen na 6 s</small></div></li>
+              <li><time>06:00</time><span class="k" style="background:var(--hot)"></span><div>Warmwaterrun 41 → 52 °C<small>48 min · 1.9 kWh in</small></div></li>
+              <li><time>03:41</time><span class="k" style="background:var(--ink-3)"></span><div>Gat in data, 3 min<small>geen berichten van HeishaMon</small></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CURVE ═══ -->
+    <section class="screen" id="screen-curve" aria-label="Stooklijn">
+      <div class="screen-head"><h1>Stooklijn</h1><p>Sleep de twee punten, of typ waarden. Er gaat pas iets naar de warmtepomp als je op Toepassen drukt.</p></div>
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true">Zone 1 · verwarmen <span class="badge">stooklijn</span></button>
+        <button role="tab" aria-selected="false">Zone 1 · koelen <span class="badge">niet actief</span></button>
+        <button role="tab" aria-selected="false">Zone 2 · verwarmen <span class="badge">niet actief</span></button>
+      </div>
+      <div class="cv">
+        <div class="main-col">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>Lijn en gemeten data, laatste 30 dagen</h2>
+              <div class="colorby seg" role="group" aria-label="Kleur punten op">
+                <button aria-pressed="true">water − doel</button><button>COP</button><button>voor/na wijziging</button>
+              </div>
+            </div>
+            <div class="panel-body" style="padding:8px 8px 0">
+              <svg id="curvechart" viewBox="0 0 760 400" role="img" aria-label="Stooklijn met twee versleepbare punten"></svg>
+            </div>
+            <div class="panel-body" style="padding:0 8px 8px">
+              <svg id="histo" viewBox="0 0 760 84" aria-label="Uren per buitentemperatuurband"></svg>
+            </div>
+          </div>
+        </div>
+        <div class="side-col">
+          <div class="panel">
+            <div class="panel-head"><h2>Punten</h2><span class="tag">1 °C stappen</span></div>
+            <div class="panel-body">
+              <div class="pts">
+                <div class="pt"><h3><i style="background:var(--cold)"></i>Koude kant</h3>
+                  <label>Buiten <input type="number" id="in-ol" step="1"></label>
+                  <label>Water <input type="number" id="in-th" step="1"></label></div>
+                <div class="pt"><h3><i style="background:var(--warm)"></i>Warme kant</h3>
+                  <label>Buiten <input type="number" id="in-oh" step="1"></label>
+                  <label>Water <input type="number" id="in-tl" step="1"></label></div>
+              </div>
+              <div class="seg" style="margin-top:12px;justify-content:space-between" role="group" aria-label="Helling en niveau">
+                <button data-sl="level:-1">Niveau −1</button><button data-sl="level:1">Niveau +1</button><button data-sl="slope:-1">Vlakker</button><button data-sl="slope:1">Steiler</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Concept</h2><span class="tag" id="draftcount">geen wijzigingen</span></div>
+            <div class="panel-body">
+              <div class="diff" id="diff"></div>
+              <div class="payload" id="payload" hidden></div>
+              <div class="acts" style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn primary" id="c-apply" disabled>Toepassen</button>
+                <button class="btn" id="c-reset" disabled>Terugzetten</button>
+              </div>
+              <p class="note" style="margin:12px 0 0"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg><span>Geef een wijziging 24 tot 48 uur voordat je beoordeelt of hij werkt. Vloerverwarming reageert traag.</span></p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Eerdere wijzigingen</h2></div>
+            <div class="panel-body" style="padding:4px 16px">
+              <ul class="changelog">
+                <li><div>Koude kant 47 → 45 °C<div class="when">3 okt · 21:40</div></div><button class="btn">Terugdraaien</button></li>
+                <li><div>Warme kant buiten 18 → 16 °C<div class="when">12 sep · 09:02</div></div><button class="btn">Terugdraaien</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TOPICS ═══ -->
+    <section class="screen" id="screen-topics" aria-label="Topics">
+      <div class="screen-head"><h1>Alle topics</h1><p id="tp-count"></p></div>
+      <div class="panel">
+        <div class="tp-tools">
+          <input type="search" id="tp-filter" placeholder="Filter, bijv. temp, main/, 1wire" aria-label="Filter topics">
+          <div class="seg" role="group" aria-label="Toon"><button aria-pressed="true">Zichtbaar</button><button>Verborgen</button><button>Genegeerd</button></div>
+        </div>
+        <table class="topics">
+          <thead><tr><th>Topic</th><th style="text-align:right">Waarde</th><th class="hide-m">24 uur</th><th>Gewijzigd</th><th class="hide-m">Weergave</th></tr></thead>
+          <tbody id="tp-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-stub" aria-label="Niet uitgewerkt">
+      <div class="panel stub"><p><b id="stub-name"></b> is niet uitgewerkt in deze mockup. Het volgt dezelfde tokens: paneel, tags in Martian Mono, temperatuurkleuren alleen voor temperatuur, en concept → toepassen voor elk commando.</p></div>
+    </section>
+  </main>
+</div>
+
+<button class="about-btn" id="about-open">Over dit voorstel</button>
+<dialog id="about">
+  <div class="dlg-body">
+    <h2>Voorstel: het dashboard als installatieschema</h2>
+    <p>Het huidige dashboard is een rij losse tegels. Dat laat waarden zien, maar niet hoe ze samenhangen. Dit voorstel draait het om: het hart van het scherm is een live schema van je eigen installatie, zoals een installateur het zou tekenen.</p>
+
+    <h3>Uitgangspunten</h3>
+    <ul>
+      <li><b>Schema als startscherm.</b> Buitenunit, binnenunit, 3-wegklep, zones en boiler, met meetpunten als instrumentlabels (TT, SC) zoals op een technische tekening. Leidingen kleuren met hun temperatuur en het stromingspatroon beweegt met het pompdebiet. Het schema wordt opgebouwd uit het installatieprofiel: geen boiler, dan geen boilertak; twee zones, dan twee afgiftes.</li>
+      <li><b>Kleur betekent temperatuur, en verder bijna niets.</b> Eén koud-naar-warm schaal voor alles wat een temperatuur is. Geel is alleen voor een concept dat nog niet verstuurd is, groen alleen voor bevestigd.</li>
+      <li><b>Getallen in een eigen letter.</b> Martian Mono met vaste cijferbreedte voor alle meetwaarden, zodat ze niet verspringen als ze live updaten. Instrument Sans voor de rest.</li>
+      <li><b>Één tijdlijn in plaats van zes sparklines.</b> Activiteit als kleurband (verwarmen, SWW, ontdooien), temperaturen als lijnen, verbruik als staafjes, met één cursor die alles tegelijk uitleest.</li>
+      <li><b>Commando's als concept.</b> Elke wijziging komt eerst in een gele lade met het exacte commando. Toepassen stuurt, de status loopt van verstuurd naar teruggelezen. Het schrijfslot staat zichtbaar in de statusbalk.</li>
+      <li><b>Stooklijn met echte data.</b> Versleepbare punten met spiegelinvoer, de huidige lijn als spook, gemeten kwartiergemiddelden als puntenwolk, mediaan per 2 °C-band en een urenhistogram.</li>
+      <li><b>Dag en nacht.</b> Beide thema's zijn volwaardig. Op de telefoon wordt de zijbalk een tabbalk en stapelt alles onder het schema.</li>
+    </ul>
+
+    <h3>Palet</h3>
+    <div class="swatches">
+      <span><i style="background:#12181c"></i>grond #12181c</span>
+      <span><i style="background:#182026"></i>paneel #182026</span>
+      <span><i style="background:#4fa3e0"></i>koud #4fa3e0</span>
+      <span><i style="background:#f0a04b"></i>warm #f0a04b</span>
+      <span><i style="background:#e5533d"></i>heet #e5533d</span>
+      <span><i style="background:#e8c25a"></i>concept #e8c25a</span>
+      <span><i style="background:#6cc59a"></i>bevestigd #6cc59a</span>
+    </div>
+
+    <h3>Probeer de toestanden</h3>
+    <p>De mockup draait op verzonnen data. Kies een toestand om te zien hoe het schema reageert.</p>
+    <div class="demo seg" role="group" aria-label="Demo-toestand" id="scen">
+      <button data-scen="heat" aria-pressed="true">Verwarmen</button>
+      <button data-scen="dhw">Warmwaterrun</button>
+      <button data-scen="defrost">Ontdooien</button>
+      <button data-scen="idle">Stand-by</button>
+    </div>
+    <div class="demo"><label><input type="checkbox" id="has-dhw" checked> Profiel heeft een SWW-boiler</label></div>
+
+    <h3>Wat dit vraagt van de code</h3>
+    <ul>
+      <li>Nieuwe tokens in <code>app.css</code>, en de schermen gaan erop over. Geen nieuwe dependencies, alleen twee webfonts (lokaal meeleveren in de image).</li>
+      <li>Een nieuwe component voor het schema die alleen uit het profiel en de live state leest.</li>
+      <li>De tijdlijn kan op uPlot blijven draaien, met een eigen plugin voor de activiteitsband.</li>
+    </ul>
+  </div>
+  <div class="dlg-foot"><button class="btn primary" id="about-close">Sluiten</button></div>
+</dialog>
+
+<script>
+// ── Helpers ────────────────────────────────────────────
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const NS = 'http://www.w3.org/2000/svg';
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = (v, d = 1) => v.toFixed(d);
+function el(tag, attrs = {}, parent) {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function hex2rgb(h) { h = h.replace('#', ''); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); }
+const RAMP = [[15, '#4fa3e0'], [28, '#8fb8c9'], [38, '#f0a04b'], [55, '#e5533d']];
+function tcol(t) {
+  if (t <= RAMP[0][0]) return RAMP[0][1];
+  for (let i = 1; i < RAMP.length; i++) {
+    if (t <= RAMP[i][0]) {
+      const [t0, c0] = RAMP[i - 1], [t1, c1] = RAMP[i];
+      const f = (t - t0) / (t1 - t0), a = hex2rgb(c0), b = hex2rgb(c1);
+      return `rgb(${a.map((x, j) => Math.round(x + (b[j] - x) * f)).join(',')})`;
+    }
+  }
+  return RAMP[RAMP.length - 1][1];
+}
+
+// ── Navigation ─────────────────────────────────────────
+const NAMES = { charts: 'Grafieken', energy: 'Energie', settings: 'Instellen', log: 'Logboek', system: 'Systeem' };
+function route() {
+  const id = location.hash.slice(1) || 'overview';
+  $$('.screen').forEach((s) => s.classList.remove('on'));
+  const target = $('#screen-' + id);
+  if (target) target.classList.add('on');
+  else { $('#screen-stub').classList.add('on'); $('#stub-name').textContent = NAMES[id] || id; }
+  $$('.rail a').forEach((a) => { if (a.dataset.nav === id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  if (id === 'curve') drawCurve();
+  window.scrollTo(0, 0);
+}
+addEventListener('hashchange', route);
+
+// ── Theme, lock, dialog ────────────────────────────────
+$('#theme').onclick = () => {
+  const day = document.documentElement.dataset.theme === 'night';
+  document.documentElement.dataset.theme = day ? 'day' : 'night';
+  $('#theme span').textContent = day ? 'Nacht' : 'Dag';
+  redrawAll();
+};
+let locked = true;
+$('#lock').onclick = () => {
+  locked = !locked;
+  const b = $('#lock');
+  b.classList.toggle('locked', locked); b.classList.toggle('unlocked', !locked);
+  b.setAttribute('aria-pressed', locked);
+  $('span', b).textContent = locked ? 'Schrijfslot aan' : 'Schrijfslot uit';
+  $('#ctl-state').textContent = locked ? 'alleen lezen' : 'schrijven toegestaan';
+  updateTray();
+};
+$('#about-open').onclick = () => $('#about').showModal();
+$('#about-close').onclick = () => $('#about').close();
+
+// ── Live simulation ────────────────────────────────────
+const S = { out: 6.3, flow: 35.2, ret: 30.4, target: 35, hz: 34, pin: 0.62, pout: 2.71, pump: 14.8, dhw: 48.6, dhwT: 52, scen: 'heat', hasDhw: true };
+const SCEN = {
+  heat:    { act: 'Verwarmen', sub: 'zone 1 · stooklijn', dot: 'var(--warm)', valve: 'zone', fan: true },
+  dhw:     { act: 'Warm water', sub: 'boiler 48 → 52 °C', dot: 'var(--hot)', valve: 'dhw', fan: true },
+  defrost: { act: 'Ontdooien', sub: 'buitenunit, ca. 4 min', dot: 'var(--cold)', valve: 'zone', fan: false },
+  idle:    { act: 'Stand-by', sub: 'compressor uit · doel bereikt', dot: 'var(--ink-3)', valve: 'zone', fan: false },
+};
+let lastMsg = 0;
+function tick() {
+  const n = () => (Math.random() - 0.5);
+  S.out = clamp(S.out + n() * 0.1, 3, 10);
+  if (S.scen === 'heat') { S.target = 35; S.flow += (S.target + n() - S.flow) * 0.3; S.ret = S.flow - 4.6 + n() * 0.4; S.hz = Math.round(clamp(34 + n() * 4, 28, 40)); S.pin = 0.6 + n() * 0.06; S.pout = S.pin * (4.3 + n() * 0.3); S.pump = 14.8 + n() * 0.3; }
+  if (S.scen === 'dhw') { S.target = 54; S.flow += (54 - S.flow) * 0.25; S.ret = S.flow - 5.4 + n() * 0.4; S.hz = Math.round(58 + n() * 4); S.pin = 1.45 + n() * 0.1; S.pout = S.pin * (2.6 + n() * 0.2); S.pump = 17.2 + n() * 0.3; S.dhw = Math.min(52, S.dhw + 0.15); }
+  if (S.scen === 'defrost') { S.flow += (22 - S.flow) * 0.3; S.ret = S.flow + 2.5; S.hz = Math.round(70 + n() * 3); S.pin = 1.1 + n() * 0.1; S.pout = 0; S.pump = 14.5; }
+  if (S.scen === 'idle') { S.flow += (29 - S.flow) * 0.15; S.ret = S.flow - 0.6; S.hz = 0; S.pin = 0.02; S.pout = 0; S.pump = 0; }
+  if (S.scen !== 'dhw') S.dhw = Math.max(44, S.dhw - 0.01);
+  lastMsg = 0;
+  const p = $('#pulse'); p.classList.remove('beat'); void p.offsetWidth; p.classList.add('beat');
+  render();
+}
+function render() {
+  const sc = SCEN[S.scen];
+  $('#act').textContent = sc.act; $('#act-sub').textContent = sc.sub; $('#act-dot').style.background = sc.dot;
+  $('#r-out').textContent = fmt(S.out) + '°';
+  $('#r-hz').textContent = S.hz;
+  $('#r-flow').textContent = fmt(S.flow) + '°';
+  $('#r-flow-sub').textContent = `AANVOER · DOEL ${S.target}`;
+  $('#r-ret').textContent = fmt(S.ret) + '°';
+  $('#r-dt').textContent = `RETOUR · ΔT ${fmt(S.flow - S.ret)} K`;
+  $('#r-pump').textContent = fmt(S.pump);
+  $('#r-dhw').textContent = fmt(S.dhw) + '°';
+  $('#r-dhw-sub').textContent = `DOEL ${S.dhwT}`;
+  // pipes
+  const toZone = sc.valve === 'zone', running = S.pump > 0;
+  const fc = tcol(S.flow), rc = tcol(S.ret), idle = css('--pipe-idle');
+  $('#p-flow').setAttribute('stroke', running ? fc : idle);
+  $('#p-zf').setAttribute('stroke', toZone && running ? fc : idle);
+  $('#p-zr').setAttribute('stroke', toZone && running ? rc : idle);
+  $('#p-df').setAttribute('stroke', !toZone && running ? fc : idle);
+  $('#p-dr').setAttribute('stroke', !toZone && running ? rc : idle);
+  $('#pf-flow').classList.toggle('off', !running);
+  ['#pf-zf', '#pf-zr'].forEach((s) => $(s).classList.toggle('off', !(toZone && running)));
+  ['#pf-df', '#pf-dr'].forEach((s) => $(s).classList.toggle('off', !(!toZone && running)));
+  $('#br-dhw').classList.toggle('branch-off', toZone);
+  $('#br-zone').classList.toggle('branch-off', !toZone);
+  $('#br-dhw').style.display = S.hasDhw ? '' : 'none';
+  document.documentElement.style.setProperty('--flow-speed', running ? (18 / S.pump).toFixed(2) + 's' : '0s');
+  $('#tank-top').setAttribute('stop-color', tcol(S.dhw + 2));
+  $('#tank-bot').setAttribute('stop-color', tcol(S.dhw - 14));
+  const fan = $('#fan'); fan.classList.toggle('spin', sc.fan);
+  document.documentElement.style.setProperty('--fan-speed', (60 / Math.max(S.hz, 20)).toFixed(2) + 's');
+  // now panel
+  const cop = S.pin > 0.1 && S.pout > 0 ? S.pout / S.pin : null;
+  $('#cop').textContent = cop ? fmt(cop) : '—';
+  $('#cop-sub').textContent = `${fmt(S.pout, 2)} kW uit / ${fmt(S.pin, 2)} kW in`;
+  const tot = Math.max(S.pout, S.pin) || 1;
+  $('#pb-in').style.width = (S.pin / tot * 100) + '%';
+  $('#pb-amb').style.width = (Math.max(0, S.pout - S.pin) / tot * 100) + '%';
+  $('#kv-hz').innerHTML = `${S.hz}<small>Hz</small>`;
+  $('#kv-pump').innerHTML = `${fmt(S.pump)}<small>l/min</small>`;
+  drawMini();
+  tickTopics();
+}
+setInterval(tick, 3000);
+setInterval(() => { lastMsg++; $('#lastmsg').textContent = `${lastMsg} s geleden`; }, 1000);
+$$('#scen button').forEach((b) => b.onclick = () => {
+  $$('#scen button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+  S.scen = b.dataset.scen; tick();
+});
+$('#has-dhw').onchange = (e) => { S.hasDhw = e.target.checked; render(); };
+
+// ── Controls → draft tray ──────────────────────────────
+const committed = { mode: 'Verwarmen + SWW', shift: 1, dhwset: 52, quiet: 'Uit', power: true };
+const draft = { ...committed };
+const CMD = {
+  mode: (v) => ['Bedrijfsmodus', v, `SetOperationMode = ${['Verwarmen', 'Koelen', 'Auto', 'SWW', 'Verwarmen + SWW'].indexOf(v)}`],
+  shift: (v) => ['Verschuiving zone 1', (v > 0 ? '+' : '') + v + ' K', `SetZ1HeatRequestTemperature = ${v}`],
+  dhwset: (v) => ['Warmwater doel', v + ' °C', `SetDHWTemp = ${v}`],
+  quiet: (v) => ['Stille modus', v, `SetQuietMode = ${v === 'Uit' ? 0 : v}`],
+  power: (v) => ['Warmtepomp', v ? 'aan' : 'uit', `SetHeatpump = ${v ? 1 : 0}`],
+};
+function updateTray() {
+  const keys = Object.keys(draft).filter((k) => draft[k] !== committed[k]);
+  $('#tray').classList.toggle('show', keys.length > 0);
+  $('#tray-list').innerHTML = keys.map((k) => { const [l, v, c] = CMD[k](draft[k]); return `<li><span>${l} → <b>${v}</b></span><code>${c}</code></li>`; }).join('');
+  $('#apply').disabled = locked;
+  $('#apply').textContent = keys.length > 1 ? `${keys.length} wijzigingen toepassen` : 'Toepassen';
+  $('#lockhint').style.display = locked ? '' : 'none';
+  $$('#modeseg button').forEach((b) => { b.setAttribute('aria-pressed', b.dataset.mode === committed.mode); b.classList.toggle('draft', b.dataset.mode === draft.mode && draft.mode !== committed.mode); });
+  for (const id of ['shift', 'dhwset']) {
+    const st = $('#' + id), v = draft[id];
+    st.classList.toggle('draft', v !== committed[id]);
+    $('output', st).textContent = st.dataset.fmt === 'shift' ? (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v) + ' K' : v + ' °C';
+  }
+}
+$$('.stepper').forEach((st) => {
+  const [dn, up] = $$('button', st);
+  const step = (d) => { const id = st.id; draft[id] = clamp(draft[id] + d, +st.dataset.min, +st.dataset.max); updateTray(); };
+  dn.onclick = () => step(-1); up.onclick = () => step(1);
+});
+$$('#modeseg button').forEach((b) => b.onclick = () => { draft.mode = b.dataset.mode; updateTray(); });
+$$('#quietseg button').forEach((b) => b.onclick = () => { draft.quiet = b.textContent; $$('#quietseg button').forEach((x) => x.setAttribute('aria-pressed', x === b)); updateTray(); });
+$('[data-cmd="power"]').onclick = (e) => { draft.power = !draft.power; e.currentTarget.setAttribute('aria-checked', draft.power); updateTray(); };
+$('#discard').onclick = () => {
+  Object.assign(draft, committed);
+  $$('#quietseg button').forEach((x) => x.setAttribute('aria-pressed', x.textContent === committed.quiet));
+  $('[data-cmd="power"]').setAttribute('aria-checked', committed.power);
+  updateTray();
+};
+$('#apply').onclick = () => {
+  const items = $$('#tray-list li');
+  items.forEach((li) => li.insertAdjacentHTML('beforeend', '<span class="tag" style="color:var(--pending)">verstuurd…</span>'));
+  $('#apply').disabled = true;
+  setTimeout(() => {
+    items.forEach((li) => { const t = $('.tag', li); t.textContent = 'teruggelezen ✓'; t.style.color = 'var(--ok)'; });
+    setTimeout(() => { Object.assign(committed, draft); updateTray(); }, 1400);
+  }, 1800);
+};
+updateTray();
+
+// ── 24h timeline ───────────────────────────────────────
+const H = 288; // 5-min samples
+const now = new Date(); now.setSeconds(0, 0);
+const t0 = now.getTime() - 24 * 3600e3;
+function curveTarget(o, c = curve) {
+  if (o <= c.ol) return c.th;
+  if (o >= c.oh) return c.tl;
+  return c.th + (c.tl - c.th) * (o - c.ol) / (c.oh - c.ol);
+}
+let curve = { ol: -10, th: 45, oh: 16, tl: 26 };
+const committedCurve = { ...curve };
+const series = [];
+(() => {
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647) - 0.5;
+  let flow = 33;
+  for (let i = 0; i < H; i++) {
+    const t = t0 + i * 300e3, h = new Date(t).getHours() + new Date(t).getMinutes() / 60;
+    const out = 5.5 + 3.2 * Math.sin((h - 9) / 24 * 2 * Math.PI) + rnd() * 0.4;
+    let act = 'heat';
+    if ((h >= 6 && h < 6.8) || (h >= 18 && h < 18.6)) act = 'dhw';
+    else if ([2.2, 4.6, 14.0].some((d) => h >= d && h < d + 0.08)) act = 'defrost';
+    else if ((h >= 12.5 && h < 13.6) || (h >= 15.4 && h < 16.2)) act = 'idle';
+    const tgt = act === 'dhw' ? 54 : curveTarget(out) + 1;
+    const goal = act === 'defrost' ? 22 : act === 'idle' ? 28 : tgt;
+    flow += (goal - flow) * 0.45 + rnd() * 0.5;
+    const ret = act === 'idle' ? flow - 0.5 : flow - (act === 'dhw' ? 5.5 : 4.6) + rnd() * 0.3;
+    const pin = act === 'idle' ? 0.02 : act === 'dhw' ? 1.4 + rnd() * 0.1 : act === 'defrost' ? 1.1 : clamp(0.45 + (8 - out) * 0.05 + rnd() * 0.08, 0.3, 1.2);
+    series.push({ t, out, flow, ret, tgt: act === 'heat' ? curveTarget(out) + 1 : null, act, pin });
+  }
+})();
+const ACTC = { heat: '--warm', dhw: '--hot', defrost: '--cold', idle: '--line-2' };
+const ACTN = { heat: 'verwarmen', dhw: 'warm water', defrost: 'ontdooien', idle: 'stand-by' };
+function drawTimeline() {
+  const svg = $('#timeline'); svg.innerHTML = '';
+  const L = 34, R = 992, W = R - L;
+  const x = (i) => L + (i / (H - 1)) * W;
+  const band = { y: 6, h: 12 }, tc = { y: 32, h: 150 }, pw = { y: 196, h: 36 };
+  const ty = (v) => tc.y + tc.h - (v - 0) / 60 * tc.h;
+  const line = css('--line');
+  // activity band
+  let start = 0;
+  for (let i = 1; i <= H; i++) {
+    if (i === H || series[i].act !== series[start].act) {
+      el('rect', { x: x(start), y: band.y, width: Math.max(1, x(i - 1) - x(start) + W / H), height: band.h, rx: 2, fill: css(ACTC[series[start].act]) }, svg);
+      start = i;
+    }
+  }
+  // grid
+  for (const v of [0, 20, 40, 60]) {
+    el('line', { x1: L, x2: R, y1: ty(v), y2: ty(v), stroke: line, 'stroke-width': 1 }, svg);
+    el('text', { x: L - 6, y: ty(v) + 3, 'text-anchor': 'end' }, svg).textContent = v + '°';
+  }
+  for (let i = 0; i < H; i++) {
+    const d = new Date(series[i].t);
+    if (d.getMinutes() > 4 || d.getHours() % 3) continue;
+    el('text', { x: x(i), y: 248, 'text-anchor': 'middle' }, svg).textContent = String(d.getHours()).padStart(2, '0') + ':00';
+  }
+  const path = (key, col, w = 1.6, dash) => {
+    let d = '', pen = false;
+    series.forEach((s, i) => { if (s[key] == null) { pen = false; return; } d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + ty(s[key]).toFixed(1); pen = true; });
+    el('path', { d, fill: 'none', stroke: col, 'stroke-width': w, 'stroke-linejoin': 'round', ...(dash ? { 'stroke-dasharray': dash } : {}) }, svg);
+  };
+  path('tgt', css('--ink-3'), 1.2, '3 3');
+  path('out', css('--cold'), 1.6);
+  path('ret', css('--cool'), 1.4);
+  path('flow', css('--warm'), 1.9);
+  // power bars
+  series.forEach((s, i) => { const h = s.pin / 1.6 * pw.h; el('rect', { x: x(i) - 1, y: pw.y + pw.h - h, width: Math.max(1.4, W / H - 0.6), height: h, fill: css('--ink-3') }, svg); });
+  el('text', { x: L - 6, y: pw.y + 10, 'text-anchor': 'end' }, svg).textContent = 'kW';
+  // cursor
+  const cur = el('line', { y1: band.y, y2: pw.y + pw.h, stroke: css('--ink-2'), 'stroke-width': 1, opacity: 0 }, svg);
+  const hit = el('rect', { x: L, y: 0, width: W, height: 240, fill: 'transparent' }, svg);
+  const read = (i) => {
+    const s = series[i], d = new Date(s.t);
+    const tt = i === H - 1 ? 'nu' : String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    $('#tl-read').innerHTML = `<span><b>${tt}</b></span><span><i style="background:${css(ACTC[s.act])}"></i>${ACTN[s.act]}</span>` +
+      `<span><i style="background:var(--warm)"></i>aanvoer <b>${fmt(s.flow)}°</b></span><span><i style="background:var(--cool)"></i>retour <b>${fmt(s.ret)}°</b></span>` +
+      `<span><i style="background:var(--cold)"></i>buiten <b>${fmt(s.out)}°</b></span><span><i style="background:var(--ink-3)"></i>in <b>${fmt(s.pin, 2)} kW</b></span>`;
+  };
+  const move = (e) => {
+    const r = svg.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width * 1000;
+    const i = clamp(Math.round((px - L) / W * (H - 1)), 0, H - 1);
+    cur.setAttribute('x1', x(i)); cur.setAttribute('x2', x(i)); cur.setAttribute('opacity', 1);
+    read(i);
+  };
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerleave', () => { cur.setAttribute('opacity', 0); read(H - 1); });
+  read(H - 1);
+}
+
+// ── Curve geometry (shared) ────────────────────────────
+function curveFrame(svg, box, xr, yr) {
+  const X = (v) => box.l + (v - xr[0]) / (xr[1] - xr[0]) * (box.r - box.l);
+  const Y = (v) => box.b - (v - yr[0]) / (yr[1] - yr[0]) * (box.b - box.t);
+  const line = css('--line');
+  for (let v = xr[0]; v <= xr[1]; v += 5) {
+    el('line', { x1: X(v), x2: X(v), y1: box.t, y2: box.b, stroke: line }, svg);
+    el('text', { x: X(v), y: box.b + 16, 'text-anchor': 'middle' }, svg).textContent = v + '°';
+  }
+  for (let v = yr[0]; v <= yr[1]; v += 10) {
+    el('line', { x1: box.l, x2: box.r, y1: Y(v), y2: Y(v), stroke: line }, svg);
+    el('text', { x: box.l - 8, y: Y(v) + 3, 'text-anchor': 'end' }, svg).textContent = v + '°';
+  }
+  return { X, Y };
+}
+function curvePath(c, X, Y, xr) {
+  return `M${X(xr[0])} ${Y(c.th)} L${X(c.ol)} ${Y(c.th)} L${X(c.oh)} ${Y(c.tl)} L${X(xr[1])} ${Y(c.tl)}`;
+}
+function drawMini() {
+  const svg = $('#minicurve'); if (!svg) return; svg.innerHTML = '';
+  const xr = [-15, 20], yr = [20, 50];
+  const { X, Y } = curveFrame(svg, { l: 34, r: 670, t: 10, b: 214 }, xr, yr);
+  el('path', { d: curvePath(committedCurve, X, Y, xr), fill: 'none', stroke: css('--ink-2'), 'stroke-width': 2 }, svg);
+  const shifted = { ...committedCurve, th: committedCurve.th + committed.shift, tl: committedCurve.tl + committed.shift };
+  el('path', { d: curvePath(shifted, X, Y, xr), fill: 'none', stroke: css('--warm'), 'stroke-width': 1.4, 'stroke-dasharray': '4 4' }, svg);
+  const tx = X(S.out);
+  el('line', { x1: tx, x2: tx, y1: 10, y2: 214, stroke: css('--ink-3'), 'stroke-dasharray': '2 3' }, svg);
+  el('circle', { cx: tx, cy: Y(curveTarget(S.out, shifted)), r: 5, fill: 'none', stroke: css('--warm'), 'stroke-width': 2 }, svg);
+  el('circle', { cx: tx, cy: Y(clamp(S.flow, yr[0], yr[1])), r: 4, fill: tcol(S.flow) }, svg);
+  el('text', { x: tx + 9, y: Y(curveTarget(S.out, shifted)) - 8 }, svg).textContent = `doel ${fmt(curveTarget(S.out, shifted))}° · gemeten ${fmt(S.flow)}°`;
+  el('text', { x: 670, y: 246, 'text-anchor': 'end' }, svg).textContent = 'buiten °C →';
+  el('text', { x: 40, y: 22 }, svg).textContent = 'lijn + verschuiving +' + committed.shift;
+}
+
+// ── Curve editor ───────────────────────────────────────
+const LIM = { o: [-20, 30], t: [15, 75] };
+const scatter = (() => {
+  let seed = 11; const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647) - 0.5;
+  return Array.from({ length: 260 }, () => {
+    const o = clamp(4 + r() * 18 + r() * 6, -9, 17);
+    const w = curveTarget(o, committedCurve) + 1 + r() * 2.6 + (o < -2 ? 1.2 : 0);
+    return { o, w };
+  });
+})();
+function drawCurve() {
+  const svg = $('#curvechart'); svg.innerHTML = '';
+  const xr = [-20, 25], yr = [15, 60], box = { l: 44, r: 744, t: 14, b: 370 };
+  const { X, Y } = curveFrame(svg, box, xr, yr);
+  el('text', { x: box.r, y: box.b + 30, 'text-anchor': 'end' }, svg).textContent = 'buiten °C →';
+  // flat-end zones (model assumption)
+  el('rect', { x: box.l, y: box.t, width: X(curve.ol) - box.l, height: box.b - box.t, fill: css('--panel-2'), opacity: .6 }, svg);
+  el('rect', { x: X(curve.oh), y: box.t, width: box.r - X(curve.oh), height: box.b - box.t, fill: css('--panel-2'), opacity: .6 }, svg);
+  el('text', { x: box.l + 8, y: box.t + 14 }, svg).textContent = 'vlak (aanname)';
+  // scatter
+  scatter.forEach((p) => {
+    const d = p.w - curveTarget(p.o, committedCurve);
+    el('circle', { cx: X(p.o), cy: Y(p.w), r: 2.6, fill: d > 0 ? css('--warm') : css('--cold'), opacity: clamp(.25 + Math.abs(d) / 4, .25, .85) }, svg);
+  });
+  // median per 2° band
+  let md = '';
+  for (let b = -10; b < 18; b += 2) {
+    const pts = scatter.filter((p) => p.o >= b && p.o < b + 2).map((p) => p.w).sort((a, z) => a - z);
+    if (pts.length < 4) continue;
+    md += (md ? 'L' : 'M') + X(b + 1) + ' ' + Y(pts[Math.floor(pts.length / 2)]);
+  }
+  el('path', { d: md, fill: 'none', stroke: css('--ink'), 'stroke-width': 1.3, 'stroke-dasharray': '1 4', 'stroke-linecap': 'round' }, svg);
+  // ghost (current) + draft
+  el('path', { d: curvePath(committedCurve, X, Y, xr), fill: 'none', stroke: css('--ink-3'), 'stroke-width': 2, 'stroke-dasharray': '6 5' }, svg);
+  const changed = JSON.stringify(curve) !== JSON.stringify(committedCurve);
+  el('path', { d: curvePath(curve, X, Y, xr), fill: 'none', stroke: changed ? css('--pending') : css('--ink'), 'stroke-width': 2.6, 'stroke-linejoin': 'round' }, svg);
+  // live marker
+  const lx = X(S.out);
+  el('line', { x1: lx, x2: lx, y1: box.t, y2: box.b, stroke: css('--ink-2'), 'stroke-dasharray': '2 3' }, svg);
+  el('text', { x: lx + 6, y: box.b - 6 }, svg).textContent = `nu ${fmt(S.out)}°`;
+  el('circle', { cx: lx, cy: Y(S.flow), r: 5, fill: tcol(S.flow), stroke: css('--panel'), 'stroke-width': 2 }, svg);
+  // handles
+  const mk = (key, ok, tk, col, label) => {
+    const g = el('g', { class: 'handle', tabindex: 0, role: 'slider', 'aria-label': label, transform: `translate(${X(curve[ok])},${Y(curve[tk])})` }, svg);
+    el('circle', { class: 'hit', r: 22 }, g);
+    el('circle', { class: 'ring', r: 8, stroke: col }, g);
+    const lbl = el('text', { x: 14, y: -12 }, g); lbl.textContent = `${curve[ok]}° → ${curve[tk]}°`; lbl.style.fill = css('--ink');
+    const inv = (px, py) => [Math.round(xr[0] + (px - box.l) / (box.r - box.l) * (xr[1] - xr[0])), Math.round(yr[0] + (box.b - py) / (box.b - box.t) * (yr[1] - yr[0]))];
+    g.addEventListener('pointerdown', (e) => {
+      g.setPointerCapture(e.pointerId);
+      const mv = (ev) => {
+        const r = svg.getBoundingClientRect();
+        const [o, t] = inv((ev.clientX - r.left) / r.width * 760, (ev.clientY - r.top) / r.height * 400);
+        setPoint(key, o, t);
+      };
+      const up = () => { g.removeEventListener('pointermove', mv); g.removeEventListener('pointerup', up); };
+      g.addEventListener('pointermove', mv); g.addEventListener('pointerup', up);
+    });
+    g.addEventListener('keydown', (e) => {
+      const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+      if (!d) return; e.preventDefault();
+      setPoint(key, curve[ok] + d[0], curve[tk] + d[1]);
+      $(`.handle[aria-label="${label}"]`)?.focus();
+    });
+  };
+  mk('cold', 'ol', 'th', css('--cold'), 'Koude kant');
+  mk('warm', 'oh', 'tl', css('--warm'), 'Warme kant');
+  drawHisto(X);
+  syncCurveUI();
+}
+function valid(c) {
+  return c.ol >= LIM.o[0] && c.oh <= LIM.o[1] && c.ol + 1 <= c.oh && c.th <= LIM.t[1] && c.tl >= LIM.t[0] && c.th >= c.tl;
+}
+function setPoint(which, o, t) {
+  const next = { ...curve };
+  if (which === 'cold') { next.ol = o; next.th = t; } else { next.oh = o; next.tl = t; }
+  // stop at last valid integer: try each axis independently
+  const tryX = { ...curve }, tryY = { ...curve };
+  if (which === 'cold') { tryX.ol = o; tryY.th = t; } else { tryX.oh = o; tryY.tl = t; }
+  if (valid(next)) curve = next;
+  else { if (valid(tryX)) curve = tryX; if (valid({ ...curve, ...(which === 'cold' ? { th: t } : { tl: t }) })) curve = { ...curve, ...(which === 'cold' ? { th: t } : { tl: t }) }; }
+  drawCurve();
+}
+function syncCurveUI() {
+  for (const [id, k] of [['in-ol', 'ol'], ['in-th', 'th'], ['in-oh', 'oh'], ['in-tl', 'tl']]) if (document.activeElement !== $('#' + id)) $('#' + id).value = curve[k];
+  const L = { ol: 'Koude kant buiten', th: 'Koude kant water', oh: 'Warme kant buiten', tl: 'Warme kant water' };
+  const ch = Object.keys(L).filter((k) => curve[k] !== committedCurve[k]);
+  $('#diff').innerHTML = ch.length ? ch.map((k) => `<div><span>${L[k]}</span><span><span class="was">${committedCurve[k]}°</span><span class="is">${curve[k]}°</span></span></div>`).join('') : '<div class="empty">Nog niets gewijzigd. Sleep een punt of gebruik de knoppen.</div>';
+  $('#draftcount').textContent = ch.length ? `${ch.length} gewijzigd` : 'geen wijzigingen';
+  $('#c-apply').disabled = !ch.length || locked; $('#c-reset').disabled = !ch.length;
+  $('#c-apply').title = locked ? 'Schrijfslot staat aan' : '';
+  const heat = {};
+  if (curve.th !== committedCurve.th || curve.tl !== committedCurve.tl) heat.target = { ...(curve.th !== committedCurve.th && { high: curve.th }), ...(curve.tl !== committedCurve.tl && { low: curve.tl }) };
+  if (curve.ol !== committedCurve.ol || curve.oh !== committedCurve.oh) heat.outside = { ...(curve.oh !== committedCurve.oh && { high: curve.oh }), ...(curve.ol !== committedCurve.ol && { low: curve.ol }) };
+  $('#payload').hidden = !ch.length;
+  $('#payload').textContent = 'SetCurves ' + JSON.stringify({ zone1: { heat } });
+  $$('[data-sl]').forEach((b) => { const [k, d] = b.dataset.sl.split(':'); b.disabled = !valid(slopeLevel(k, +d)); });
+}
+function slopeLevel(k, d) { return k === 'level' ? { ...curve, th: curve.th + d, tl: curve.tl + d } : { ...curve, th: curve.th + d, tl: curve.tl - d }; }
+$$('[data-sl]').forEach((b) => b.onclick = () => { const [k, d] = b.dataset.sl.split(':'); const n = slopeLevel(k, +d); if (valid(n)) { curve = n; drawCurve(); } });
+for (const [id, k] of [['in-ol', 'ol'], ['in-th', 'th'], ['in-oh', 'oh'], ['in-tl', 'tl']]) {
+  $('#' + id).addEventListener('change', (e) => { const n = { ...curve, [k]: Math.round(+e.target.value) }; if (valid(n)) curve = n; drawCurve(); });
+}
+$('#c-reset').onclick = () => { curve = { ...committedCurve }; drawCurve(); };
+$('#c-apply').onclick = () => {
+  $('#c-apply').disabled = true; $('#draftcount').textContent = 'verstuurd…'; $('#draftcount').style.color = 'var(--pending)';
+  setTimeout(() => { $('#draftcount').textContent = 'teruggelezen ✓'; $('#draftcount').style.color = 'var(--ok)';
+    setTimeout(() => { Object.assign(committedCurve, curve); $('#draftcount').style.color = ''; drawCurve(); drawMini(); }, 1400); }, 1800);
+};
+function drawHisto(X) {
+  const svg = $('#histo'); svg.innerHTML = '';
+  const bands = [];
+  for (let b = -10; b < 18; b += 2) bands.push([b, scatter.filter((p) => p.o >= b && p.o < b + 2).length]);
+  const max = Math.max(...bands.map((b) => b[1]));
+  bands.forEach(([b, n]) => {
+    const h = n / max * 46;
+    el('rect', { x: X(b) + 2, y: 64 - h, width: X(b + 2) - X(b) - 4, height: h, rx: 2, fill: css('--line-2') }, svg);
+    if (n) el('text', { x: X(b + 1), y: 60 - h, 'text-anchor': 'middle' }, svg).textContent = Math.round(n * 2.8) + 'u';
+  });
+  el('text', { x: 44, y: 80 }, svg).textContent = 'uren per 2 °C-band, verwarmen, zonder ontdooien en SWW';
+}
+
+// ── Topics ─────────────────────────────────────────────
+const TOPICS = [
+  ['main', 'Outside_Temp', () => S.out, '°C', 1], ['main', 'Main_Outlet_Temp', () => S.flow, '°C', 1], ['main', 'Main_Inlet_Temp', () => S.ret, '°C', 1],
+  ['main', 'Main_Target_Temp', () => S.target, '°C', 0], ['main', 'Compressor_Freq', () => S.hz, 'Hz', 0], ['main', 'Pump_Flow', () => S.pump, 'l/min', 2],
+  ['main', 'DHW_Temp', () => S.dhw, '°C', 1], ['main', 'DHW_Target_Temp', () => S.dhwT, '°C', 0], ['main', 'Heat_Power_Consumption', () => S.pin * 1000, 'W', 0],
+  ['main', 'Heat_Power_Production', () => S.pout * 1000, 'W', 0], ['main', 'Z1_Heat_Request_Temp', () => committed.shift, '°C', 0], ['main', 'Z1_Water_Target_Temp', () => S.target, '°C', 0],
+  ['main', 'ThreeWay_Valve_State', () => SCEN[S.scen].valve === 'dhw' ? 'SWW' : 'Ruimte', '', 0], ['main', 'Defrosting_State', () => S.scen === 'defrost' ? 'Aan' : 'Uit', '', 0],
+  ['main', 'Pump_Speed', () => S.pump ? 2400 : 0, 'r/min', 0], ['main', 'High_Pressure', () => 18 + S.hz / 10, 'kgf/cm²', 1], ['main', 'Discharge_Temp', () => 40 + S.hz * 0.6, '°C', 0],
+  ['main', 'Buffer_Temp', () => -128, '°C', 0, 'sensor afwezig'], ['main', 'Solar_Temp', () => -78, '°C', 0, 'NTC niet aangesloten'], ['main', 'Z2_Water_Temp', () => -128, '°C', 0, 'sensor afwezig'],
+  ['main', 'Operations_Hours', () => 18422, 'u', 0], ['main', 'Operations_Counter', () => 9311, '', 0], ['main', 'Error', () => 'No error', '', 0],
+  ['1wire', '28-0000xxxx01', () => 21.4, '°C', 1], ['1wire', '28-0000xxxx02', () => 19.8, '°C', 1],
+];
+const lastChange = {}, lastVal = {};
+function spark(seed) {
+  let s = seed, v = 0, d = '';
+  for (let i = 0; i < 24; i++) { s = (s * 16807) % 2147483647; v += (s / 2147483647 - 0.5) * 2; d += (i ? 'L' : 'M') + (i * 4) + ' ' + (10 - clamp(v, -8, 8)).toFixed(1); }
+  return `<svg width="92" height="20" viewBox="0 0 92 20"><path d="${d}" fill="none" stroke="var(--ink-3)" stroke-width="1.2"/></svg>`;
+}
+function renderTopics() {
+  const f = ($('#tp-filter').value || '').toLowerCase();
+  const rows = TOPICS.filter(([g, k]) => (g + '/' + k).toLowerCase().includes(f));
+  $('#tp-count').textContent = `${rows.length} van ${TOPICS.length} topics · ${TOPICS.filter((t) => t[5]).length} ignore-suggesties`;
+  $('#tp-body').innerHTML = rows.map(([g, k, fn, u, d, sent], i) => {
+    const v = fn(), id = g + '/' + k;
+    const shown = typeof v === 'number' ? v.toFixed(d) : v;
+    const ago = lastChange[id] ? Math.round((Date.now() - lastChange[id]) / 1000) + ' s' : '4 u';
+    return `<tr class="${sent ? 'sentinel' : ''}" data-id="${id}"><td class="key"><span>${g}/</span>${k}</td>` +
+      `<td class="val">${sent ? `<span class="sent">${shown} · ${sent}</span>` : `${shown}<small> ${u}</small>`}</td>` +
+      `<td class="hide-m">${sent ? '' : spark(i + 3)}</td><td class="ago">${ago}</td>` +
+      `<td class="hide-m"><select class="vis" aria-label="Weergave ${k}"><option>zichtbaar</option><option>verborgen</option><option ${sent ? 'selected' : ''}>${sent ? 'negeren?' : 'negeren'}</option></select></td></tr>`;
+  }).join('');
+}
+function tickTopics() {
+  const changed = [];
+  for (const [g, k, fn, , d] of TOPICS) {
+    const id = g + '/' + k, v = fn(), s = typeof v === 'number' ? v.toFixed(d) : v;
+    if (lastVal[id] !== undefined && lastVal[id] !== s) { lastChange[id] = Date.now(); changed.push(id); }
+    lastVal[id] = s;
+  }
+  if (!$('#screen-topics').classList.contains('on')) return;
+  renderTopics();
+  changed.forEach((id) => $(`tr[data-id="${id}"]`)?.classList.add('flash'));
+}
+$('#tp-filter').addEventListener('input', renderTopics);
+
+// ── Boot ───────────────────────────────────────────────
+function redrawAll() { render(); drawTimeline(); if ($('#screen-curve').classList.contains('on')) drawCurve(); }
+redrawAll(); renderTopics(); route();
+// On a phone the schematic scrolls; start on the water side, where the action is
+const sc = $('.schem-scroll'); sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) * 0.65;
+</script>
+</body>
+</html>
