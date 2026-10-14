@@ -43,8 +43,9 @@
   }
 </script>
 
-<section data-testid="screen-system">
+<section data-testid="screen-system" class="system">
   <h1>{translate($language, 'system.title')}</h1>
+  <div class="panel panel-body status">
   <p data-testid="system-broker">
     {translate($language, 'system.broker')}:
     {$systemStore?.broker_connected ? translate($language, 'system.connected') : translate($language, 'system.disconnected')}
@@ -61,8 +62,10 @@
   {#if $systemStore?.listen_only_suspected}
     <p data-testid="listen-only" role="status">{translate($language, 'system.listenOnly')}</p>
   {/if}
-  <section data-testid="system-stats">
-    <h2>{translate($language, 'system.stats')}</h2>
+  </div>
+  <section data-testid="system-stats" class="panel">
+    <div class="panel-head"><h2>{translate($language, 'system.stats')}</h2></div>
+    <div class="panel-body">
     {#if statsEntries.length === 0}
       <p>{translate($language, 'system.unknown')}</p>
     {:else}
@@ -75,7 +78,9 @@
         {/each}
       </dl>
     {/if}
+    </div>
   </section>
+  <div class="panel panel-body status">
   <p data-testid="system-db">{translate($language, 'system.dbSize')}: {$systemStore?.db_bytes ?? 0}</p>
   <p data-testid="system-flush-age">{translate($language, 'system.lastFlush')}: {flushAge}</p>
   <p data-testid="system-flush-state">
@@ -105,4 +110,15 @@
     <input data-testid="pcb-enabled" type="checkbox" checked={$prefsStore?.pcb_enabled === true} onchange={togglePcb} />
   </label>
   <p>{translate($language, 'system.pcbHelp')}</p>
+  </div>
 </section>
+
+<style>
+  .system { display: flex; flex-direction: column; gap: 0.75rem; max-width: 60rem; }
+  h1 { margin: 0; font: 600 22px/1.1 var(--font-ui); }
+  .status p { margin: 0 0 0.35rem; }
+  .status p[data-testid='listen-only'] { color: var(--pending-ink); }
+  dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.5rem 1.5rem; }
+  dt { color: var(--ink-3); font: 11px var(--font-data); }
+  dd { margin: 0; font-family: var(--font-data); overflow-wrap: anywhere; }
+</style>

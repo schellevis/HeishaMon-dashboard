@@ -186,6 +186,12 @@ function pointer(el, type, x, y) {
 describe('CurveChart', () => {
   afterEach(() => vi.restoreAllMocks());
 
+  it('marks a moved handle with the draft class', () => {
+    render(CurveChart, { props: { mode: 'heat', current: curve(-5, 45, 15, 30), draft: curve(-5, 50, 15, 30) } });
+    expect(screen.getByTestId('handle-cold').classList.contains('changed')).toBe(true);
+    expect(screen.getByTestId('handle-warm').classList.contains('changed')).toBe(false);
+  });
+
   it('dragging a handle past the other end stops at the invariant', async () => {
     mockRect();
     const onchange = vi.fn();

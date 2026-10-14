@@ -83,8 +83,8 @@
 
 <section data-testid="screen-topics" class="topics">
   <h1>{translate($language, 'topics.title')}</h1>
-  <section class="card suggestions" data-testid="ignore-suggestions">
-    <h2>{translate($language, 'topics.suggestions')}</h2>
+  <section class="card suggestions panel" data-testid="ignore-suggestions">
+    <div class="panel-head"><h2>{translate($language, 'topics.suggestions')}</h2></div>
     {#if suggestions.length === 0}
       <p>{translate($language, 'topics.suggestionsEmpty')}</p>
     {:else}
@@ -104,8 +104,8 @@
     {/if}
   </section>
   {#each sections as section (section.prefix)}
-    <section class="card" data-testid={`section-${section.prefix}`}>
-      <h2>{translate($language, 'topics.section', { name: section.prefix })} <span class="count">{section.keys.length}</span></h2>
+    <section class="card panel" data-testid={`section-${section.prefix}`}>
+      <div class="panel-head"><h2>{translate($language, 'topics.section', { name: section.prefix })} <span class="count">{section.keys.length}</span></h2></div>
       <div class="head" aria-hidden="true">
         <span>{translate($language, 'topics.name')}</span>
         <span>{translate($language, 'topics.value')}</span>
@@ -139,23 +139,15 @@
   }
   h1 {
     margin: 0;
-    font-size: 1.375rem;
+    font: 600 22px/1.1 var(--font-ui);
   }
   .card {
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
     overflow: hidden;
-  }
-  h2 {
-    margin: 0;
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-    background: var(--bg-secondary);
   }
   .count {
     font-weight: 400;
     font-size: 0.8125rem;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   .suggestions p,
   .suggestions ul {
@@ -176,7 +168,7 @@
     align-items: center;
   }
   .suggestions li span[data-reason] {
-    color: var(--text-secondary);
+    color: var(--ink-2);
     font-size: 0.8125rem;
   }
   .head {
@@ -185,8 +177,8 @@
     gap: 0.75rem;
     padding: 0.25rem 0.75rem;
     font-size: 0.75rem;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border);
+    color: var(--ink-2);
+    border-bottom: 1px solid var(--line);
   }
   .topics {
     --topic-cols: minmax(12rem, 2.2fr) minmax(6rem, 1fr) minmax(4rem, 0.7fr) 5.5rem 100px 7.5rem;

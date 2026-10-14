@@ -51,8 +51,8 @@
   {#each groups as group (group.id)}
     {#if group.id === 'pcb'}
       {#if $prefsStore?.pcb_enabled && group.items.length}
-        <section class="card" data-testid="category-pcb">
-          <h2>{translate($language, group.labelKey)}</h2>
+        <section class="card panel" data-testid="category-pcb">
+          <div class="panel-head"><h2>{translate($language, group.labelKey)}</h2></div>
           <p class="hint" data-testid="h74-note">{translate($language, 'settings.h74')}</p>
           {@render rows(group.items)}
         </section>
@@ -60,13 +60,13 @@
     {:else if group.items.length}
       {@const opened = openCategory(group.id)}
       {#if opened}
-        <details class="card" data-testid={`category-${group.id}`} data-collapsed="false" open>
-          <summary>{translate($language, group.labelKey)} <span class="count">{group.items.length}</span></summary>
+        <details class="card panel" data-testid={`category-${group.id}`} data-collapsed="false" open>
+          <summary class="panel-head">{translate($language, group.labelKey)} <span class="count">{group.items.length}</span></summary>
           {@render rows(group.items)}
         </details>
       {:else}
-        <details class="card" data-testid={`category-${group.id}`} data-collapsed="true">
-          <summary>{translate($language, group.labelKey)} <span class="count">{group.items.length}</span></summary>
+        <details class="card panel" data-testid={`category-${group.id}`} data-collapsed="true">
+          <summary class="panel-head">{translate($language, group.labelKey)} <span class="count">{group.items.length}</span></summary>
           <div class="hint">
             {translate($language, 'settings.collapsedHint')}
             <button type="button" data-testid={`show-${group.id}`} onclick={() => showAnyway(group.id)}>
@@ -89,35 +89,28 @@
   }
   h1 {
     margin: 0 0 0.25rem;
-    font-size: 1.375rem;
+    font: 600 22px/1.1 var(--font-ui);
   }
   .card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg);
     overflow: hidden;
   }
-  summary,
-  h2 {
-    margin: 0;
-    padding: 0.625rem 0.75rem;
-    font-weight: 700;
-    font-size: 1rem;
-    background: var(--bg-secondary);
+  summary {
     cursor: pointer;
+    list-style: none;
   }
+  summary::-webkit-details-marker { display: none; }
   details[open] > summary {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
   }
   .count {
     font-weight: 400;
-    color: var(--text-secondary);
+    color: var(--ink-2);
     font-size: 0.8125rem;
   }
   .hint {
     padding: 0.5rem 0.75rem;
     font-size: 0.8125rem;
-    color: var(--text-secondary);
+    color: var(--ink-2);
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -128,7 +121,7 @@
     margin: 0;
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
-    background: var(--warn-bg);
-    border: 1px solid var(--warn-border);
+    background: color-mix(in srgb, var(--pending) 14%, transparent);
+    border: 1px solid var(--pending);
   }
 </style>

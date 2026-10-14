@@ -1,4 +1,8 @@
 export default {
+  sentinelUnknown: 'onbekende toestand',
+  sentinelAbsent: 'sensor afwezig',
+  sentinelNotConnected: 'niet aangesloten',
+  sentinelUnused: 'ongebruikt',
   title: 'Alle topics',
   suggestions: 'Negeervoorstellen',
   suggestionsEmpty: 'Geen negeervoorstellen.',

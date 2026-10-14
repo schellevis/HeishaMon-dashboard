@@ -297,10 +297,10 @@ describe('Charts screen (§7.2)', () => {
 
   describe('Enum bands', () => {
     it('has color mapping for enum values', () => {
-      expect(ENUM_COLORS[0]).toBe('#999999');
-      expect(ENUM_COLORS[1]).toBe('#1f77b4');
-      expect(ENUM_COLORS[2]).toBe('#ff7f0e');
-      expect(ENUM_COLORS[8]).toBe('#7f7f7f');
+      expect(ENUM_COLORS[0]).toBe('#64737f');
+      expect(ENUM_COLORS[1]).toBe('#4fa3e0');
+      expect(ENUM_COLORS[2]).toBe('#f0a04b');
+      expect(ENUM_COLORS[8]).toBe('#93a3b0');
     });
 
     it('converts enum history to uplot with bands', () => {
@@ -607,9 +607,9 @@ describe('Color scheme', () => {
   });
 
   it('has consistent colors', () => {
-    expect(COLORS[0]).toBe('#1f77b4'); // blue
-    expect(COLORS[1]).toBe('#ff7f0e'); // orange
-    expect(COLORS[2]).toBe('#2ca02c'); // green
+    expect(COLORS[0]).toBe('#f0a04b'); // amber
+    expect(COLORS[1]).toBe('#4fa3e0'); // blue
+    expect(COLORS[2]).toBe('#6cc59a'); // green
   });
 });
 

@@ -11,20 +11,6 @@
   --font-data: 'Martian Mono Variable', 'Martian Mono', ui-monospace, monospace;
   --r: 10px;
   --r-control: 8px;
-
-  /* Legacy names, kept until every screen is migrated (removed in Task 10). */
-  --bg: var(--panel);
-  --bg-secondary: var(--panel-2);
-  --bg-hover: var(--line);
-  --border: var(--line-2);
-  --text: var(--ink);
-  --text-secondary: var(--ink-2);
-  --primary: var(--warm);
-  --primary-dark: var(--hot);
-  --danger: var(--fail);
-  --warn-bg: color-mix(in srgb, var(--pending) 14%, transparent);
-  --warn-border: var(--pending);
-  --card-radius: var(--r);
 }
 :root,
 :root[data-theme='night'] {
@@ -75,7 +61,7 @@ body {
 /* Shared building blocks */
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); min-width: 0; }
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-.panel-head h2 { margin: 0; font: 600 13.5px var(--font-ui); }
+.panel-head h2, .panel-head h3 { margin: 0; font: 600 13.5px var(--font-ui); }
 .panel-body { padding: 16px; }
 .tag { font: 500 10.5px/1 var(--font-data); font-stretch: 87.5%; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-stretch: 87.5%; }

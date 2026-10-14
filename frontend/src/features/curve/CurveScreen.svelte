@@ -356,7 +356,7 @@
 </script>
 
 <section data-testid="screen-curve" class="curve-screen">
-  <h2>{t('title')}</h2>
+  <h2 class="screen-title">{t('title')}</h2>
 
   <div role="tablist" aria-label={t('tabsLabel')}>
     {#each TABS as x (x.id)}
@@ -392,6 +392,7 @@
     </p>
   {/if}
 
+  <div class="panel panel-body chart-panel">
   <CurveChart
     {lang}
     mode={tab.mode}
@@ -413,9 +414,10 @@
     onthreshold={setThreshold}
   />
   <p class="hint" data-testid="assumption-note">{t('assumptionNote')}</p>
+  </div>
 
   {#if !direct}
-    <div class="shift" data-testid="shift-control">
+    <div class="shift panel panel-body" data-testid="shift-control">
       <span>{t('shift')}: <output data-testid="shift-value">{shift}</output></span>
       <button type="button" data-testid="shift-minus" aria-label={t('shiftMinus')} disabled={shift <= SHIFT_RANGE.min} onclick={() => stepShift(-1)}>−</button>
       <button type="button" data-testid="shift-plus" aria-label={t('shiftPlus')} disabled={shift >= SHIFT_RANGE.max} onclick={() => stepShift(1)}>+</button>
@@ -448,3 +450,17 @@
     }}
   />
 </section>
+
+<style>
+  .curve-screen { display: flex; flex-direction: column; gap: 0.75rem; max-width: 60rem; }
+  .screen-title { margin: 0; font: 600 22px/1.1 var(--font-ui); }
+  .curve-screen p { margin: 0; }
+  .hint { color: var(--ink-2); font-size: 0.8125rem; }
+  .badge { font: 500 11px var(--font-data); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-2); }
+  [role='tablist'] { display: flex; flex-wrap: wrap; gap: 6px; }
+  [role='tab'][aria-selected='true'] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  [role='tab'].inactive { opacity: .7; }
+  .shift { display: flex; align-items: center; gap: 0.5rem; }
+  [role='alert'] { color: var(--pending-ink); }
+  :global(.curve-screen h3) { margin: 0; font: 600 13.5px var(--font-ui); }
+</style>

@@ -66,33 +66,10 @@ export const DEFAULT_OPTIONS = {
 };
 
 /** Color scheme for chart series */
-export const COLORS = [
-  '#1f77b4', // blue
-  '#ff7f0e', // orange
-  '#2ca02c', // green
-  '#d62728', // red
-  '#9467bd', // purple
-  '#8c564b', // brown
-  '#e377c2', // pink
-  '#7f7f7f', // gray
-  '#bcbd22', // olive
-  '#17becf', // cyan
-];
+export const COLORS = ['#f0a04b', '#4fa3e0', '#6cc59a', '#e5533d', '#8fb8c9', '#b48ce0', '#e8c25a', '#93a3b0', '#d07fb0', '#5fc4c0'];
 
 /** Enum value to color mapping for band rendering */
-export const ENUM_COLORS = {
-  0: '#999999',
-  1: '#1f77b4',
-  2: '#ff7f0e',
-  3: '#2ca02c',
-  4: '#d62728',
-  5: '#9467bd',
-  6: '#8c564b',
-  7: '#e377c2',
-  8: '#7f7f7f',
-  9: '#bcbd22',
-  10: '#17becf',
-};
+export const ENUM_COLORS = { 0: '#64737f', 1: '#4fa3e0', 2: '#f0a04b', 3: '#6cc59a', 4: '#e5533d', 5: '#b48ce0', 6: '#8fb8c9', 7: '#d07fb0', 8: '#93a3b0', 9: '#e8c25a', 10: '#5fc4c0' };
 
 /** Create a chart instance
  * @param {HTMLElement} element - DOM element to render the chart in

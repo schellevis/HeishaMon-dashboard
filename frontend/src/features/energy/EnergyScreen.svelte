@@ -101,8 +101,9 @@
   </div>
 
   {#if s0.length}
-    <section class="s0-section" data-testid="s0-section">
-      <h2>{translate($language, 'energy.s0_meters')}</h2>
+    <section class="s0-section panel" data-testid="s0-section">
+      <div class="panel-head"><h2>{translate($language, 'energy.s0_meters')}</h2></div>
+      <div class="panel-body">
       <p class="hint">{translate($language, 'energy.s0_cumulative')}</p>
       <div class="s0-values">
         {#each s0 as meter}
@@ -110,6 +111,7 @@
             {topicByKey(meter.key)?.label?.[$language] || meter.key}: {meter.kwh.toFixed(1)} {translate($language, 'energy.kwh')}
           </div>
         {/each}
+      </div>
       </div>
     </section>
   {/if}
@@ -121,9 +123,9 @@
   {:else if !rows.length}
     <p data-testid="no-data">{translate($language, 'energy.no_data')}</p>
   {:else}
-    <section class="energy-table" data-testid="energy-table">
-      <h2>{translate($language, 'energy.chart_title')}</h2>
-      <div class="table-scroll">
+    <section class="energy-table panel" data-testid="energy-table">
+      <div class="panel-head"><h2>{translate($language, 'energy.chart_title')}</h2></div>
+      <div class="table-scroll panel-body">
       <table>
         <thead>
           <tr>
@@ -170,10 +172,11 @@
     margin: 0 auto;
   }
   h1 {
-    margin-bottom: 1rem;
+    margin: 0 0 1rem;
+    font: 600 22px/1.1 var(--font-ui);
   }
   .error {
-    color: #d32f2f;
+    color: var(--fail-ink);
   }
   .period-selector {
     margin: 1rem 0;
@@ -182,20 +185,14 @@
   }
   .period-selector button {
     padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    background: #f5f5f5;
-    cursor: pointer;
   }
   .period-selector button.active {
-    background: #1976d2;
-    color: white;
-    border-color: #1976d2;
+    background: var(--ink);
+    color: var(--ground);
+    border-color: var(--ink);
   }
   .s0-section {
-    margin: 2rem 0 1.5rem;
-    padding: 1rem;
-    background: #f5f5f5;
-    border-radius: 4px;
+    margin: 1.5rem 0;
   }
   .s0-values {
     display: flex;
@@ -204,9 +201,10 @@
   }
   .s0-value {
     padding: 0.5rem 1rem;
-    background: white;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    background: var(--panel-2);
+    border-radius: var(--r-control);
+    border: 1px solid var(--line);
+    font-family: var(--font-data);
   }
   .energy-table {
     margin-top: 1.5rem;
@@ -221,23 +219,24 @@
   th, td {
     padding: 0.5rem;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--line);
   }
   th {
-    background: #f5f5f5;
-    font-weight: bold;
+    background: var(--panel-2);
+    font-weight: 500;
   }
+  td { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
   tr:hover {
-    background: #f9f9f9;
+    background: var(--panel-2);
   }
   .hint {
     margin: 0 0 0.5rem;
-    color: #666;
+    color: var(--ink-3);
     font-size: 0.9em;
   }
   .estimate-label {
     margin-top: 1rem;
-    color: #666;
+    color: var(--ink-3);
     font-style: italic;
   }
 </style>

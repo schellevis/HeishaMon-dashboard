@@ -222,7 +222,7 @@
     gap: 12px;
     align-items: center;
     padding: 8px 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
     margin-bottom: 12px;
   }
   
@@ -234,22 +234,22 @@
   
   .range-presets button {
     padding: 4px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--panel);
+    color: var(--ink);
     cursor: pointer;
     font-size: 12px;
   }
   
   .range-presets button:hover {
-    background: var(--bg-hover);
+    background: var(--line);
   }
   
   .range-presets button.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
+    background: var(--warm);
+    color: var(--ground);
+    border-color: var(--warm);
   }
   
   .range-controls {
@@ -259,16 +259,16 @@
   
   .range-controls button {
     padding: 4px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--panel);
+    color: var(--ink);
     cursor: pointer;
     font-size: 12px;
   }
   
   .range-controls button:hover {
-    background: var(--bg-hover);
+    background: var(--line);
   }
   
   .resolution-selector {
@@ -280,19 +280,19 @@
   
   .resolution-selector select {
     padding: 4px 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--panel);
+    color: var(--ink);
     cursor: pointer;
   }
   
   .range-display {
     margin-left: auto;
     padding: 4px 8px;
-    background: var(--bg-secondary);
+    background: var(--panel-2);
     border-radius: 4px;
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
 </style>

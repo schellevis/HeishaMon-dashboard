@@ -117,6 +117,8 @@
   const thresholdLabel = { heaterOn: 'heaterOnBelow', heatingOff: 'heatingOffAbove' };
   /** Labels of markers in the right half are drawn to the left of the line, so they stay inside the chart. */
   const flip = (value) => sx(value) > (M.left + W - M.right) / 2;
+  /** Short label: the note's lead-in before its colon ("Model assumption"). */
+  const assumptionLabel = $derived(t('assumptionNote').split(':')[0]);
   const hasLive = $derived(Number.isFinite(outside));
 </script>
 
@@ -154,7 +156,7 @@
         cy={sy(w.water)}
         r="3"
         fill={c.color}
-        stroke={c.outlined ? '#333' : 'none'}
+        stroke={c.outlined ? 'var(--ink-2)' : 'none'}
         opacity="0.75"
       >
         <title>{t('windowTitle', { outside: w.outside.toFixed(1), water: w.water.toFixed(1), target: w.target.toFixed(1) })}</title>
@@ -170,11 +172,14 @@
   {/if}
 
   {#if shown}
+    <rect class="flat" x={M.left} y={M.top} width={Math.max(0, sx(shown.cold.outside) - M.left)} height={H - M.top - M.bottom} />
+    <rect class="flat" x={sx(shown.warm.outside)} y={M.top} width={Math.max(0, W - M.right - sx(shown.warm.outside))} height={H - M.top - M.bottom} />
+    <text class="tick label" x={M.left + 4} y={H - M.bottom - 6}>{assumptionLabel}</text>
     {#if changed}
       <polyline data-testid="ghost-line" class="ghost" points={points(curveLine(current, 0, xd))} />
     {/if}
     {#if directSetpoint === null && !inactive}
-      <polyline data-testid="curve-line" class="curve" points={points(curveLine(shown, 0, xd))} />
+      <polyline data-testid="curve-line" class="curve" class:changed={changed} points={points(curveLine(shown, 0, xd))} />
       {#if showShift && shift}
         <polyline data-testid="shift-line" class="shift" points={points(curveLine(shown, shift, xd))} />
       {/if}
@@ -194,7 +199,8 @@
     {#each ['cold', 'warm'] as end (end)}
       <circle
         data-testid="handle-{end}"
-        class="handle"
+        class="handle {end}"
+        class:changed={Boolean(current) && (shown[end].outside !== current[end].outside || shown[end].target !== current[end].target)}
         class:readonly={!editable}
         cx={sx(shown[end].outside)}
         cy={sy(shown[end].target)}
@@ -269,21 +275,26 @@
 
 <style>
   .curve-chart { width: 100%; height: auto; touch-action: none; }
-  .grid { stroke: #8884; stroke-width: 0.5; }
+  .grid { stroke: var(--line); stroke-width: 1; }
   .tick, .axis { font-size: 10px; fill: currentColor; }
-  .label { paint-order: stroke; stroke: var(--bg, #fff); stroke-width: 3px; stroke-linejoin: round; }
-  .curve { fill: none; stroke: #1b6ec2; stroke-width: 2.5; }
+  .label { paint-order: stroke; stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; fill: var(--ink-3); }
+  .curve { fill: none; stroke: var(--ink); stroke-width: 2.6; }
+  .curve.changed { stroke: var(--pending); }
   .curve.inactive-line { stroke-dasharray: 2 4; opacity: 0.6; }
-  .ghost { fill: none; stroke: #888; stroke-width: 2; stroke-dasharray: 6 4; }
-  .shift { fill: none; stroke: #1b6ec2; stroke-width: 1.5; stroke-dasharray: 5 3; }
-  .direct { stroke: #c2571b; stroke-width: 2; }
-  .handle { fill: #fff; stroke: #1b6ec2; stroke-width: 3; cursor: grab; }
+  .ghost { fill: none; stroke: var(--ink-3); stroke-width: 2; stroke-dasharray: 6 5; }
+  .shift { fill: none; stroke: var(--warm); stroke-width: 1.4; stroke-dasharray: 4 4; }
+  .direct { stroke: var(--warm); stroke-width: 2; }
+  .handle { fill: var(--panel); stroke: var(--ink); stroke-width: 2.5; cursor: grab; }
+  .handle.cold { stroke: var(--cold); }
+  .handle.warm { stroke: var(--warm); }
+  .handle.changed { stroke: var(--pending); }
   .handle.readonly { cursor: default; }
-  .threshold { stroke: #b0771b; stroke-width: 1.5; stroke-dasharray: 4 3; }
-  .threshold.readonly { stroke: #888; }
-  .threshold-grip { fill: #b0771b; cursor: ew-resize; }
-  .live { stroke: #2b8a6e; stroke-width: 1; }
-  .live-target { fill: #c2571b; }
-  .live-water { fill: #1b6ec2; }
-  .median { fill: none; stroke: #222; stroke-width: 2; }
+  .threshold { stroke: var(--pending); stroke-width: 1.5; stroke-dasharray: 4 3; }
+  .threshold.readonly { stroke: var(--ink-3); }
+  .threshold-grip { fill: var(--pending); cursor: ew-resize; }
+  .live { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: 2 3; }
+  .live-target { fill: none; stroke: var(--warm); stroke-width: 2; }
+  .live-water { fill: var(--warm); }
+  .median { fill: none; stroke: var(--ink); stroke-width: 1.3; stroke-dasharray: 1 4; stroke-linecap: round; }
+  .flat { fill: var(--panel-2); opacity: .6; }
 </style>

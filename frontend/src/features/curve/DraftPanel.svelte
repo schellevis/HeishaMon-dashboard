@@ -8,8 +8,9 @@
   const nonEmpty = $derived(groups.filter((g) => g.rows.length));
 </script>
 
-<section class="draft" data-testid="draft-panel">
-  <h3>{t('draftTitle')}</h3>
+<section class="draft panel" data-testid="draft-panel">
+  <div class="panel-head"><h3>{t('draftTitle')}</h3></div>
+  <div class="panel-body">
   {#if !nonEmpty.length}
     <p>{t('draftNone')}</p>
   {/if}
@@ -33,4 +34,5 @@
   {#if eepromWarning}
     <p role="alert" data-testid="eeprom-warning">{t('eepromWarn')}</p>
   {/if}
+  </div>
 </section>

@@ -3,6 +3,13 @@
 // Cold end = Outside_Low + Target_High; warm end = Outside_High + Target_Low (crosswise naming, §3).
 
 import { curveEnds, curveLeaf, curveLimits, curveShift, modeSets, roomSensorValues } from './domain/rules.js';
+import { MARK_RGB, RAMP, mixRgb } from './ui/thermal.js';
+
+// one source for the ramp: thermal.js
+const NEUTRAL = MARK_RGB.neutral;
+const COLD = RAMP[0][1];
+const WARM = RAMP[2][1];
+const HOT = RAMP[3][1];
 
 export const LIMITS = curveLimits;
 export const MODE_SETS = { heat: modeSets.heating, cool: modeSets.cooling };
@@ -244,30 +251,28 @@ export function overlayModes(windows) {
   return modes;
 }
 
-/** Diverging colour for a deviation in °C (blue below, red above, grey zero). */
+/** Diverging colour for a deviation in °C: cold blue below, warm orange above, grey at zero. */
 export function deviationColor(v) {
-  if (v === null || v === undefined || !Number.isFinite(v)) return '#9aa0a6';
-  const t = Math.min(1, Math.abs(v) / 5);
-  const l = 85 - 40 * t;
-  return v < 0 ? `hsl(215 70% ${l}%)` : `hsl(8 75% ${l}%)`;
+  if (v === null || v === undefined || !Number.isFinite(v)) return mixRgb(NEUTRAL, NEUTRAL, 0);
+  return mixRgb(NEUTRAL, v < 0 ? COLD : WARM, Math.min(1, Math.abs(v) / 5));
 }
 
 export function sequentialColor(v, lo, hi) {
-  if (v === null || v === undefined || !Number.isFinite(v)) return '#9aa0a6';
+  if (v === null || v === undefined || !Number.isFinite(v)) return mixRgb(NEUTRAL, NEUTRAL, 0);
   const t = hi > lo ? Math.min(1, Math.max(0, (v - lo) / (hi - lo))) : 0.5;
-  return `hsl(${200 - 160 * t} 65% ${70 - 25 * t}%)`;
+  return mixRgb(COLD, HOT, t);
 }
 
 /** Colour and label of one window for a colour-by mode. */
 export function windowColor(w, by, ranges = {}) {
   switch (by) {
     case 'cop':
-      return w.cop === null || w.cop === undefined ? { color: '#9aa0a6', noCop: true } : { color: sequentialColor(w.cop, ranges.copLo ?? 1, ranges.copHi ?? 6) };
+      return w.cop === null || w.cop === undefined ? { color: mixRgb(NEUTRAL, NEUTRAL, 0), noCop: true } : { color: sequentialColor(w.cop, ranges.copLo ?? 1, ranges.copHi ?? 6) };
     case 'freq':
       return { color: sequentialColor(w.freq, ranges.freqLo ?? 0, ranges.freqHi ?? 100) };
     case 'side':
-      if (w.side === 'before') return { color: '#8e6bbf' };
-      if (w.side === 'after') return { color: '#2b8a6e' };
+      if (w.side === 'before') return { color: mixRgb(NEUTRAL, NEUTRAL, 0) };
+      if (w.side === 'after') return { color: mixRgb(MARK_RGB.ok, MARK_RGB.ok, 0) };
       return { color: 'none', outlined: true };
     case 'room_minus_setpoint':
       return { color: deviationColor(w.room_minus_setpoint) };

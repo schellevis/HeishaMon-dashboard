@@ -6,8 +6,9 @@
   const t = (key, params) => translate(lang, `curve.${key}`, params);
 </script>
 
-<section class="log" data-testid="curve-log">
-  <h3>{t('logTitle')}</h3>
+<section class="log panel" data-testid="curve-log">
+  <div class="panel-head"><h3>{t('logTitle')}</h3></div>
+  <div class="panel-body">
   {#if !entries.length}
     <p>{t('logNone')}</p>
   {/if}
@@ -22,4 +23,5 @@
   </ul>
   {#if notice}<p data-testid="revert-notice">{notice}</p>{/if}
   <p class="hint" data-testid="wait-hint">{t('waitHint')}</p>
+  </div>
 </section>
