@@ -13,9 +13,10 @@ heating-curve ("stooklijn") module.
 **The design spec is the source of truth:**
 `docs/superpowers/specs/2026-10-11-heishamon-dashboard-design.md`.
 
-Status (2026-10-13): spec (revision 4.2, amended) written, plan executed, build complete and
-independently verified (backend, frontend, simulator and capture tool), followed by a review-fixes
-refactor on branch `refactor/review-fixes` (everything still uncommitted). Open item:
+Status (2026-10-14): spec (revision 4.2, amended) written, plan executed, build complete and
+independently verified (backend, frontend, simulator and capture tool). A review-fixes refactor
+(command-safety fixes, HeishaMon conformity, security hardening, `rules.json`, module split) was
+verified and merged into `main` on 2026-10-13. Open item:
 the real-capture replay fixture, which the owner records with `tools/capture.py` (decision-006); that
 test stays skipped until `backend/tests/fixtures/replay_real.json` exists. The Docker image was never
 built in development; the release check is in the README.
@@ -205,4 +206,7 @@ Note: `heishamon/HeishaMon` and `Egyras/HeishaMon` are the same repository.
     (`npm --prefix frontend run test`; Playwright in `frontend/e2e`, run from `frontend/`).
   - A **simulator** with profile presets (heat-only, Heat+DHW, Cool+DHW, auto, two zones with mixed modes, thermostat sensor, no DHW tank, with/without `extra/`, PCB on) lets every UI variant be tested without a heat pump.
   - Replay fixtures must have the `ip` topic and any identifying data stripped.
+  - Run the suites one after another, never in parallel. Playwright starts its own app, simulator and
+    embedded broker on port 8765, and fails intermittently when pytest runs at the same time.
 - Commit only when asked. The default branch is `main`.
+- `CLAUDE.md` is a symlink to this file; edit `AGENTS.md` only.
