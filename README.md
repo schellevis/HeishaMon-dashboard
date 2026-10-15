@@ -140,7 +140,7 @@ Spec §12. A missing required variable, or a value outside its range, stops star
 
 `STATIC_DIR` is not in that table. It is the directory of the built SPA. Unset, a checkout uses `<repo>/frontend/dist`. The container image sets it to `/app/static`. If that directory is missing, `/` responds with a short “frontend has not been built” page.
 
-UI preferences (write lock, optional-PCB section, topic visibility, tiles, chart presets) are stored in the database, not in these variables. Write lock defaults to off. Language is stored in the browser (`localStorage`), from the browser language, falling back to English.
+UI preferences (write lock, optional-PCB section, topic visibility, tiles, chart presets) are stored in the database, not in these variables. Write lock defaults to off. Language is stored in the browser (`localStorage`), from the browser language, falling back to English. The day/night theme is stored the same way (`localStorage`), from the browser's colour-scheme preference until you pick one with the toggle.
 
 ## Commands, dropped writes, EEPROM
 
