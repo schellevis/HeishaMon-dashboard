@@ -21,8 +21,7 @@ the real-capture replay fixture, which the owner records with `tools/capture.py`
 test stays skipped until `backend/tests/fixtures/replay_real.json` exists. The Docker image was never
 built in development; the release check is in the README.
 A visual redesign (design tokens, day/night theme, new Overview with plant schematic, Now panel, 24-hour
-timeline and mini curve) is built and verified on branch `feat/visual-redesign`, not yet merged into
-`main`. Spec: `docs/superpowers/specs/2026-10-14-visual-design.md`; static mockup:
+timeline and mini curve) was built, verified and merged into `main` on 2026-11-16 (PR #1). Spec: `docs/superpowers/specs/2026-10-14-visual-design.md`; static mockup:
 `docs/mockups/2026-10-14-redesign/index.html`.
 
 **Workflow:** brainstorm → spec → implementation plan → build. Do not start building without an
