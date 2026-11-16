@@ -1,4 +1,8 @@
 export default {
+  sentinelUnknown: 'unknown state',
+  sentinelAbsent: 'sensor absent',
+  sentinelNotConnected: 'not connected',
+  sentinelUnused: 'unused',
   title: 'All topics',
   suggestions: 'Ignore suggestions',
   suggestionsEmpty: 'No ignore suggestions.',

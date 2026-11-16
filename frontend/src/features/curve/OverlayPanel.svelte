@@ -29,8 +29,9 @@
   const hasNoCop = $derived(colorBy === 'cop' && (data?.windows ?? []).some((w) => w.cop === null || w.cop === undefined));
 </script>
 
-<section class="overlay" data-testid="overlay-panel">
-  <h3>{t('overlayTitle')}</h3>
+<section class="overlay panel" data-testid="overlay-panel">
+  <div class="panel-head"><h3>{t('overlayTitle')}</h3></div>
+  <div class="panel-body">
   <div role="group" aria-label={t('overlayRange')}>
     {#each [['7', 'range7'], ['14', 'range14'], ['30', 'range30'], ['custom', 'rangeCustom']] as [value, label] (value)}
       <button type="button" data-testid="range-{value}" aria-pressed={range === value} onclick={() => onrange(value)}>{t(label)}</button>
@@ -72,4 +73,5 @@
     </div>
   {/if}
   <p class="hint">{t('overlayNote')}</p>
+  </div>
 </section>

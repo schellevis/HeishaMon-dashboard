@@ -7,6 +7,6 @@
   }
 </script>
 
-<button type="button" data-testid={testid ?? 'apply'} disabled={disabled || pending} aria-busy={pending} onclick={activate}>
+<button type="button" class="primary" data-testid={testid ?? 'apply'} disabled={disabled || pending} aria-busy={pending} onclick={activate}>
   {label}
 </button>

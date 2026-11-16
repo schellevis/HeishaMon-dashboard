@@ -1,64 +1,105 @@
-/* Shared design tokens and base control styling. */
+/* Design tokens (spec 2026-10-14 §2). Components use these variables only. */
 :root {
-  --bg: #ffffff;
-  --bg-secondary: #f4f4f5;
-  --bg-hover: #e4e4e7;
-  --border: #d4d4d8;
-  --text: #18181b;
-  --text-secondary: #52525b;
-  --primary: #1d4ed8;
-  --primary-dark: #1e40af;
-  --danger: #b91c1c;
-  --warn-bg: #fef3c7;
-  --warn-border: #f59e0b;
-  --card-radius: 8px;
-  color: var(--text);
-  background: var(--bg);
+  --cold: #4fa3e0;
+  --cool: #8fb8c9;
+  --warm: #f0a04b;
+  --hot: #e5533d;
+  --ok: #6cc59a;
+  --pending: #e8c25a;
+  --fail: #e5533d;
+  --font-ui: 'Instrument Sans', system-ui, sans-serif;
+  --font-data: 'Martian Mono Variable', 'Martian Mono', ui-monospace, monospace;
+  --r: 10px;
+  --r-control: 8px;
+}
+:root,
+:root[data-theme='night'] {
+  --ground: #12181c;
+  --panel: #182026;
+  --panel-2: #1e2830;
+  --line: #2a3640;
+  --line-2: #364552;
+  --ink: #dce3e8;
+  --ink-2: #93a3b0;
+  --ink-3: #8494a1;
+  --pipe-idle: #33414c;
+  --unit: #222c34;
+  --flow-dash: rgb(255 255 255 / .7);
+  --ok-ink: #6cc59a;
+  --pending-ink: #e8c25a;
+  --fail-ink: #ef6a55;
+  --warm-ink: #f0a04b;
+  color-scheme: dark;
+}
+:root[data-theme='day'] {
+  --ground: #e9edf0;
+  --panel: #ffffff;
+  --panel-2: #f3f6f8;
+  --line: #d5dde3;
+  --line-2: #bcc8d1;
+  --ink: #18212a;
+  --ink-2: #4f5f6c;
+  --ink-3: #5a6874;
+  --pipe-idle: #c9d3da;
+  --unit: #f6f8f9;
+  --flow-dash: rgb(255 255 255 / .95);
+  --ok-ink: #2a7050;
+  --pending-ink: #7a5d0a;
+  --fail-ink: #b8321f;
+  --warm-ink: #8f520f;
+  color-scheme: light;
 }
 
-button,
-select,
-input,
-textarea {
-  font: inherit;
-  font-size: 0.875rem;
-  color: var(--text);
+html, body { margin: 0; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 14px/1.45 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
 }
 
+/* Shared building blocks */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); min-width: 0; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panel-head h2, .panel-head h3 { margin: 0; font: 600 13.5px var(--font-ui); }
+.panel-body { padding: 16px; }
+.tag { font: 500 10.5px/1 var(--font-data); font-stretch: 87.5%; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; font-stretch: 87.5%; }
+.value-stale { color: var(--ink-3); }
+
+/* Controls */
+button, select, input, textarea { font: inherit; font-size: 13px; color: var(--ink); }
 button {
-  padding: 0.3rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
+  padding: 6px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-control);
+  background: var(--panel-2);
   cursor: pointer;
 }
-
-button:hover:not(:disabled) {
-  background: var(--bg-hover);
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
+button:hover:not(:disabled) { background: var(--line); }
+button:disabled { cursor: not-allowed; opacity: .45; }
+button.primary { background: var(--ink); color: var(--ground); border-color: var(--ink); font-weight: 600; }
+button.primary:hover:not(:disabled) { background: var(--ink); opacity: .9; }
+button[aria-pressed='true'] { background: var(--panel); box-shadow: 0 0 0 1px var(--line-2); }
 select,
 input:not([type='checkbox']):not([type='radio']):not([type='range']),
 textarea {
-  padding: 0.3rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
+  padding: 6px 8px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-control);
+  background: var(--panel-2);
   box-sizing: border-box;
   max-width: 100%;
 }
+input[type='range'] { accent-color: var(--warm); }
+input[type='checkbox'], input[type='radio'] { accent-color: var(--warm); }
+a { color: var(--ink); }
 
-button:focus-visible,
-select:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-a:focus-visible,
-summary:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 1px;
+:focus-visible { outline: 2px solid var(--warm); outline-offset: 2px; border-radius: 4px; }
+
+table { border-collapse: collapse; }
+th { font-weight: 500; color: var(--ink-2); text-align: left; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

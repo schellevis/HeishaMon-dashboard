@@ -20,6 +20,8 @@ import TopicSelector from '../src/features/charts/TopicSelector.svelte';
 import PresetSelector from '../src/features/charts/PresetSelector.svelte';
 import {
   createChart,
+  buildSeries,
+  themedAxes,
   historyToUplot,
   getBreakChecker,
   insertBreaks,
@@ -295,10 +297,10 @@ describe('Charts screen (§7.2)', () => {
 
   describe('Enum bands', () => {
     it('has color mapping for enum values', () => {
-      expect(ENUM_COLORS[0]).toBe('#999999');
-      expect(ENUM_COLORS[1]).toBe('#1f77b4');
-      expect(ENUM_COLORS[2]).toBe('#ff7f0e');
-      expect(ENUM_COLORS[8]).toBe('#7f7f7f');
+      expect(ENUM_COLORS[0]).toBe('#64737f');
+      expect(ENUM_COLORS[1]).toBe('#4fa3e0');
+      expect(ENUM_COLORS[2]).toBe('#f0a04b');
+      expect(ENUM_COLORS[8]).toBe('#93a3b0');
     });
 
     it('converts enum history to uplot with bands', () => {
@@ -605,9 +607,9 @@ describe('Color scheme', () => {
   });
 
   it('has consistent colors', () => {
-    expect(COLORS[0]).toBe('#1f77b4'); // blue
-    expect(COLORS[1]).toBe('#ff7f0e'); // orange
-    expect(COLORS[2]).toBe('#2ca02c'); // green
+    expect(COLORS[0]).toBe('#f0a04b'); // amber
+    expect(COLORS[1]).toBe('#4fa3e0'); // blue
+    expect(COLORS[2]).toBe('#6cc59a'); // green
   });
 });
 
@@ -822,5 +824,26 @@ describe('T06: LOCF alignment, preset contract, overrides', () => {
     } finally {
       catalog.topics.splice(catalog.topics.indexOf(probe), 1);
     }
+  });
+});
+
+describe('buildSeries', () => {
+  const Fake = { paths: { stepped: () => 'STEPPED' } };
+  it('prepends the x series and steps enum and stepped series', () => {
+    const out = buildSeries([{ label: 'a' }, { label: 'b', enumBand: true }, { label: 'c', stepped: true }], Fake);
+    expect(out[0]).toEqual({});
+    expect(out[1].paths).toBeUndefined();
+    expect(out[2].paths).toBe('STEPPED');
+    expect(out[3].paths).toBe('STEPPED');
+    expect('stepped' in out[3]).toBe(false);
+  });
+});
+
+describe('themedAxes', () => {
+  it('keeps explicit axis colours and fills the rest', () => {
+    const [a, b] = themedAxes([{ stroke: 'red' }, {}]);
+    expect(a.stroke).toBe('red');
+    expect(b).toHaveProperty('grid');
+    expect(b).toHaveProperty('ticks');
   });
 });

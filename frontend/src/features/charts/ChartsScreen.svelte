@@ -155,7 +155,7 @@
 <div class="charts-screen" data-testid="screen-charts">
   <h2>{translate($language, 'charts.charts_title')}</h2>
   
-  <div class="chart-controls">
+  <div class="chart-controls panel panel-body">
     <div class="control-bar">
       <TimeRangeSelector
         from={from}
@@ -173,7 +173,7 @@
           {translate($language, 'charts.add_topic_label')}
         </button>
         {#if csvUrl && selectedTopics.length > 0}
-          <a href={csvUrl} download class="csv-button">
+          <a href={csvUrl} download class="csv-button primary">
             {translate($language, 'charts.csv_export_label')}
           </a>
         {/if}
@@ -201,7 +201,7 @@
     {/if}
   </div>
   
-  <div class="chart-area">
+  <div class="chart-area panel panel-body">
     {#if selectedTopics.length > 0 && from && to}
       <ChartContainer
         topics={selectedTopics}
@@ -215,7 +215,7 @@
     {:else if selectedTopics.length === 0}
       <div class="empty-state">
         <p>{translate($language, 'charts.no_topics_selected')}</p>
-        <button onclick={toggleTopicSelector}>
+        <button class="primary" onclick={toggleTopicSelector}>
           {translate($language, 'charts.add_topic_label')}
         </button>
       </div>
@@ -233,7 +233,7 @@
   
   .charts-screen h2 {
     margin: 0 0 16px 0;
-    font-size: 20px;
+    font: 600 22px/1.1 var(--font-ui);
   }
   
   .chart-controls {
@@ -256,10 +256,10 @@
   .control-actions button,
   .control-actions a {
     padding: 8px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-control);
+    background: var(--panel-2);
+    color: var(--ink);
     cursor: pointer;
     font-size: 12px;
     text-decoration: none;
@@ -269,17 +269,10 @@
   
   .control-actions button:hover,
   .control-actions a:hover {
-    background: var(--bg-hover);
+    background: var(--line);
   }
   
-  .csv-button {
-    background: var(--primary);
-    color: white;
-  }
-  
-  .csv-button:hover {
-    background: var(--primary-dark);
-  }
+  .csv-button { background: var(--ink); color: var(--ground); border-color: var(--ink); font-weight: 600; }
   
   .selector-popup {
     margin-top: 12px;
@@ -297,27 +290,14 @@
     justify-content: center;
     height: 100%;
     min-height: 300px;
-    border: 2px dashed var(--border);
+    border: 2px dashed var(--line-2);
     border-radius: 8px;
-    background: var(--bg-secondary);
+    background: var(--panel-2);
   }
   
   .empty-state p {
-    color: var(--text-secondary);
+    color: var(--ink-2);
     margin-bottom: 16px;
   }
   
-  .empty-state button {
-    padding: 12px 24px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--primary);
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .empty-state button:hover {
-    background: var(--primary-dark);
-  }
 </style>

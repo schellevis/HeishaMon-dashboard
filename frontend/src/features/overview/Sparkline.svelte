@@ -1,5 +1,5 @@
 <script>
-  let { data = [], width = 100, height = 40, stroke = '#3b82f6' } = $props();
+  let { data = [], width = 100, height = 40, stroke = 'currentColor' } = $props();
 
   // Filter out null values for min/max calculation, but keep them in the array for positioning
   const validData = $derived(data.filter((d) => d !== null && typeof d === 'number' && !isNaN(d)));

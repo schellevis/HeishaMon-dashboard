@@ -216,9 +216,9 @@
 
 <style>
   .topic-selector {
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 8px;
-    background: var(--bg);
+    background: var(--panel);
     max-height: 500px;
     overflow: auto;
   }
@@ -228,7 +228,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
   }
   
   .filter-controls {
@@ -239,10 +239,10 @@
   
   .filter-controls input[type="text"] {
     padding: 6px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--panel);
+    color: var(--ink);
     min-width: 150px;
   }
   
@@ -256,18 +256,18 @@
   
   .selection-count {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   
   .selected-list {
     padding: 12px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
   }
   
   .selected-list h4 {
     margin: 0 0 8px 0;
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   
   .selected-topics {
@@ -281,8 +281,8 @@
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
-    background: var(--primary);
-    color: white;
+    background: var(--warm);
+    color: var(--ground);
     border-radius: 4px;
     font-size: 12px;
   }
@@ -290,7 +290,7 @@
   .topic-tag button {
     background: none;
     border: none;
-    color: white;
+    color: var(--ground);
     cursor: pointer;
     padding: 0 0 0 4px;
     font-size: 12px;
@@ -306,7 +306,7 @@
   
   .no-results {
     padding: 12px;
-    color: var(--text-secondary);
+    color: var(--ink-2);
     text-align: center;
     font-style: italic;
   }
@@ -320,13 +320,13 @@
     cursor: pointer;
     font-size: 12px;
     font-weight: 500;
-    color: var(--text);
-    background: var(--bg-secondary);
+    color: var(--ink);
+    background: var(--panel-2);
     border-radius: 4px;
   }
   
   .category-group summary:hover {
-    background: var(--bg-hover);
+    background: var(--line);
   }
   
   .category-topics {
@@ -346,7 +346,7 @@
   }
   
   .category-topics label:hover {
-    background: var(--bg-hover);
+    background: var(--line);
   }
   
   .category-topics label.disabled {
@@ -356,7 +356,7 @@
   
   .category-topics label input[type="checkbox"] {
     margin: 0;
-    accent-color: var(--primary);
+    accent-color: var(--warm-ink);
   }
   
   .topic-label {
@@ -367,26 +367,26 @@
   }
   
   .topic-unit {
-    color: var(--text-secondary);
+    color: var(--ink-2);
     font-size: 11px;
   }
   
   .selection-actions {
     padding: 8px 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--line);
   }
   
   .selection-actions button {
     padding: 6px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--panel);
+    color: var(--ink);
     cursor: pointer;
     font-size: 12px;
   }
   
   .selection-actions button:hover {
-    background: var(--bg-hover);
+    background: var(--line);
   }
 </style>

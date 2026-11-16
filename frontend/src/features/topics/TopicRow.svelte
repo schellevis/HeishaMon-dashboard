@@ -2,6 +2,9 @@
   import { formatAge, presentTopic } from '../../lib/format.js';
   import { translate } from '../../lib/i18n/index.js';
   import Sparkline from './Sparkline.svelte';
+  import TempDot from '../../lib/ui/TempDot.svelte';
+
+  const SENTINEL_KEY = { '-1': 'topics.sentinelUnknown', '-128': 'topics.sentinelAbsent', '-78': 'topics.sentinelNotConnected', '-127': 'topics.sentinelUnused' };
 
   let {
     topicKey,
@@ -21,6 +24,7 @@
   const valueText = $derived(unit && presented.text.endsWith(` ${unit}`)
     ? presented.text.slice(0, -(unit.length + 1))
     : presented.text);
+  const slash = $derived(topicKey.indexOf('/') + 1);
   const name = $derived(catalogTopic?.label?.[lang] || catalogTopic?.label?.en || topicKey);
   const age = $derived(topicValue?.last_change == null ? '' : formatAge(Math.max(0, now - topicValue.last_change), lang));
 </script>
@@ -34,11 +38,19 @@
 >
   <div class="name">
     <h3>{name}</h3>
-    <code class="key">{topicKey}</code>
+    <code class="key">{#if slash}<span class="prefix">{topicKey.slice(0, slash)}</span>{/if}{topicKey.slice(slash)}</code>
     {#if !catalogued}<span class="badge" data-testid={`raw-badge-${topicKey}`}>{translate(lang, 'topics.raw')}</span>{/if}
   </div>
   <div class="value" title={translate(lang, 'topics.value')}>
-    <span class={presented.className}>{valueText}</span>{#if unit}<span class="unit" data-testid={`unit-${topicKey}`}> {unit}</span>{/if}
+    {#key topicValue?.last_change}
+      <span class="val flash">
+        {#if topicValue?.sentinel}
+          <span class="sentinel-badge" data-testid={`sentinel-${topicKey}`}>{topicValue.raw}{#if SENTINEL_KEY[topicValue.raw]}{" · "}{translate(lang, SENTINEL_KEY[topicValue.raw])}{/if}</span>
+        {:else}
+          {#if unit === '°C'}<TempDot value={topicValue?.value ?? null} />{/if}<span class={presented.className}>{valueText}</span>
+        {/if}
+      </span>
+    {/key}{#if unit && !topicValue?.sentinel}<span class="unit" data-testid={`unit-${topicKey}`}> {unit}</span>{/if}
   </div>
   <div class="raw" title={translate(lang, 'topics.rawValue')}><code data-testid={`raw-${topicKey}`}>{topicValue?.raw ?? ''}</code></div>
   <div class="age" data-last-change={topicValue?.last_change ?? ''} title={translate(lang, 'topics.lastChange')}>{age}</div>
@@ -62,7 +74,7 @@
     gap: 0.75rem;
     align-items: center;
     padding: 0.3rem 0.75rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
     font-size: 0.875rem;
   }
   .row:last-child {
@@ -84,35 +96,41 @@
     font-weight: 600;
   }
   .key {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    font: 12px var(--font-data);
+    color: var(--ink-2);
     overflow-wrap: anywhere;
   }
   .badge {
     font-size: 0.6875rem;
     padding: 0 0.375rem;
     border-radius: 999px;
-    background: var(--warn-bg);
+    background: color-mix(in srgb, var(--pending) 14%, transparent);
   }
+  .prefix { color: var(--ink-3); }
+  .val.flash { animation: flash 1.2s; }
+  @keyframes flash { from { background: color-mix(in srgb, var(--warm) 25%, transparent); } }
+  .sentinel-badge { font: 10.5px var(--font-data); border: 1px solid var(--line-2); border-radius: 4px; padding: 1px 5px; color: var(--ink-2); }
   .value {
+    font-family: var(--font-data);
+    text-align: right;
     font-variant-numeric: tabular-nums;
     overflow-wrap: anywhere;
   }
   .unit {
-    color: var(--text-secondary);
+    color: var(--ink-2);
     margin-left: 0.2em;
   }
   .raw code {
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--ink-2);
     overflow-wrap: anywhere;
   }
   .age {
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   .spark {
-    color: var(--primary);
+    color: var(--warm-ink);
     line-height: 0;
   }
   select {

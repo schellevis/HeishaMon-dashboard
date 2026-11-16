@@ -7,6 +7,11 @@
   import { api } from '../../lib/api.js';
   import Tile from './Tile.svelte';
   import QuickControls from './QuickControls.svelte';
+  import PlantSchematic from './PlantSchematic.svelte';
+  import NowPanel from './NowPanel.svelte';
+  import Timeline24h from './Timeline24h.svelte';
+  import MiniCurve from './MiniCurve.svelte';
+  import RecentEvents from './RecentEvents.svelte';
   import { liveCop, powerPairs } from '../../lib/domain/power.js';
   import { tileIds } from '../../lib/domain/rules.js';
   import { fetchSparklineValues, normalizeSparkline } from './sparkline.js';
@@ -183,23 +188,36 @@
 
 <div class="overview" data-testid="screen-overview">
   {#if $stateStore && $profileStore}
-    <QuickControls profile={$profileStore} stateData={$stateStore} prefs={$prefsStore} lang={$language} commandMap={$commandsStore} />
-
-    <div class="tiles" data-testid="tiles">
-      {#each activeTiles as tileId}
-        {@const topic = getTileTopic(tileId)}
-        {@const sparkline = getSparkline(tileId)}
-        <Tile
-          key={tileId}
-          topic={topic}
-          sparkline={sparkline}
-          lang={$language}
-          deviceOnline={$stateStore.device_online}
-          isPinned={pinnedTiles.includes(tileId)}
-          onPin={handlePin}
-          onUnpin={handleUnpin}
-        />
-      {/each}
+    <div class="grid">
+      <div class="plant"><PlantSchematic stateData={$stateStore} profile={$profileStore} lang={$language} /></div>
+      <aside class="side">
+        <NowPanel stateData={$stateStore} profile={$profileStore} lang={$language} />
+        <QuickControls profile={$profileStore} stateData={$stateStore} prefs={$prefsStore} lang={$language} commandMap={$commandsStore} />
+      </aside>
+      <div class="timeline"><Timeline24h profile={$profileStore} lang={$language} /></div>
+      <div class="lower">
+        <MiniCurve stateData={$stateStore} profile={$profileStore} lang={$language} />
+        <RecentEvents lang={$language} />
+      </div>
+      <section class="pinned">
+        <h2 class="tag">{translate($language, 'overview.pinnedTiles')}</h2>
+        <div class="tiles" data-testid="tiles">
+          {#each activeTiles as tileId}
+            {@const topic = getTileTopic(tileId)}
+            {@const sparkline = getSparkline(tileId)}
+            <Tile
+              key={tileId}
+              topic={topic}
+              sparkline={sparkline}
+              lang={$language}
+              deviceOnline={$stateStore.device_online}
+              isPinned={pinnedTiles.includes(tileId)}
+              onPin={handlePin}
+              onUnpin={handleUnpin}
+            />
+          {/each}
+        </div>
+      </section>
     </div>
   {:else}
     <p class="loading">{translate($language, 'common.ageUnknown')}</p>
@@ -207,17 +225,27 @@
 </div>
 
 <style>
-  .overview {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; }
+  .grid > * { min-width: 0; }
+  .plant, .timeline { grid-column: 1; }
+  .side { grid-column: 2; grid-row: 1 / 3; display: flex; flex-direction: column; gap: 16px; }
+  .lower, .pinned { grid-column: 1 / 3; }
+  .lower { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; }
+  .pinned h2 { margin: 4px 0 10px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(10.5rem, 45%), 1fr)); gap: 12px; }
+  .loading { color: var(--ink-3); }
+  @media (max-width: 1180px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .side { grid-column: 1; grid-row: auto; display: grid; grid-template-columns: 1fr 1fr; }
+    .lower, .pinned { grid-column: 1; }
+    /* stack in the spec order: schematic, timeline, Now + controls, curve + events, tiles */
+    .plant { order: 1; }
+    .timeline { order: 2; }
+    .side { order: 3; }
+    .lower { order: 4; }
+    .pinned { order: 5; }
   }
-  .tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(10.5rem, 45%), 1fr));
-    gap: 0.75rem;
-  }
-  .loading {
-    color: #888;
+  @media (max-width: 759px) {
+    .side, .lower { grid-template-columns: 1fr; }
   }
 </style>

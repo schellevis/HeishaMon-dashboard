@@ -6,6 +6,29 @@
  */
 
 import { axisFormatter } from './time.js';
+import { cssVar } from './theme.js';
+
+/** uPlot series: series[0] describes the x axis; enum bands and `stepped` series draw as steps. */
+export function buildSeries(series = [], Uplot = null) {
+  return [{}, ...series.map((s) => {
+    const { enumBand, stepped, ...rest } = s;
+    if ((enumBand || stepped) && Uplot?.paths?.stepped) rest.paths = Uplot.paths.stepped({ align: 1 });
+    return rest;
+  })];
+}
+
+/** Axes coloured from the current theme; explicit settings win. */
+export function themedAxes(axes = []) {
+  const ink = cssVar('--ink-3') || undefined;
+  const line = cssVar('--line') || undefined;
+  return axes.map((axis) => ({
+    stroke: ink,
+    grid: { stroke: line, width: 1 },
+    ticks: { stroke: line, width: 1 },
+    font: '10px "Martian Mono Variable", monospace',
+    ...axis,
+  }));
+}
 
 // Dynamic import of uplot to avoid module-level side effects
 let uplotPromise = null;
@@ -43,33 +66,10 @@ export const DEFAULT_OPTIONS = {
 };
 
 /** Color scheme for chart series */
-export const COLORS = [
-  '#1f77b4', // blue
-  '#ff7f0e', // orange
-  '#2ca02c', // green
-  '#d62728', // red
-  '#9467bd', // purple
-  '#8c564b', // brown
-  '#e377c2', // pink
-  '#7f7f7f', // gray
-  '#bcbd22', // olive
-  '#17becf', // cyan
-];
+export const COLORS = ['#f0a04b', '#4fa3e0', '#6cc59a', '#e5533d', '#8fb8c9', '#b48ce0', '#e8c25a', '#93a3b0', '#d07fb0', '#5fc4c0'];
 
 /** Enum value to color mapping for band rendering */
-export const ENUM_COLORS = {
-  0: '#999999',
-  1: '#1f77b4',
-  2: '#ff7f0e',
-  3: '#2ca02c',
-  4: '#d62728',
-  5: '#9467bd',
-  6: '#8c564b',
-  7: '#e377c2',
-  8: '#7f7f7f',
-  9: '#bcbd22',
-  10: '#17becf',
-};
+export const ENUM_COLORS = { 0: '#64737f', 1: '#4fa3e0', 2: '#f0a04b', 3: '#6cc59a', 4: '#e5533d', 5: '#b48ce0', 6: '#8fb8c9', 7: '#d07fb0', 8: '#93a3b0', 9: '#e8c25a', 10: '#5fc4c0' };
 
 /** Create a chart instance
  * @param {HTMLElement} element - DOM element to render the chart in
@@ -85,14 +85,7 @@ export async function createChart(element, options = {}) {
     ...options,
   };
 
-  // uPlot expects series[0] to describe the x axis; historyToUplot only emits value series.
-  const series = [{}, ...(mergedOptions.series || []).map((s) => {
-    const { enumBand, ...rest } = s;
-    if (enumBand && Uplot.paths && Uplot.paths.stepped) {
-      rest.paths = Uplot.paths.stepped({ align: 1 });
-    }
-    return rest;
-  })];
+  const series = buildSeries(mergedOptions.series || [], Uplot);
   const chart = new Uplot({ ...mergedOptions, series }, mergedOptions.data || [], element);
 
   return {

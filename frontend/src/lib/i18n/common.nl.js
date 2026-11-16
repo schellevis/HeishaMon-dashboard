@@ -63,4 +63,8 @@ export default {
   ageMinutes: '{n} min',
   ageHours: '{n} u',
   ageDays: '{n} d',
+  themeToggle: 'Thema wisselen',
+  themeDay: 'Dag',
+  themeNight: 'Nacht',
+  brand: 'HeishaMon-dashboard',
 };

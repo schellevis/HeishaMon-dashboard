@@ -224,7 +224,7 @@
         bind:value={presetNameInput}
         placeholder={translate($language, 'charts.preset_name_placeholder')}
       />
-      <button onclick={saveCurrentPreset}>
+      <button class="primary" onclick={saveCurrentPreset}>
         {translate($language, 'charts.save_preset_button')}
       </button>
     </div>
@@ -262,9 +262,9 @@
 
 <style>
   .preset-selector {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    background: var(--panel);
     padding: 12px;
   }
   
@@ -276,7 +276,7 @@
   .preset-selector h5 {
     margin: 12px 0 8px 0;
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   
   .preset-list {
@@ -287,22 +287,22 @@
   
   .preset-list button {
     padding: 6px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--panel);
+    color: var(--ink);
     cursor: pointer;
     font-size: 12px;
   }
   
   .preset-list button:hover {
-    background: var(--bg-hover);
+    background: var(--line);
   }
   
   .user-presets {
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--line);
   }
   
   .user-preset {
@@ -314,20 +314,20 @@
   .user-preset .delete {
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--ink-2);
     cursor: pointer;
     padding: 2px 4px;
     font-size: 14px;
   }
   
   .user-preset .delete:hover {
-    color: var(--error);
+    color: var(--fail-ink);
   }
   
   .save-preset {
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--line);
   }
   
   .save-form {
@@ -338,30 +338,17 @@
   .save-form input {
     flex: 1;
     padding: 6px 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--line-2);
     border-radius: 4px;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--panel);
+    color: var(--ink);
     font-size: 12px;
   }
   
-  .save-form button {
-    padding: 6px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--primary);
-    color: white;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  
-  .save-form button:hover {
-    background: var(--primary-dark);
-  }
   
   .error {
     margin-top: 8px;
-    color: var(--error);
+    color: var(--fail-ink);
     font-size: 12px;
   }
 </style>

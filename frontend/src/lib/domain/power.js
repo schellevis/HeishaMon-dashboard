@@ -11,9 +11,11 @@ function watts(tv) {
   return tv && !tv.sentinel && typeof tv.value === 'number' ? tv.value : null;
 }
 
-/** Topic-value-shaped heat COP (production / consumption), or null unless both are readable and consumption > 0. */
-export function liveCop(values, profile) {
-  const [prodKey, consKey] = powerPairs(profile).pairs.heat;
+/** Topic-value-shaped COP (production / consumption of the chosen mode's pair, default heat), or null unless both are readable and consumption > 0. */
+export function liveCop(values, profile, mode = 'heat') {
+  const pair = powerPairs(profile).pairs[mode];
+  if (!pair) return null;
+  const [prodKey, consKey] = pair;
   const production = values?.[prodKey];
   const consumption = values?.[consKey];
   const prod = watts(production);

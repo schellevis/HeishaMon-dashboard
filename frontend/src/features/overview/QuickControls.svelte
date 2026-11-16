@@ -159,27 +159,27 @@
 
 <style>
   .quick-controls {
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
-    background: var(--bg);
-    padding: 0.5rem 1rem 0.75rem;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 0;
   }
   h2 {
-    margin: 0.25rem 0 0.25rem;
-    font-size: 1rem;
+    margin: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    font: 600 13.5px var(--font-ui);
   }
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-    column-gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    padding: 0 16px 8px;
   }
   .grid > div {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
     min-width: 0;
   }
-  @media (max-width: 480px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
+  .grid > div:last-child {
+    border-bottom: 0;
   }
 </style>

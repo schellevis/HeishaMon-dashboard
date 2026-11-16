@@ -168,6 +168,7 @@
 <article
   class="command"
   class:compact={variant === 'compact'}
+  class:draft={toSend != null}
   class:wide={entry.type === 'json'}
   data-testid={`control-${id}`}
   data-gate={gate ?? undefined}
@@ -326,7 +327,7 @@
     align-items: center;
     gap: 0.25rem 1rem;
     padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
   }
   .command:last-child {
     border-bottom: none;
@@ -345,7 +346,8 @@
     font-weight: 600;
   }
   .current {
-    color: var(--text-secondary);
+    font-family: var(--font-data);
+    color: var(--ink-2);
     font-size: 0.8125rem;
   }
   .edit {
@@ -370,10 +372,10 @@
   .warn {
     margin: 0;
     font-size: 0.75rem;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   .warn {
-    color: var(--danger);
+    color: var(--fail-ink);
   }
   select {
     min-width: 9rem;
@@ -397,7 +399,7 @@
     width: 6rem;
   }
   .unit {
-    color: var(--text-secondary);
+    color: var(--ink-2);
     font-size: 0.875rem;
   }
   input[type='range'] {
@@ -410,7 +412,7 @@
   .link {
     background: none;
     border: none;
-    color: var(--primary);
+    color: var(--warm-ink);
     padding: 0;
     cursor: pointer;
     font-size: 0.8125rem;
@@ -452,5 +454,12 @@
     input[type='range'] {
       flex: 1 1 8rem;
     }
+  }
+  .draft :is(select, input:not([type='range'])) {
+    border-color: var(--pending);
+    color: var(--pending-ink);
+  }
+  .draft input[type='range'] {
+    accent-color: var(--pending);
   }
 </style>

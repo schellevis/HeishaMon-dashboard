@@ -20,6 +20,10 @@ verified and merged into `main` on 2026-10-13. Open item:
 the real-capture replay fixture, which the owner records with `tools/capture.py` (decision-006); that
 test stays skipped until `backend/tests/fixtures/replay_real.json` exists. The Docker image was never
 built in development; the release check is in the README.
+A visual redesign (design tokens, day/night theme, new Overview with plant schematic, Now panel, 24-hour
+timeline and mini curve) is built and verified on branch `feat/visual-redesign`, not yet merged into
+`main`. Spec: `docs/superpowers/specs/2026-10-14-visual-design.md`; static mockup:
+`docs/mockups/2026-10-14-redesign/index.html`.
 
 **Workflow:** brainstorm → spec → implementation plan → build. Do not start building without an
 approved plan.
@@ -67,6 +71,10 @@ approved plan.
 
 - **No authentication.** It sits behind the user's reverse proxy; the README must warn loudly.
 - **UI:** bilingual EN/NL (extensible string tables), responsive for desktop and phone equally.
+- **Look and feel:** day and night themes (spec `2026-10-14-visual-design.md`). The theme is browser-local
+  like the language: `localStorage` key `heishamon.theme`, falling back to `prefers-color-scheme`, never a
+  server pref (`lib/theme.js`). Fonts are bundled through Fontsource (Instrument Sans, Martian Mono), so
+  the UI makes no external font requests.
 - **Out of scope:** `SendRawValue`, alerts/notifications, and room temperature from arbitrary external MQTT sources.
 - **Deferred to the future:**
   - "Option B": integration with the HeishaMon device's HTTP interface (rules, device settings, console);
@@ -195,6 +203,11 @@ Note: `heishamon/HeishaMon` and `Egyras/HeishaMon` are the same repository.
 - Frontend `frontend/src/`: `app/` (shell and the route registry), `features/<id>/` (one folder per
   screen, default export `{id, navKey, order, component}`), `lib/` (stores, api, domain, commands
   controller, i18n, ui).
+- **Design tokens:** colours, spacing and type live as CSS custom properties in `frontend/src/app.css`
+  (one block per theme). Hex colours are allowed only in `app.css`, `lib/ui/thermal.js` (the temperature
+  ramp), `lib/uplot.js` and the `lib/i18n/` files; `frontend/tests/tokens.test.js` fails otherwise.
+  Components use `var(--…)`; charts read the active values with `cssVar()` from `lib/theme.js`.
+  `frontend/tests/contrast.test.js` checks text contrast for both themes, so a token change can fail it.
 
 ## Development notes
 
@@ -204,6 +217,12 @@ Note: `heishamon/HeishaMon` and `Egyras/HeishaMon` are the same repository.
 - **Testing:**
   - pytest for the backend (`backend/tests`) and Vitest plus Playwright for the frontend
     (`npm --prefix frontend run test`; Playwright in `frontend/e2e`, run from `frontend/`).
+  - Vitest runs `frontend/tests/setup.js` first: it installs a no-op `ResizeObserver` and a global fake
+    `uplot`, because jsdom has no canvas. A test that needs its own uPlot mock overrides it (see
+    `charts.test.js`). Real charts are only exercised in Playwright.
+  - `frontend/e2e/visual.spec.js` is slow. It walks every screen in both themes at desktop and phone width
+    under one preset (`heat_dhw`), then renders the Overview again for every simulator preset. Run it on its
+    own with `npx playwright test e2e/visual.spec.js` from `frontend/`.
   - A **simulator** with profile presets (heat-only, Heat+DHW, Cool+DHW, auto, two zones with mixed modes, thermostat sensor, no DHW tank, with/without `extra/`, PCB on) lets every UI variant be tested without a heat pump.
   - Replay fixtures must have the `ip` topic and any identifying data stripped.
   - Run the suites one after another, never in parallel. Playwright starts its own app, simulator and

@@ -16,7 +16,7 @@
     startRealtime,
   } from '../lib/stores.js';
 
-  let desktop = $state(typeof window !== 'undefined' && window.innerWidth >= 768);
+  let desktop = $state(typeof window !== 'undefined' && window.innerWidth >= 760);
 
   const screens = Object.fromEntries(registry.map((feature) => [feature.id, feature.component]));
 
@@ -27,7 +27,7 @@
     loadLanguage();
     const unbind = bindLanguagePersistence();
     const sync = () => {
-      desktop = window.innerWidth >= 768;
+      desktop = window.innerWidth >= 760;
       setRouteFromHash(location.hash);
     };
     sync();
@@ -44,12 +44,10 @@
 </script>
 
 <div class="app" data-testid="shell" data-layout={navVariant}>
-  <header>
-    <h1>HeishaMon dashboard</h1>
+  <Nav variant={navVariant} />
+  <div class="column">
+    <h1 class="sr-only">{translate($language, 'common.brand')}</h1>
     <Statusbar />
-  </header>
-  <div class="frame" data-layout={navVariant}>
-    <Nav variant={navVariant} />
     <main>
       <Screen />
     </main>
@@ -66,38 +64,10 @@
 </div>
 
 <style>
-  :global(body) {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-  }
-  :global(.value-stale) {
-    color: #6b7280;
-  }
-  .app {
-    min-height: 100vh;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  header {
-    min-width: 0;
-  }
-  h1 {
-    font-size: 1.125rem;
-    margin: 0;
-    padding: 0.75rem 1rem 0;
-  }
-  .frame {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-  }
-  .frame[data-layout='bottom'] {
-    flex-direction: column;
-  }
-  main {
-    flex: 1;
-    min-width: 0;
-    padding: 1rem;
-  }
+  .app { min-height: 100vh; display: flex; }
+  .app[data-layout='bottom'] { display: block; }
+  .column { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  main { flex: 1; min-width: 0; padding: 22px 24px 48px; }
+  .app[data-layout='bottom'] main { padding: 16px 12px 96px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 </style>

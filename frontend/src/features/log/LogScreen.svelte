@@ -4,28 +4,8 @@
   import { api } from '../../lib/api.js';
   import { translate } from '../../lib/i18n/index.js';
   import { language } from '../../lib/stores.js';
-  import { commandByName } from '../../lib/catalog.js';
+  import { commandLabel, detailText, kindLabel } from '../../lib/eventtext.js';
   import { formatDateTime } from '../../lib/time.js';
-
-  function kindLabel(kind, lang) {
-    const key = `log.kind_${kind}`;
-    const text = translate(lang, key);
-    return text === key ? kind : text;
-  }
-
-  function commandLabel(name, lang) {
-    const entry = commandByName(name);
-    return entry?.label?.[lang] || entry?.label?.en || name;
-  }
-
-  function detailText(detail) {
-    if (detail == null) return '';
-    if (typeof detail !== 'object') return String(detail);
-    return Object.entries(detail)
-      .filter(([, value]) => value !== null && value !== undefined)
-      .map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`)
-      .join(', ');
-  }
 
   let commandRows = $state([]);
   let eventRows = $state([]);
@@ -78,8 +58,8 @@
   </label>
   </div>
   {#if source !== 'events'}
-    <section class="card" data-testid="log-commands">
-      <h2>{translate($language, 'log.commands')}</h2>
+    <section class="card panel" data-testid="log-commands">
+      <div class="panel-head"><h2>{translate($language, 'log.commands')}</h2></div>
       {#if shownCommands.length === 0}
         <p>{translate($language, 'log.empty')}</p>
       {:else}
@@ -97,8 +77,8 @@
     </section>
   {/if}
   {#if source !== 'commands'}
-    <section class="card" data-testid="log-events">
-      <h2>{translate($language, 'log.events')}</h2>
+    <section class="card panel" data-testid="log-events">
+      <div class="panel-head"><h2>{translate($language, 'log.events')}</h2></div>
       {#if shownEvents.length === 0}
         <p>{translate($language, 'log.empty')}</p>
       {:else}
@@ -124,7 +104,7 @@
   }
   h1 {
     margin: 0;
-    font-size: 1.375rem;
+    font: 600 22px/1.1 var(--font-ui);
   }
   .filters {
     display: flex;
@@ -138,15 +118,7 @@
     font-size: 0.875rem;
   }
   .card {
-    border: 1px solid var(--border);
-    border-radius: var(--card-radius);
     overflow: hidden;
-  }
-  h2 {
-    margin: 0;
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-    background: var(--bg-secondary);
   }
   .card > p {
     margin: 0;
@@ -163,7 +135,7 @@
     gap: 0.75rem;
     align-items: baseline;
     padding: 0.3rem 0.75rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
     font-size: 0.875rem;
   }
   li:last-child {
@@ -171,12 +143,12 @@
   }
   time {
     font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
+    color: var(--ink-2);
     white-space: nowrap;
   }
   code {
     font-size: 0.8125rem;
-    color: var(--text-secondary);
+    color: var(--ink-2);
     overflow-wrap: anywhere;
   }
   .key {

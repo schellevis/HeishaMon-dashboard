@@ -37,7 +37,7 @@
 </script>
 
 {#if shown}
-  <div class="editor" data-testid="curve-editor">
+  <div class="editor panel panel-body" data-testid="curve-editor">
     <div role="group" aria-label={t('editorMode')}>
       <button type="button" data-testid="editor-two-point" aria-pressed={editorMode === 'two-point'} onclick={() => (editorMode = 'two-point')}>{t('twoPoint')}</button>
       <button type="button" data-testid="editor-slope-level" aria-pressed={editorMode === 'slope-level'} onclick={() => (editorMode = 'slope-level')}>{t('slopeLevel')}</button>

@@ -1,10 +1,11 @@
 <script>
   import { onMount, onDestroy, untrack } from 'svelte';
-  import { createChart, historyToUplot, insertBreaks } from '../../lib/uplot.js';
+  import { createChart, historyToUplot, insertBreaks, themedAxes } from '../../lib/uplot.js';
   import { api } from '../../lib/api.js';
   import { language, system } from '../../lib/stores.js';
   import { catalog } from '../../lib/catalog.js';
   import { translate } from '../../lib/i18n/index.js';
+  import { resolvedTheme } from '../../lib/theme.js';
   
   /**
    * Chart container component
@@ -122,6 +123,7 @@
     const w = el.clientWidth || 800;
     const h = height || 300;
     const opts = historyToUplot(data, catalog, { lang, timeZone });
+    opts.axes = themedAxes(opts.axes);
     opts.width = w;
     opts.height = h;
     opts.legend.show = legend;
@@ -168,6 +170,7 @@
     const el = chartContainer;
     const legend = showLegend;
     const lang = $language;
+    void $resolvedTheme;
     const timeZone = $system?.tz || undefined;
     untrack(() => buildChart(data, el, legend, lang, timeZone));
   });
@@ -211,10 +214,10 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    background: var(--bg-secondary);
-    border: 1px dashed var(--border);
+    background: var(--panel-2);
+    border: 1px dashed var(--line-2);
     border-radius: 4px;
-    color: var(--text-secondary);
+    color: var(--ink-2);
   }
   
   .status {
@@ -224,16 +227,16 @@
     transform: translate(-50%, -50%);
     padding: 12px 24px;
     border-radius: 4px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
+    background: color-mix(in srgb, var(--ground) 85%, transparent);
+    color: var(--ink);
     font-size: 14px;
   }
   
   .status.loading {
-    background: rgba(0, 0, 0, 0.7);
+    background: color-mix(in srgb, var(--ground) 85%, transparent);
   }
   
   .status.error {
-    background: rgba(255, 0, 0, 0.8);
+    background: color-mix(in srgb, var(--fail) 85%, transparent);
   }
 </style>
